@@ -1,7 +1,7 @@
 import textwrap
 import magic
-from PDFReader import PDFToText
-from PPTXReader import PPTXToText
+from file_Reader.PDFReader import PDFToText
+from file_Reader.PPTXReader import PPTXToText
 from DocxReader import DocxReaderInstance
 
 
@@ -14,7 +14,6 @@ class chunkerizer():
     def __init__(self):
         self.PDFReader = PDFToText()
         self.PPTXReader = PPTXToText()
-
     def make_chunk(self, input_file):
         chunks = textwrap.wrap(input_file, 1024)
 
@@ -42,10 +41,10 @@ class chunkerizer():
                     extracted_text = instance.ConvertToText()
                     extracted_image_text = instance.ConvertImageToText()
 
-            if 'filetype' not in locals():
-                raise NotSupportedFiletype
-            else:
-                return filetype, extracted_text
+                case _:
+                    raise NotSupportedFiletype
+                    
+            return filetype, extracted_text
             
         except Exception as error:
             print(type(error).__name__, "-", error)
