@@ -15,7 +15,6 @@ class chunkerizer():
     def __init__(self):
         self.PDFReader = PDFToText()
         self.PPTXReader = PPTXToText()
-
     def make_chunk(self, input_file):
         chunks = textwrap.wrap(input_file, 1024)
 
