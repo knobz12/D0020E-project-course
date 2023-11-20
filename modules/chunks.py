@@ -1,8 +1,8 @@
 import textwrap
 import magic
-from file_Reader.PDFReader import PDFToText
-from file_Reader.PPTXReader import PPTXToText
-from DocxReader import DocxReaderInstance
+from file_reader.PDFReader import PDFToText
+from file_reader.PPTXReader import PPTXToText
+from file_reader.DocxReader import DocxReaderInstance
 
 
 class NotSupportedFiletype(Exception):

@@ -17,5 +17,5 @@ class PPTXToText():
                     extracted_text = extracted_text + " " + shape.text
         return extracted_text
     
-    def ConvertToImage(self, file):
+    def ConvertImageToText(self, file):
         pass

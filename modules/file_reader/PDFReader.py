@@ -13,5 +13,5 @@ class PDFToText():
                 extracted_text = extracted_text + " " + pageObj.extract_text()
         return extracted_text
     
-    def ConvertToImage(self, file):
+    def ConvertImageToText(self, file):
         pass
