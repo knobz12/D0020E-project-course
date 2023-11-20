@@ -1,8 +1,9 @@
 from PIL import Image
-import os
-import numpy as np
+import pytesseract
 
-filename = 'Untitled.png'
-os.system("./tesseract Untitled.png - -l eng")
+def image_path_to_text(filepath: str):
+    image = Image.open(filepath)
+    return pytesseract.image_to_string(image)
 
-#print(text)
+def image_to_text(image: Image):
+    return pytesseract.image_to_string(image)

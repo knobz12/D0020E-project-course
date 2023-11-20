@@ -2,6 +2,7 @@ import textwrap
 import magic
 from PDFReader import PDFToText
 from PPTXReader import PPTXToText
+from DocxReader import DocxReaderInstance
 
 
 class NotSupportedFiletype(Exception):
@@ -35,6 +36,11 @@ class chunkerizer():
                 case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
                     filetype = "ppt"
                     extracted_text = self.PPTXReader.ConvertToText(input_file)
+                case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                    filetype = "docx"
+                    instance = DocxReaderInstance(input_file)
+                    extracted_text = instance.ConvertToText()
+                    extracted_image_text = instance.ConvertImageToText()
 
             if 'filetype' not in locals():
                 raise NotSupportedFiletype
