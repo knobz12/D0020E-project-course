@@ -1,2 +1,1 @@
-from .PDFReader import PDFToText
-from .PPTXReader import PPTXToText
+__all__ = ["PDFReader", "PPTXReader"]
