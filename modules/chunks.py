@@ -1,4 +1,6 @@
 import textwrap
+import magic
+import PyPDF2
 from PDFReader import PDFToText
 from PPTXReader import PPTXToText
 from HashFunction import TextToHash
