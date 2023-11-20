@@ -1,5 +1,4 @@
 import json
-import time
 
 class FillJson():
     def __init__(self) -> None:
@@ -23,4 +22,4 @@ class FillJson():
 
 
     def return_json(self):
-        return self.template
+        return json.dumps(self.template)
