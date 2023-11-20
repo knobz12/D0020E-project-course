@@ -1,7 +1,8 @@
 import textwrap
 import magic
-from PDFReader import PDFToText
-from PPTXReader import PPTXToText
+from file_reader import PDFReader, PPTXReader
+#from PDFReader import PDFToText
+#from PPTXReader import PPTXToText
 
 
 class NotSupportedFiletype(Exception):
@@ -11,8 +12,8 @@ class NotSupportedFiletype(Exception):
 
 class chunkerizer():
     def __init__(self):
-        self.PDFReader = PDFToText()
-        self.PPTXReader = PPTXToText()
+        self.PDFReader = PDFReader.PDFToText()
+        self.PPTXReader = PPTXReader.PPTXToText()
 
     def make_chunk(self, input_file):
         chunks = textwrap.wrap(input_file, 1024)
