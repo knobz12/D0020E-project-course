@@ -36,10 +36,10 @@ class chunkerizer():
                     filetype = "ppt"
                     extracted_text = self.PPTXReader.ConvertToText(input_file)
 
-            if 'filetype' not in locals():
-                raise NotSupportedFiletype
-            else:
-                return filetype, extracted_text
+                case _:
+                    raise NotSupportedFiletype
+                    
+            return filetype, extracted_text
             
         except Exception as error:
             print(type(error).__name__, "-", error)
