@@ -23,8 +23,11 @@ class chunkerizer():
             fileformat = magic.from_file(input_file, mime = True)
             match fileformat:
                 case "image/png":
+                    import pytesseract
+                    from PIL import Image
                     filetype = "png"
-
+                    image = Image.open(input_file)
+                    extracted_text = pytesseract.image_to_string(image)
                 case "":
                     filetype = "jpeg"
 
@@ -56,6 +59,7 @@ class chunkerizer():
 
 if __name__ == "__main__":
     c = chunkerizer()
-    x = c.check_mimetype_convert_to_text("./tests/sample_files/Test_ppts/D0020E_Sustainability.pptx")
+    # x = c.check_mimetype_convert_to_text("./tests/sample_files/Test_ppts/D0020E_Sustainability.pptx")
+    x = c.check_mimetype_convert_to_text("./tests/sample_files/Test_images/alkohol.png")
     if x is not None:
         print(x[0],x[1])
