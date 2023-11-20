@@ -51,6 +51,6 @@ class chunkerizer():
 
 if __name__ == "__main__":
     c = chunkerizer()
-    x = c.check_mimetype_convert_to_text("tests\sample_files\Test_ppts\D0020E_Sustainability.pptx")
+    x = c.check_mimetype_convert_to_text("./tests/sample_files/Test_ppts/D0020E_Sustainability.pptx")
     if x is not None:
         print(x[0],x[1])
