@@ -9,11 +9,6 @@ class FillJson():
             json_file = json.loads(file.read())
         self.template = json_file
 
-
-    def write_json_to_file(self):
-        with open("Test_json/best.json", "w") as f:
-            f.write(json.dumps(self.template))
-
     def return_json_keys(self):
         keys = []
         for values in self.template.keys():
