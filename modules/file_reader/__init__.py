@@ -1,1 +1,1 @@
-__all__ = ["PDFReader", "PPTXReader", "DocxReader"]
+__all__ = ["PDFReader", "PPTXReader", "DocxReader","htmlReader"]
