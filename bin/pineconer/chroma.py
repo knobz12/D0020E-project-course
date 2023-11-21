@@ -1,14 +1,17 @@
-# import os
-# import pathlib
-# from torch import cuda
-# from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-# from langchain.vectorstores import Pinecone
-# import pinecone
+import chromadb
 from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from langchain.vectorstores.chroma import Chroma
 from datasets import load_dataset
-import chromadb
 from chromadb.config import Settings
+from langchain.prompts import ChatPromptTemplate
+from langchain.llms.llamacpp import LlamaCpp
+from langchain.callbacks.manager import CallbackManager
+from langchain.callbacks import StreamingStdOutCallbackHandler
+from langchain.prompts.prompt import Prompt
+from langchain.schema.runnable import RunnablePassthrough
+from langchain.schema.output_parser import StrOutputParser
+import time
+import pathlib
 
 collection_name = "llama-2-papers"
 client = chromadb.HttpClient(settings=Settings(allow_reset=True))
@@ -31,7 +34,6 @@ vectorstore = Chroma(embedding_function=embedding_function,client=client,collect
 # print(result)
 
 def upsert_data() -> None:
-    import pathlib
     dataset_file_path = pathlib.Path("./result.jsonl")
     print("Loading dataset...")
     data = load_dataset("json", data_files=str(dataset_file_path.resolve()),split="train")
@@ -50,12 +52,6 @@ def upsert_data() -> None:
         collection.add([ident],metadatas={'course':course,'text': text},documents=[text])
 
 def run_llm():
-    from langchain import hub
-    prompt = hub.pull("rlm/rag-prompt")
-    print(prompt)
-    from langchain.llms.llamacpp import LlamaCpp
-    from langchain.callbacks.manager import CallbackManager
-    from langchain.callbacks import StreamingStdOutCallbackHandler
     # callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
 
     llm = LlamaCpp(
@@ -79,15 +75,7 @@ def run_llm():
     Answer:"""
 
     retriever = vectorstore.as_retriever(search_kwargs={'k': 2})
-    # import langchain
-    # langchain.debug = True
-    from langchain import hub
-    from langchain.prompts.prompt import Prompt
-    from langchain.schema.runnable import RunnablePassthrough
-    from langchain.schema.output_parser import StrOutputParser
-    prompt = hub.pull("rlm/rag-prompt")
 
-    from langchain.prompts import ChatPromptTemplate
     prompt = ChatPromptTemplate.from_template(prompt_str)
 
     # print(retriever.get_relevant_documents("CNN when switching GTX gpu"))
@@ -105,7 +93,6 @@ def run_llm():
         # "For SMLP, what were the test errors?"
     ]
 
-    import time
     for (idx, question) in enumerate(questions):
         # for chunk in rag_chain.stream("CNN when switching GTX gpu"):
         print(f"Asking question {idx}")
