@@ -13,6 +13,20 @@ from langchain.schema.output_parser import StrOutputParser
 import time
 import pathlib
 
+from argparse import ArgumentParser
+import sys
+
+parser = ArgumentParser()
+parser.add_argument("--model-path", help="The path to the llama-cpp supported LLM model")
+args = parser.parse_args()
+print('args',args)
+path = args.model_path
+import os
+model_path = str(pathlib.Path(path).resolve())
+exists = os.path.exists(model_path)
+if not exists:
+    raise FileNotFoundError("Model does not exist at path: "+ model_path)
+
 collection_name = "llama-2-papers"
 client = chromadb.HttpClient(settings=Settings(allow_reset=True))
 
@@ -51,11 +65,11 @@ def upsert_data() -> None:
         course = str(obj["course"])
         collection.add([ident],metadatas={'course':course,'text': text},documents=[text])
 
+
 def run_llm():
     # callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
-
     llm = LlamaCpp(
-        model_path="S:\models\llama-2-13b-chat.Q3_K_M.gguf",
+        model_path=model_path,
         # model_path="S:\models\llama-2-70b-chat.Q2_K.gguf",
         n_gpu_layers=43,
         n_batch=256,
