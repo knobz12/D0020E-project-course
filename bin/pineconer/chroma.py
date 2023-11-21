@@ -124,18 +124,16 @@ def run_llm(model_path, vectorstore):
     ]
 
     import langchain
-    langchain.debug = True
+    langchain.debug = False
     for (idx, question) in enumerate(questions):
         # for chunk in rag_chain.stream("CNN when switching GTX gpu"):
         print(f"Asking question {idx}")
         for chunk in rag_chain.stream(question):
             print(chunk, end="")
-            time.sleep(0.1)
+
         print("\n")
         print(f"Done with question {idx}")
-        time.sleep(1)
 
-    time.sleep(10)
         # llm.
     # rag_chain.strea
 
