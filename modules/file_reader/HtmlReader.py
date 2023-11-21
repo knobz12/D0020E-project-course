@@ -1,4 +1,3 @@
-
 from bs4 import BeautifulSoup
 import codecs
 
@@ -12,7 +11,7 @@ import codecs
 #print(text)
 
 
-class htmlReaderInstance():
+class HtmlToText():
     def __init__(self):
         pass
 

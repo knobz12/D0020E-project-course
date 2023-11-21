@@ -1,1 +1,1 @@
-__all__ = ["file_reader"]
+__all__ = ["file_reader", "hash_and_json"]

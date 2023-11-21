@@ -14,6 +14,7 @@ class PDFToText():
             for image in page.get_images():
                 if image[1] == 0:
                     with fitz.Pixmap(self.doc, image[0]) as pix:
+                        #To bytesio and then tesseract and boom we done
                         pix.pil_tobytes(format="WEBP", optimize=True, dpi=(150, 150))
 
                     """

@@ -1,7 +1,9 @@
 import docx3txt
-import pathlib
 
-class DocxReaderInstance():
+#This import might not be needed
+#import pathlib
+
+class DocxToText():
     def __init__(self, file_path: str):
         self.text, self.image_text = docx3txt.process(file_path)
         #Changed this from (text, image_text)
