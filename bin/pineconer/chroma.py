@@ -16,41 +16,50 @@ import os
 
 from argparse import ArgumentParser
 
-parser = ArgumentParser()
-parser.add_argument("--model-path", help="The path to the llama-cpp supported LLM model")
-args = parser.parse_args()
+def main():
+    parser = ArgumentParser()
+    parser.add_argument("--model-path", help="The path to the llama-cpp supported LLM model")
+    args = parser.parse_args()
 
-global model_path
-model_path: str = ""
-if args.model_path != None:
-    print(args)
-    path = args.model_path
-    model_path = str(pathlib.Path(path).resolve())
-    exists = os.path.exists(model_path)
-    if not exists:
-        raise FileNotFoundError("Model does not exist at path: "+ model_path)
+    model_path: str = ""
+    if args.model_path != None:
+        path = args.model_path
+        model_path = str(pathlib.Path(path).resolve())
+        exists = os.path.exists(model_path)
+        if not exists:
+            raise FileNotFoundError("Model does not exist at path: "+ model_path)
 
-collection_name = "llama-2-papers"
-client = chromadb.HttpClient(settings=Settings(allow_reset=True))
+    collection_name = "llama-2-papers"
+    client = chromadb.HttpClient(settings=Settings(allow_reset=True))
 
-print("Creating embedding function")
-embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    print("Creating embedding function")
+    embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
-collection: chromadb.Collection
-try:
-    collection = client.get_collection(collection_name)
-except Exception:
-    print(f"Creating missing collection '{collection_name}'...")
-    collection = client.create_collection(collection_name)
+    collection: chromadb.Collection
+    try:
+        collection = client.get_collection(collection_name)
+    except Exception:
+        print(f"Creating missing collection '{collection_name}'...")
+        collection = client.create_collection(collection_name)
 
-# Chroma.from_texts
-print(collection)
-print("Document count:", collection.count())
-vectorstore = Chroma(embedding_function=embedding_function,client=client,collection_name=collection_name)
-# result = db.similarity_search("CNN when switching GTX gpu")
-# print(result)
+    # Chroma.from_texts
+    print(collection)
+    print("Document count:", collection.count())
+    vectorstore = Chroma(embedding_function=embedding_function,client=client,collection_name=collection_name)
+    # result = db.similarity_search("CNN when switching GTX gpu")
+    # print(result)
+    # Upsert the result.jsonl data
+    if args.model_path != None:
+        # Run RAG with the dataset
+        run_llm(args.model_path, vectorstore)
+    else:
+        upsert_data(collection)
+    
 
-def upsert_data() -> None:
+
+
+
+def upsert_data(collection) -> None:
     dataset_file_path = pathlib.Path("./result.jsonl")
     print("Loading dataset...")
     data = load_dataset("json", data_files=str(dataset_file_path.resolve()),split="train")
@@ -69,7 +78,7 @@ def upsert_data() -> None:
         collection.add([ident],metadatas={'course':course,'text': text},documents=[text])
 
 
-def run_llm():
+def run_llm(model_path, vectorstore):
     # callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
     llm = LlamaCpp(
         model_path=model_path,
@@ -130,9 +139,8 @@ def run_llm():
         # llm.
     # rag_chain.strea
 
-# Upsert the result.jsonl data
-if args.model_path != None:
-    # Run RAG with the dataset
-    run_llm()
-else:
-    upsert_data()
+
+
+
+if __name__ == "__main__":
+    main()
