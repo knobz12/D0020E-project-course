@@ -16,3 +16,6 @@ class DocxToText():
     
     def ConvertImageToText(self) -> str:
         return self.image_text
+
+d = DocxToText("tests/sample_files/Test_docx/AIPR_Lab1-1.docx")
+d.ConvertToText()

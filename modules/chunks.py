@@ -1,9 +1,12 @@
 import textwrap
 import magic
-from file_reader.PDFReader import PDFToText
-from file_reader.PPTXReader import PPTXToText
-from file_reader.DocxReader import DocxReaderInstance
-from file_reader.htmlReader import htmlReaderInstance
+import sys
+sys.path.insert(1, 'modules/file_reader')
+from file_reader.PdfReader import PDFToText
+from file_reader.PptxReader import PPTXToText
+from file_reader.DocxReader import DocxToText
+from file_reader.HtmlReader import HtmlToText
+
 
 
 class NotSupportedFiletype(Exception):
@@ -15,7 +18,7 @@ class chunkerizer():
     def __init__(self):
         self.PDFReader = PDFToText()
         self.PPTXReader = PPTXToText()
-        self.htmlReader = htmlReaderInstance()
+        self.htmlReader = HtmlToText()
     def make_chunk(self, input_file):
         chunks = textwrap.wrap(input_file, 1024)
 
@@ -48,7 +51,7 @@ class chunkerizer():
                     extracted_text = self.PPTXReader.ConvertToText(input_file)
                 case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
                     filetype = "docx"
-                    instance = DocxReaderInstance(input_file)
+                    instance = DocxToText(input_file)
                     extracted_text = instance.ConvertToText()
                     extracted_image_text = instance.ConvertImageToText()
 
