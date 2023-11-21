@@ -1,0 +1,181 @@
+<project name="King of Tokyo" default="dist" basedir="."
+         xmlns:jacoco="antlib:org.jacoco.ant">
+    <description>
+        Maxence Cornaton's implementation of King of Tokyo
+    </description>
+
+    <!--     Sources location -->
+    <property name="src" location="src"/>
+    <property name="code" location="${src}/se"/>
+    <property name="tests" location="${src}/test"/>
+    <property name="resources" location="resources"/>
+
+    <!--     Libraries -->
+    <property name="lib" location="lib"/>
+    <property name="gson_lib" location="${lib}/gson-2.8.6.jar"/>
+    <property name="junit_lib" location="${lib}/junit-5.3.jar"/>
+
+    <!--     Build directories -->
+    <property name="build" location="build"/>
+    <property name="dist" location="dist"/>
+    <property name="testsBuild" location="build/tests"/>
+
+    <!--     Jar informations -->
+    <property name="mainClass" value="se.ltu.softwareengineering.KingTokyoPowerUp"/>
+
+    <!--     Classpathes -->
+    <path id="classpath">
+        <fileset dir="${basedir}/">
+            <include name="${lib}/*.jar"/>
+            <exclude name="${junit_lib}"/>
+        </fileset>
+    </path>
+
+    <!--    Classpathes-->
+    <path id="testClasspath">
+        <fileset dir="${basedir}/">
+            <include name="${lib}/*.jar"/>
+        </fileset>
+    </path>
+
+    <!--     Application targets -->
+    <target name="init">
+        <tstamp/>
+        <mkdir dir="${build}"/>
+    </target>
+
+    <target name="copyResources" depends="init">
+        <mkdir dir="${build}/resources"/>
+
+        <copy todir="${build}/resources">
+            <fileset dir="${resources}" includes="**/*"/>
+        </copy>
+    </target>
+
+    <target name="copyLibs" depends="init"
+            description="copy libs to the build directory">
+        <mkdir dir="${build}/lib"/>
+
+        <copy todir="${build}/lib">
+            <fileset dir="${lib}" includes="gson-2.8.6.jar"/>
+        </copy>
+    </target>
+
+
+    <target name="compile" depends="init, copyResources, copyLibs"
+            description="compile the source">
+        <javac srcdir="${code}" destdir="${build}">
+            <classpath>
+                <pathelement path="${gson_lib}"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="dist" depends="compile"
+            description="generate the distribution">
+        <!-- Create the distribution directory -->
+        <mkdir dir="${dist}"/>
+        <jar jarfile="${dist}/KingOfTokyo-${DSTAMP}.jar" basedir="${build}">
+            <manifest>
+                <attribute name="mainClass" value="${mainClass}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run" depends="compile"
+            description="run the newly generated jar file">
+        <java fork="true" dir="${build}" classname="se.ltu.softwareengineering.KingTokyoPowerUp"/>
+    </target>
+
+    <target name="clean"
+            description="clean up">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+        <delete dir="build"/>
+        <delete dir="out"/>
+        <delete dir="report"/>
+        <delete file="jacoco.exec"/>
+    </target>
+
+    <!--    Tests targets -->
+    <target name="initTests">
+        <mkdir dir="${testsBuild}"/>
+    </target>
+
+    <target name="compileTests" depends="initTests, compile"
+            description="compile the source">
+        <javac srcdir="${tests}" destdir="${testsBuild}"
+               target="12" source="12">
+            <classpath>
+                <pathelement path="${junit_lib}"/>
+                <pathelement path="${build}"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+        <classpath path="${lib}/jacocoant.jar"/>
+    </taskdef>
+
+    <target name="runTests" depends="compileTests"
+            description="run the tests">
+        <junit fork="true" includeantruntime="true">
+
+            <batchtest fork="yes" todir="junitReport">
+                <fileset dir="${testsBuild}">
+                    <include name="**/*.class"/>
+                </fileset>
+            </batchtest>
+
+            <classpath>
+                <pathelement location="${junit_lib}"/>
+                <pathelement location="${gson_lib}"/>
+                <pathelement location="${testsBuild}"/>
+                <pathelement location="${build}"/>
+            </classpath>
+
+        </junit>
+    </target>
+
+    <target name="createReport" depends="runTests">
+
+        <jacoco:coverage>
+            <junit fork="true" includeantruntime="true">
+
+                <!--            <test name="se.ltu.softwareengineering.tool.TRandomizer"/>-->
+                <batchtest fork="yes" todir="junitReport">
+                    <fileset dir="${testsBuild}">
+                        <include name="**/*.class"/>
+                    </fileset>
+                </batchtest>
+
+                <classpath>
+                    <pathelement location="${junit_lib}"/>
+                    <pathelement location="${gson_lib}"/>
+                    <pathelement location="${testsBuild}"/>
+                    <pathelement location="${build}"/>
+                </classpath>
+
+            </junit>
+        </jacoco:coverage>
+
+        <jacoco:report>
+            <executiondata>
+                <file file="jacoco.exec"/>
+            </executiondata>
+
+            <structure name="King of Tokyo">
+                <classfiles>
+                    <fileset dir="build/se"/>
+                </classfiles>
+                <sourcefiles encoding="UTF-8">
+                    <fileset dir="src"/>
+                </sourcefiles>
+            </structure>
+
+            <html destdir="report"/>
+
+        </jacoco:report>
+    </target>
+
+</project>

@@ -1,0 +1,77 @@
+<p><span>As systems grow increasingly complex, the ability to test them effectively becomes ever more vital. These videos covers the concept of Testability - a software quality attribute that gauges the ease with which a system can be tested. The videos will present&nbsp;the core concepts of testability, discuss its importance in the software development lifecycle, and offer practical strategies to enhance it.</span></p>
+<h3>Overview</h3>
+<p><iframe id="kaltura_player" title="Testability part 1" src="https://api.kaltura.nordu.net/p/306/sp/30600/embedIframeJs/uiconf_id/23449820/partner_id/306?iframeembed=true&amp;playerId=kaltura_player&amp;entry_id=0_i1zw8l3e&amp;flashvars[streamerType]=auto&amp;flashvars[localizationCode]=en&amp;flashvars[leadWithHTML5]=true&amp;flashvars[sideBarContainer.plugin]=true&amp;flashvars[sideBarContainer.position]=left&amp;flashvars[sideBarContainer.clickToClose]=true&amp;flashvars[chapters.plugin]=true&amp;flashvars[chapters.layout]=vertical&amp;flashvars[chapters.thumbnailRotator]=false&amp;flashvars[streamSelector.plugin]=true&amp;flashvars[EmbedPlayer.SpinnerTarget]=videoHolder&amp;flashvars[dualScreen.plugin]=true&amp;flashvars[hotspots.plugin]=1&amp;flashvars[Kaltura.addCrossoriginToIframe]=true&amp;&amp;wid=0_i5r1kgmc" width="400" height="285" sandbox="allow-downloads allow-forms allow-same-origin allow-scripts allow-top-navigation allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" allowfullscreen="allowfullscreen" webkitallowfullscreen="webkitallowfullscreen" mozallowfullscreen="mozallowfullscreen" allow="autoplay *; fullscreen *; encrypted-media *"></iframe></p>
+<p>&nbsp;</p>
+<h3>Tactics</h3>
+<p><iframe id="kaltura_player" title="Testability part 2" src="https://api.kaltura.nordu.net/p/306/sp/30600/embedIframeJs/uiconf_id/23449820/partner_id/306?iframeembed=true&amp;playerId=kaltura_player&amp;entry_id=0_meppljbp&amp;flashvars[streamerType]=auto&amp;flashvars[localizationCode]=en&amp;flashvars[leadWithHTML5]=true&amp;flashvars[sideBarContainer.plugin]=true&amp;flashvars[sideBarContainer.position]=left&amp;flashvars[sideBarContainer.clickToClose]=true&amp;flashvars[chapters.plugin]=true&amp;flashvars[chapters.layout]=vertical&amp;flashvars[chapters.thumbnailRotator]=false&amp;flashvars[streamSelector.plugin]=true&amp;flashvars[EmbedPlayer.SpinnerTarget]=videoHolder&amp;flashvars[dualScreen.plugin]=true&amp;flashvars[hotspots.plugin]=1&amp;flashvars[Kaltura.addCrossoriginToIframe]=true&amp;&amp;wid=0_lmggoy3y" width="400" height="285" sandbox="allow-downloads allow-forms allow-same-origin allow-scripts allow-top-navigation allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" allowfullscreen="allowfullscreen" webkitallowfullscreen="webkitallowfullscreen" mozallowfullscreen="mozallowfullscreen" allow="autoplay *; fullscreen *; encrypted-media *"></iframe></p>
+<p>&nbsp;</p>
+<h3>Design and implementation</h3>
+<p><iframe id="kaltura_player" title="Testability part 3" src="https://api.kaltura.nordu.net/p/306/sp/30600/embedIframeJs/uiconf_id/23449820/partner_id/306?iframeembed=true&amp;playerId=kaltura_player&amp;entry_id=0_t64kj0vc&amp;flashvars[streamerType]=auto&amp;flashvars[localizationCode]=en&amp;flashvars[leadWithHTML5]=true&amp;flashvars[sideBarContainer.plugin]=true&amp;flashvars[sideBarContainer.position]=left&amp;flashvars[sideBarContainer.clickToClose]=true&amp;flashvars[chapters.plugin]=true&amp;flashvars[chapters.layout]=vertical&amp;flashvars[chapters.thumbnailRotator]=false&amp;flashvars[streamSelector.plugin]=true&amp;flashvars[EmbedPlayer.SpinnerTarget]=videoHolder&amp;flashvars[dualScreen.plugin]=true&amp;flashvars[hotspots.plugin]=1&amp;flashvars[Kaltura.addCrossoriginToIframe]=true&amp;&amp;wid=0_jrtm21lx" width="400" height="285" sandbox="allow-downloads allow-forms allow-same-origin allow-scripts allow-top-navigation allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" allowfullscreen="allowfullscreen" webkitallowfullscreen="webkitallowfullscreen" mozallowfullscreen="mozallowfullscreen" allow="autoplay *; fullscreen *; encrypted-media *"></iframe></p>
+<p><span>Testability is a fundamental aspect of software development, ensuring that systems behave as expected. </span>Testability at the source code level usually entails a mix of design decisions, coding best practices, and software structures to facilitate easier testing. Here are some examples of appications where testability is of outmost importance, and some examples of how testability is achieved in these applications:</p>
+<hr>
+<p><strong>1. E-Commerce Websites</strong>:</p>
+<ul>
+<li><strong>Importance</strong>:&nbsp;Users trust these platforms with financial transactions. Bugs or vulnerabilities can lead to financial losses or reputation damage.</li>
+<li><strong>Achieving Testability</strong>:
+<ul>
+<li><strong>Decoupled Architecture</strong>: Code is structured so that the database, server, and user interfaces are separated, allowing individual testing of each part.</li>
+<li><strong>Dependency Injection</strong>: Rather than hard-coding dependencies, they are injected at runtime, enabling replacement with mock objects for testing.</li>
+<li><strong>Unit Testing</strong>: Break down the checkout process into individual units (like cart addition, payment processing) and test each in isolation.</li>
+<li><strong>Mocking</strong>: Use mock services to replicate third-party payment systems and test how the e-commerce site interacts with them.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>2. Autonomous Vehicle Software</strong>:</p>
+<ul>
+<li><strong>Importance</strong>: <span>Lives depend on the reliability of self-driving car software. A fault can have tragic consequences.</span></li>
+<li><strong>Achieving Testability</strong>:
+<ul>
+<li><strong>Clear State Management</strong>: Use explicit state machines or design patterns to manage the vehicle's many states, ensuring they're testable.</li>
+<li><strong>Isolated Side Effects</strong>: Actions that have side effects (like actuating brakes) are isolated, making it straightforward to test logic without triggering the effect.</li>
+<li><strong>Simulation</strong>: Create virtual environments to test the vehicle's response to various scenarios.</li>
+<li><strong>Modularity</strong>: Ensure each component (like obstacle detection, navigation) is designed separately, making it easier to test individually.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>3. Medical Software (e.g., for MRIs or pacemakers)</strong>:</p>
+<ul>
+<li><strong>Importance</strong>: Inaccuracies can result in misdiagnoses or life-threatening situations.</li>
+<li><strong>Achieving Testability</strong>:
+<ul>
+<li><strong>Primitive and Pure Functions</strong>: Where possible, functions are designed without side effects, ensuring consistent outputs for the same inputs.</li>
+<li><strong>Configuration Files</strong>: Rather than hardcoding values (like thresholds), they are placed in external config files, making testing under different conditions easier.</li>
+<li><strong>Hardware-in-the-loop Testing</strong>: Integrate the software with actual hardware components to run tests in real-world conditions.</li>
+<li><strong>Boundary Testing</strong>: Check how the software behaves at the extreme acceptable limits (e.g., heart rate thresholds for pacemakers).</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>4. Banking Apps</strong>:</p>
+<ul>
+<li><strong>Importance</strong>: <span>Financial data security and accurate transaction processing are crucial.</span></li>
+<li><strong>Achieving Testability</strong>:
+<ul>
+<li><strong>Encapsulation</strong>: Protecting data integrity by using private variables and public getter/setter methods.</li>
+<li><strong>Error Handling</strong>: Explicitly code for anticipated errors and provide clear error messages, making automated testing for error scenarios feasible.</li>
+<li><strong>End-to-end Testing</strong>: Validate the entire process of, say, transferring money between accounts.</li>
+<li><strong>Database Rollbacks</strong>: After tests, roll back the database to its original state to ensure test data doesn't interfere with real data.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>5. Flight Booking Systems</strong>:</p>
+<ul>
+<li><strong>Importance</strong>: <span>Overbooking, wrong bookings, or incorrect fare calculations can lead to significant losses and customer dissatisfaction.</span></li>
+<li><strong>Achieving Testability</strong>:
+<ul>
+<li><strong>Modular Code</strong>: Break the booking system into modules (like seat selection, payment, ticket generation) to facilitate unit testing.</li>
+<li><strong>Continuous Integration</strong>: Automated tests run at every code check-in, ensuring that new changes don't introduce defects.</li>
+<li><strong>Scenario Testing</strong>: Simulate specific user behaviors, like booking a round trip, to test the system's response.</li>
+<li><strong>State Transition Testing</strong>: Ensure the system correctly moves from one state to another, like from 'booking' to 'ticket confirmed'.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><span>In each example, testability ensures that the software can be thoroughly vetted, guaranteeing that it performs reliably in critical situations.</span></p>

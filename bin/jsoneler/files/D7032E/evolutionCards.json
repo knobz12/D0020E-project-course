@@ -1,0 +1,92 @@
+[
+  {
+    "monsterName": "Alienoid",
+    "name": "Alien Scourge",
+    "description": "Gain 2 STAR.",
+    "effects": [
+      {
+        "effect": "GainStars",
+        "value": 2,
+        "targets": [
+          "Self"
+        ],
+        "triggeringActions": []
+      }
+    ],
+    "type": "Discard"
+  },
+  {
+    "monsterName": "Gigazaur",
+    "name": "Radioactive Waste",
+    "description": "Gain 2 ENERGY and 1 HEART.",
+    "effects": [
+      {
+        "effect": "GainEnergy",
+        "value": 2,
+        "targets": [
+          "Self"
+        ],
+        "triggeringActions": []
+      },
+      {
+        "effect": "GainHearts",
+        "value": 1,
+        "targets": [
+          "Self"
+        ],
+        "triggeringActions": []
+      }
+    ],
+    "type": "Discard"
+  },
+  {
+    "monsterName": "Gigazaur",
+    "name": "Primal Bellow",
+    "description": "All other Monsters lose 2 STAR.",
+    "effects": [
+      {
+        "effect": "GainStars",
+        "value": -2,
+        "targets": [
+          "Others"
+        ],
+        "triggeringActions": []
+      }
+    ],
+    "type": "Discard"
+  },
+  {
+    "monsterName": "Kong",
+    "name": "Red Dawn",
+    "description": "All other Monsters lose 2 HEART.",
+    "effects": [
+      {
+        "effect": "DealDamages",
+        "value": 2,
+        "targets": [
+          "Others"
+        ],
+        "triggeringActions": []
+      }
+    ],
+    "type": "Discard"
+  },
+  {
+    "monsterName": "Kong",
+    "name": "Iron Curtain",
+    "description": "Other Monsters who leave Tokyo lose 1 HEART.",
+    "effects": [
+      {
+        "effect": "DealDamages",
+        "value": 1,
+        "targets": [
+          "Others"
+        ],
+        "triggeringActions": [
+          "LeaveTokyo"
+        ]
+      }
+    ],
+    "type": "Keep"
+  }
+]

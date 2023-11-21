@@ -1,0 +1,158 @@
+[
+  {
+    "cost": 6,
+    "name": "Acid Attack",
+    "description": "Deal 1 extra damage each turn (even when you don\u0027t otherwise attack).",
+    "effects": [
+      {
+        "effect": "DealDamages",
+        "value": 1,
+        "targets": [
+          "Others"
+        ],
+        "triggeringActions": [
+          "DealDamages"
+        ]
+      }
+    ],
+    "type": "Keep"
+  },
+  {
+    "cost": 3,
+    "name": "Alien Metabolism",
+    "description": "Buying cards costs you 1 less.",
+    "effects": [
+      {
+        "effect": "AlterCardCost",
+        "value": -1,
+        "targets": [
+          "Self"
+        ],
+        "triggeringActions": []
+      }
+    ],
+    "type": "Keep"
+  },
+  {
+    "cost": 5,
+    "name": "Alpha Monster",
+    "description": "Gain 1 STAR when you attack.",
+    "effects": [
+      {
+        "effect": "GainStars",
+        "value": 1,
+        "targets": [
+          "Self"
+        ],
+        "triggeringActions": [
+          "DealDamages"
+        ]
+      }
+    ],
+    "type": "Keep"
+  },
+  {
+    "cost": 5,
+    "name": "Apartment Building",
+    "description": "Gain 3 STAR.",
+    "effects": [
+      {
+        "effect": "GainStars",
+        "value": 3,
+        "targets": [
+          "Self"
+        ],
+        "triggeringActions": []
+      }
+    ],
+    "type": "Discard"
+  },
+  {
+    "cost": 4,
+    "name": "Armor Plating",
+    "description": "Ignore damage of 1.",
+    "effects": [
+      {
+        "effect": "AlterArmor",
+        "value": 1,
+        "targets": [
+          "Self"
+        ],
+        "triggeringActions": []
+      }
+    ],
+    "type": "Keep"
+  },
+  {
+    "cost": 4,
+    "name": "Commuter Train",
+    "description": "Gain 2 STAR.",
+    "effects": [
+      {
+        "effect": "GainStars",
+        "value": 2,
+        "targets": [
+          "Self"
+        ],
+        "triggeringActions": []
+      }
+    ],
+    "type": "Discard"
+  },
+  {
+    "cost": 3,
+    "name": "Corner Stone",
+    "description": "Gain 1 STAR.",
+    "effects": [
+      {
+        "effect": "GainStars",
+        "value": 1,
+        "targets": [
+          "Self"
+        ],
+        "triggeringActions": []
+      }
+    ],
+    "type": "Discard"
+  },
+  {
+    "cost": 4,
+    "name": "Even Bigger",
+    "description": "Your maximum HEART is increased by 2. Gain 2 HEART when you get this card.",
+    "effects": [
+      {
+        "effect": "GainHearts",
+        "value": 2,
+        "targets": [
+          "Self"
+        ],
+        "triggeringActions": []
+      },
+      {
+        "effect": "AlterMaxHealth",
+        "value": 2,
+        "targets": [
+          "Self"
+        ],
+        "triggeringActions": []
+      }
+    ],
+    "type": "Keep"
+  },
+  {
+    "cost": 5,
+    "name": "Giant Brain",
+    "description": "You have one extra reroll each turn.",
+    "effects": [
+      {
+        "effect": "AlterRerollNumber",
+        "value": 1,
+        "targets": [
+          "Self"
+        ],
+        "triggeringActions": []
+      }
+    ],
+    "type": "Keep"
+  }
+]

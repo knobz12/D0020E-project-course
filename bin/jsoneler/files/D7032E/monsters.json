@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Alienoid",
+    "maxHealth": 10,
+    "baseDamages": 1,
+    "baseArmor": 0
+  },
+  {
+    "name": "Gigazaur",
+    "maxHealth": 10,
+    "baseDamages": 1,
+    "baseArmor": 0
+  },
+  {
+    "name": "Kong",
+    "maxHealth": 10,
+    "baseDamages": 1,
+    "baseArmor": 0
+  }
+]

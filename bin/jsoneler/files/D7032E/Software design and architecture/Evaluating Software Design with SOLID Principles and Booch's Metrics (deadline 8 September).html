@@ -1,0 +1,140 @@
+<p><strong>Prerequisite: </strong></p>
+<p>Make sure you have started to go through the Modular course on Software design and architecture (available in the Modules tab in canvas). For this assignment you need to have completed the Design principles and Design patterns sections.</p>
+<p><strong>Objective:</strong><br>You have been provided with three different implementations of an inventory system for a text-based dungeon crawler game. Your task is to critically analyze each implementation with respect to the SOLID principles and Booch metrics. For the final implementation, you are also expected to identify a specific design pattern used. Use your understanding of software design principles to reason about the strengths and weaknesses of each approach.</p>
+<p><strong>Instructions:</strong></p>
+<ol>
+<li>
+<p><strong>Inventory as a Simple List in Player Class</strong></p>
+<pre style="background-color: #f6f8fa; padding: 10px; border-radius: 5px;"><code>
+<span style="color: #2b7489;">public class</span> <span style="color: #005cc5;">Player</span> {
+    <span style="color: #2b7489;">private</span> <span style="color: #005cc5;">List&lt;Item&gt;</span> inventory = <span style="color: #2b7489;">new</span> <span style="color: #005cc5;">ArrayList&lt;&gt;</span>();
+  
+    <span style="color: #2b7489;">public void</span> addToInventory(<span style="color: #005cc5;">Item</span> item) {
+        inventory.<span style="color: #d73a49;">add</span>(item);
+    }
+  
+    <span style="color: #2b7489;">public void</span> removeFromInventory(<span style="color: #005cc5;">Item</span> item) {
+        inventory.<span style="color: #d73a49;">remove</span>(item);
+    }
+  
+    <span style="color: #969896;">// ...other player methods...</span>
+}
+</code></pre>
+<ul>
+<li>Review the given code.</li>
+<li>Identify which SOLID principles are adhered to and which ones are violated. Provide reasoning.</li>
+<li>Analyze the code in terms of Booch metrics. Discuss potential impacts on maintainability, flexibility, and extensibility.</li>
+</ul>
+</li>
+<li>
+<p><strong>Inventory as a Separate Class</strong></p>
+<pre style="background-color: #f6f8fa; padding: 10px; border-radius: 5px;"><code>
+<span style="color: #2b7489;">public class</span> <span style="color: #005cc5;">Inventory</span> {
+    <span style="color: #2b7489;">private</span> <span style="color: #005cc5;">List&lt;Item&gt;</span> items = <span style="color: #2b7489;">new</span> <span style="color: #005cc5;">ArrayList&lt;&gt;</span>();
+  
+    <span style="color: #2b7489;">public void</span> <span style="color: #d73a49;">add</span>(<span style="color: #005cc5;">Item</span> item) {
+        items.<span style="color: #d73a49;">add</span>(item);
+    }
+  
+    <span style="color: #2b7489;">public void</span> <span style="color: #d73a49;">remove</span>(<span style="color: #005cc5;">Item</span> item) {
+        items.<span style="color: #d73a49;">remove</span>(item);
+    }
+}
+
+<span style="color: #2b7489;">public class</span> <span style="color: #005cc5;">Player</span> {
+    <span style="color: #2b7489;">private</span> <span style="color: #005cc5;">Inventory</span> inventory = <span style="color: #2b7489;">new</span> <span style="color: #005cc5;">Inventory</span>();
+  
+    <span style="color: #2b7489;">public void</span> addToInventory(<span style="color: #005cc5;">Item</span> item) {
+        inventory.<span style="color: #d73a49;">add</span>(item);
+    }
+  
+    <span style="color: #2b7489;">public void</span> removeFromInventory(<span style="color: #005cc5;">Item</span> item) {
+        inventory.<span style="color: #d73a49;">remove</span>(item);
+    }
+  
+    <span style="color: #969896;">// ...other player methods...</span>
+}
+</code></pre>
+<ul>
+<li>Review the given code.</li>
+<li>Again, identify which SOLID principles are adhered to and which ones are violated. Provide reasoning.</li>
+<li>Analyze the code in terms of Booch metrics. Compare this to the previous implementation and discuss any improvements or regressions.</li>
+</ul>
+</li>
+<li>
+<p><strong>Inventory with Design Pattern</strong></p>
+<pre style="background-color: #f6f8fa; padding: 10px; border-radius: 5px;"><code>
+<span style="color: #2b7489;">public interface</span> <span style="color: #005cc5;">Inventory</span> {
+    <span style="color: #2b7489;">void</span> <span style="color: #d73a49;">add</span>(<span style="color: #005cc5;">Item</span> item);
+    <span style="color: #2b7489;">void</span> <span style="color: #d73a49;">remove</span>(<span style="color: #005cc5;">Item</span> item);
+    <span style="color: #2b7489;">boolean</span> <span style="color: #d73a49;">canAdd</span>(<span style="color: #005cc5;">Item</span> item);
+}
+
+<span style="color: #2b7489;">public class</span> <span style="color: #005cc5;">SimpleInventory</span> <span style="color: #2b7489;">implements</span> <span style="color: #005cc5;">Inventory</span> {
+    <span style="color: #2b7489;">private</span> <span style="color: #005cc5;">List&lt;Item&gt;</span> items = <span style="color: #2b7489;">new</span> <span style="color: #005cc5;">ArrayList&lt;&gt;</span>();
+  
+    <span style="color: #2b7489;">public void</span> <span style="color: #d73a49;">add</span>(<span style="color: #005cc5;">Item</span> item) {
+        <span style="color: #2b7489;">if</span>(<span style="color: #d73a49;">canAdd</span>(item)) {
+            items.<span style="color: #d73a49;">add</span>(item);
+        }
+    }
+  
+    <span style="color: #2b7489;">public void</span> <span style="color: #d73a49;">remove</span>(<span style="color: #005cc5;">Item</span> item) {
+        items.<span style="color: #d73a49;">remove</span>(item);
+    }
+
+    <span style="color: #2b7489;">public boolean</span> <span style="color: #d73a49;">canAdd</span>(<span style="color: #005cc5;">Item</span> item) {
+        <span style="color: #2b7489;">return</span> items.<span style="color: #d73a49;">size</span>() &lt; 10; <span style="color: #969896;">// Let's say a simple inventory can hold only 10 items.</span>
+    }
+}
+
+<span style="color: #2b7489;">public class</span> <span style="color: #005cc5;">MagicianInventory</span> <span style="color: #2b7489;">implements</span> <span style="color: #005cc5;">Inventory</span> {
+    <span style="color: #2b7489;">private</span> <span style="color: #005cc5;">List&lt;Item&gt;</span> items = <span style="color: #2b7489;">new</span> <span style="color: #005cc5;">ArrayList&lt;&gt;</span>();
+    <span style="color: #2b7489;">private</span> <span style="color: #2b7489;">double</span> totalWeight = 0;
+  
+    <span style="color: #2b7489;">public void</span> <span style="color: #d73a49;">add</span>(<span style="color: #005cc5;">Item</span> item) {
+        <span style="color: #2b7489;">if</span>(<span style="color: #d73a49;">canAdd</span>(item)) {
+            items.<span style="color: #d73a49;">add</span>(item);
+            totalWeight += item.<span style="color: #d73a49;">getWeight</span>();
+        }
+    }
+  
+    <span style="color: #2b7489;">public void</span> <span style="color: #d73a49;">remove</span>(<span style="color: #005cc5;">Item</span> item) {
+        items.<span style="color: #d73a49;">remove</span>(item);
+        totalWeight -= item.<span style="color: #d73a49;">getWeight</span>();
+    }
+
+    <span style="color: #2b7489;">public boolean</span> <span style="color: #d73a49;">canAdd</span>(<span style="color: #005cc5;">Item</span> item) {
+        <span style="color: #2b7489;">return</span> totalWeight + item.<span style="color: #d73a49;">getWeight</span>() &lt;= 50; <span style="color: #969896;">// Let's say a magician can only carry items with total weight &lt;= 50 units.</span>
+    }
+}
+
+<span style="color: #2b7489;">public class</span> <span style="color: #005cc5;">Player</span> {
+    <span style="color: #2b7489;">private</span> <span style="color: #005cc5;">Inventory</span> inventory;
+  
+    <span style="color: #2b7489;">public</span> <span style="color: #005cc5;">Player</span>(<span style="color: #005cc5;">Inventory</span> inventory) {
+        <span style="color: #d73a49;">this</span>.inventory = inventory;
+    }
+  
+    <span style="color: #2b7489;">public void</span> addToInventory(<span style="color: #005cc5;">Item</span> item) {
+        <span style="color: #2b7489;">if</span>(inventory.<span style="color: #d73a49;">canAdd</span>(item)) {
+            inventory.<span style="color: #d73a49;">add</span>(item);
+        }
+    }
+}
+</code></pre>
+<ul>
+<li>Review the given code.</li>
+<li>As before, identify which SOLID principles are adhered to and which ones are violated. Provide reasoning.</li>
+<li>Analyze the code in terms of Booch metrics.</li>
+<li>Identify the design pattern used in this implementation. Describe how this pattern affects the design's adherence to SOLID principles and its impact according to Booch metrics.</li>
+</ul>
+</li>
+</ol>
+<p><strong>Tips:</strong></p>
+<ul>
+<li>Think about how each implementation might evolve over time. How easy would it be to add new features or modify existing ones?</li>
+<li>Consider the effect of class coupling and cohesion on each design.</li>
+<li>How does each design decision impact understandability, complexity, and the potential for errors?</li>
+</ul>
+<p><strong>Submission:</strong><br>Provide a written analysis for each of the three implementations. Each analysis should be detailed and well-reasoned, drawing upon your understanding of the SOLID principles, Booch metrics, and software design patterns. Ensure that your analyses are organized, and any references to the code are clear. Include any additional observations or recommendations for further improvement of the provided designs.</p>

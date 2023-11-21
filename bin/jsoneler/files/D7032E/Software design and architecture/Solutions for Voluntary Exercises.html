@@ -1,0 +1,207 @@
+<h3>SOLID Principles</h3>
+<h3 style="padding-left: 40px;">1. Single Responsibility Principle (SRP) - Solution:</h3>
+<p style="margin: 15px 0px; padding-left: 40px;">The original code violated the SRP by combining both the user's properties and operations like saving to the database and sending emails. By separating each responsibility into its class (`User`, `Database`, and `EmailService`), we adhere to the SRP by ensuring that each class has only one reason to change.</p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">class</span> User {
+    <span style="color: #d94848;">String</span> name;
+    <span style="color: #d94848;">String</span> email;
+}
+
+<span style="color: #0074d9;">class</span> Database {
+    <span style="color: #0074d9;">void</span> saveUser(User user) {
+        // Code to save user data to the database
+    }
+}
+
+<span style="color: #0074d9;">class</span> EmailService {
+    <span style="color: #0074d9;">void</span> sendEmail(<span style="color: #d94848;">String</span> email) {
+        // Code to send an email
+    }
+}
+</code></pre>
+<h3 style="padding-left: 40px;">2. Open/Closed Principle (OCP) - Solution:</h3>
+<p style="margin: 15px 0px; padding-left: 40px;">To satisfy the OCP, we introduced the `Shape` interface with an `area()` method. The `Rectangle` class implements this interface. The `AreaCalculator` class, which was dependent on the concrete implementation of `Rectangle`, now depends on the abstraction (`Shape`). This allows us to add more shapes in the future without modifying the `AreaCalculator`.</p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">interface</span> Shape {
+    <span style="color: #0074d9;">double</span> area();
+}
+
+<span style="color: #0074d9;">class</span> Rectangle <span style="color: #0074d9;">implements</span> Shape {
+    <span style="color: #0074d9;">public double</span> width;
+    <span style="color: #0074d9;">public double</span> height;
+    
+    @Override
+    <span style="color: #0074d9;">public double</span> area() {
+        <span style="color: #0074d9;">return</span> width * height;
+    }
+}
+
+<span style="color: #0074d9;">class</span> AreaCalculator {
+    <span style="color: #0074d9;">public double</span> computeArea(Shape shape) {
+        <span style="color: #0074d9;">return</span> shape.area();
+    }
+}
+</code></pre>
+<h3 style="padding-left: 40px;">3. Liskov Substitution Principle (LSP) - Solution:</h3>
+<p style="margin: 15px 0px; padding-left: 40px;">The LSP is violated in the initial code because substituting a `Bird` object with an `Ostrich` object would lead to unintended behaviors, as ostriches can't fly. Throwing an exception in an overridden method, like the `fly` method for `Ostrich`, could lead to unpredicted behaviors and errors at runtime. <span>To resolve the violation of the Liskov Substitution Principle, we can separate the flying behavior from the </span><code>Bird</code><span> class. We can introduce interfaces that allow specific behaviors to be assigned to the classes that require them. In this way, we no longer expect every bird to be able to fly.</span></p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">interface</span> FlyingBird {
+    <span style="color: #0074d9;">void</span> fly();
+}
+
+<span style="color: #0074d9;">class</span> Bird {
+    // common attributes and behaviors of all birds
+}
+
+<span style="color: #0074d9;">class</span> Sparrow <span style="color: #0074d9;">extends</span> Bird <span style="color: #0074d9;">implements</span> FlyingBird {
+    @Override
+    <span style="color: #0074d9;">public void</span> fly() {
+        // flying mechanism for sparrows
+    }
+}
+
+<span style="color: #0074d9;">class</span> Ostrich <span style="color: #0074d9;">extends</span> Bird {
+    // Ostrich doesn't implement FlyingBird, so no fly method here
+}
+</code></pre>
+<p style="margin: 15px 0px; padding-left: 40px;">By introducing the `FlyingBird` interface, we ensure that only birds capable of flying will implement the `fly` method. This aligns with the Liskov Substitution Principle, as now, any bird type that is said to be a `FlyingBird` truly has the capability to fly, ensuring substitutability. The `Ostrich` class, for instance, doesn't implement the `FlyingBird` interface, so we don't expect it to have a `fly` method. This design avoids forcing non-flying birds to provide an incorrect or exception-throwing implementation of the `fly` method.</p>
+<h3 style="padding-left: 40px;">4. Interface Segregation Principle (ISP) - Solution:</h3>
+<p style="margin: 15px 0px; padding-left: 40px;">The Interface Segregation Principle states that no client should be forced to depend on methods it does not use. By breaking down the generic <code style="color: #0074d9;">Worker</code> interface into more specific interfaces (<code style="color: #0074d9;">Workable</code>, <code style="color: #0074d9;">Eatable</code>, and <code style="color: #0074d9;">Sleepable</code>), we ensure that classes like <code style="color: #0074d9;">Robot</code> only need to implement the methods that are relevant to them. In this refactored design, <code style="color: #0074d9;">Robot</code> implements only the <code style="color: #0074d9;">Workable</code> interface and avoids unnecessary methods like <code style="color: #0074d9;">eat()</code> and <code style="color: #0074d9;">sleep()</code>.</p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">interface</span> Workable {
+    <span style="color: #0074d9;">void</span> work();
+}
+
+<span style="color: #0074d9;">interface</span> Eatable {
+    <span style="color: #0074d9;">void</span> eat();
+}
+
+<span style="color: #0074d9;">interface</span> Sleepable {
+    <span style="color: #0074d9;">void</span> sleep();
+}
+
+<span style="color: #0074d9;">class</span> Robot <span style="color: #0074d9;">implements</span> Workable {
+    @Override
+    <span style="color: #0074d9;">public void</span> work() {
+        // work code for robot
+    }
+    
+    // Now, the Robot doesn't need to implement eat() and sleep()
+}
+</code></pre>
+<h3 style="padding-left: 40px;">5. Dependency Inversion Principle (DIP) - Solution:</h3>
+<p style="margin: 15px 0px; padding-left: 40px;">The DIP is about depending on abstractions, not on concrete implementations. In the solution, the `Switch` class doesn't depend directly on the `LightBulb` class, but on the `Switchable` interface. This makes the system more flexible and allows us to control other devices (not just a `LightBulb`) using the same `Switch`.</p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">interface</span> Switchable {
+    <span style="color: #0074d9;">void</span> turnOn();
+    <span style="color: #0074d9;">void</span> turnOff();
+}
+
+<span style="color: #0074d9;">class</span> LightBulb <span style="color: #0074d9;">implements</span> Switchable {
+    @Override
+    <span style="color: #0074d9;">public void</span> turnOn() {
+        // code to turn on the light bulb
+    }
+
+    @Override
+    <span style="color: #0074d9;">public void</span> turnOff() {
+        // code to turn off the light bulb
+    }
+}
+
+<span style="color: #0074d9;">class</span> Switch {
+    <span style="color: #0074d9;">private</span> Switchable device;
+
+    <span style="color: #0074d9;">public</span> Switch(Switchable device) {
+        <span style="color: #0074d9;">this</span>.device = device;
+    }
+
+    <span style="color: #0074d9;">void</span> operate() {
+        // code to operate the switch and use device.turnOn() or device.turnOff()
+    }
+}
+</code></pre>
+<h3>Booch's metrics</h3>
+<h3 style="padding-left: 40px;">1. Cohesion Exercise:</h3>
+<p style="padding-left: 40px;"><strong>Answer</strong>:</p>
+<p style="padding-left: 40px;">The <code>UserHandler</code> class displays <strong>low cohesion</strong>. It handles tasks like database management, email communications, and discount calculations all within one class.</p>
+<p style="padding-left: 40px;">To improve cohesion:</p>
+<ol>
+<li style="list-style-type: none;">
+<ol>
+<li>Separate database operations into a <code>DatabaseHandler</code> or <code>UserRepository</code> class.</li>
+<li>Move email operations to a <code>EmailService</code> class.</li>
+<li>Put discount-related operations in a <code>DiscountCalculator</code> or <code>UserDiscountService</code> class.</li>
+</ol>
+</li>
+</ol>
+<p style="padding-left: 40px;">This way, each class focuses on a single responsibility, increasing its cohesion.</p>
+<hr style="padding-left: 40px;">
+<h3 style="padding-left: 40px;">2. Coupling Exercise:</h3>
+<p style="padding-left: 40px;"><strong>Answer</strong>:</p>
+<p style="padding-left: 40px;">The <code>Inventory</code> class and the <code>Item</code> class display <strong>tight coupling</strong> since the <code>Inventory</code> class directly accesses the <code>Item</code> class's public <code>price</code> attribute.</p>
+<p style="padding-left: 40px;">To reduce the coupling:</p>
+<ol>
+<li style="list-style-type: none;">
+<ol>
+<li>Make the <code>price</code> attribute in the <code>Item</code> class private.</li>
+<li>Ensure that the <code>Inventory</code> class interacts with the <code>Item</code> class only through the <code>getPrice()</code> method or other public methods.</li>
+<li>Avoid direct manipulation or access of another class's attributes, instead preferring method-based interaction for encapsulation.</li>
+</ol>
+</li>
+</ol>
+<p style="padding-left: 40px;">This adjustment would make sure that the internal details of the <code>Item</code> class are hidden from <code>Inventory</code>, and any changes in the <code>Item</code> class will not directly impact the workings of <code>Inventory</code>. This reduces the coupling between the two classes.</p>
+<hr style="padding-left: 40px;">
+<h3 style="padding-left: 40px;">3. Primitiveness Exercise:</h3>
+<p style="padding-left: 40px;"><strong>Answer</strong>:</p>
+<p style="padding-left: 40px;">The <code>Order</code> class shows a good level of primitiveness. Each method in the class is focused on a specific, smaller task and the main method, <code>processOrder</code>, orchestrates them. The decomposition into smaller methods like <code>validateOrder</code>, <code>calculateTotalPrice</code>, <code>applyDiscount</code>, and <code>initiateShipping</code> is appropriate and doesn't seem to need further decomposition for the given context.</p>
+<hr style="padding-left: 40px;">
+<h3 style="padding-left: 40px;">4. Sufficiency Exercise:</h3>
+<p style="padding-left: 40px;"><strong>Answer</strong>:</p>
+<p style="padding-left: 40px;">For the <code>Book</code> class in an online book store system, at a minimum, we would expect the following methods and properties:</p>
+<p style="padding-left: 40px;">Properties:</p>
+<ul>
+<li style="list-style-type: none;">
+<ul>
+<li>Title</li>
+<li>Author</li>
+<li>ISBN number</li>
+<li>Publisher</li>
+<li>Publication Date</li>
+<li>Price</li>
+<li>Genre/Category</li>
+<li>Number of Pages</li>
+<li>Cover Image</li>
+<li>Synopsis/Description</li>
+</ul>
+</li>
+</ul>
+<p style="padding-left: 40px;">Methods:</p>
+<ul>
+<li style="list-style-type: none;">
+<ul>
+<li>Getters and setters for all properties</li>
+<li><code>addToCart()</code>: To add the book to a shopping cart.</li>
+<li><code>addReview(Review review)</code>: To allow users to review the book.</li>
+<li><code>getAverageRating()</code>: To retrieve the average rating of the book.</li>
+</ul>
+</li>
+</ul>
+<p style="padding-left: 40px;">This ensures that the <code>Book</code> class can sufficiently represent a book in the context of an online bookstore.</p>
+<hr style="padding-left: 40px;">
+<h3 style="padding-left: 40px;">5. Completeness Exercise:</h3>
+<p style="padding-left: 40px;"><strong>Answer</strong>:</p>
+<p style="padding-left: 40px;">The <code>Calculator</code> class, as given, is not complete for a basic calculator. While it provides methods for addition and subtraction, it lacks other basic operations.</p>
+<p style="padding-left: 40px;">Methods to add for completeness:</p>
+<ul>
+<li style="list-style-type: none;">
+<ul>
+<li><code>multiply(double a, double b)</code>: For multiplication.</li>
+<li><code>divide(double a, double b)</code>: For division. Be sure to handle division by zero.</li>
+<li>Potentially, <code>power(double base, double exponent)</code> for raising to a power and <code>sqrt(double number)</code> for square root.</li>
+</ul>
+</li>
+</ul>
+<p style="padding-left: 40px;">Adding these methods would make the class a more complete representation of a basic calculator.</p>
+<hr style="padding-left: 40px;">
+<p>These answers provide a comprehensive view of each exercise, highlighting the key aspects of SOLID Principles and Booch's metrics as well as their implications in software design.</p>
