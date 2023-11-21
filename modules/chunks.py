@@ -1,7 +1,5 @@
 import textwrap
 import magic
-import sys
-sys.path.insert(1, 'modules/file_reader')
 from file_reader.PdfReader import PDFToText
 from file_reader.PptxReader import PPTXToText
 from file_reader.DocxReader import DocxToText

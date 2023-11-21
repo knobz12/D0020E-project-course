@@ -1,4 +1,4 @@
-import docx3txt
+import file_reader.docx3txt as docx3txt
 
 #This import might not be needed
 #import pathlib
