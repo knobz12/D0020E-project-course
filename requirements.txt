@@ -4,6 +4,7 @@ numpy==1.26.2
 packaging==23.2
 Pillow==10.1.0
 PyPDF2==3.0.1
+PyMuPDFb==1.23.6
 pytesseract==0.3.10
 python-magic==0.4.27; 'linux' in sys.platform
 python-magic-bin==0.4.14; sys_platform == 'win32'
