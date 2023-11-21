@@ -1,0 +1,134 @@
+<p>This video is on Cloud design patterns, a specialized set of solutions tailored for the ever-evolving world of cloud computing. As the demands on cloud systems increase, so does the complexity of challenges they face, ranging from system availability and scalability to ensuring consistent and responsive user experiences. This video covers some pivotal cloud design patterns that act as roadmaps to building robust and resilient cloud-native applications:</p>
+<ol>
+<li>
+<p><strong>Asynchronous Request and Reply Pattern</strong>: Facilitates asynchronous communication between services, ensuring non-blocking operations and more responsive systems.</p>
+</li>
+<li>
+<p><strong>Command and Query Responsibility Segregation (CQRS) Pattern</strong>: Separates read and write actions, optimizing scalability and flexibility of your cloud applications.</p>
+</li>
+<li>
+<p><strong>Event Sourcing Pattern</strong>: Captures the state changes as events, allowing systems to reconstruct past states and offering better traceability.</p>
+</li>
+<li>
+<p><strong>Retry Pattern</strong>: Implements automatic retries for failed operations, enhancing system resilience especially when temporary issues occur.</p>
+</li>
+<li>
+<p><strong>Circuit Breaker Pattern</strong>: Detects failures and prevents the system from trying to perform a function that's likely to fail, protecting system overloads and cascading failures.</p>
+</li>
+<li>
+<p><strong>Bulkhead Pattern</strong>: Isolates elements of an application into pools, ensuring failures in one won’t lead to system-wide collapse.</p>
+</li>
+<li>
+<p><strong>Throttling Pattern</strong>: Regulates the rate at which application events are processed, ensuring controlled resource consumption and optimal performance.</p>
+</li>
+<li>
+<p><strong>Queue-based Load Levelling Pattern</strong>: Uses a queue to manage and level the load to system components, ensuring smooth operation even during traffic spikes.</p>
+</li>
+</ol>
+<p><iframe id="kaltura_player" title="Cloud design patterns" src="https://api.kaltura.nordu.net/p/306/sp/30600/embedIframeJs/uiconf_id/23449820/partner_id/306?iframeembed=true&amp;playerId=kaltura_player&amp;entry_id=0_fzhj4xo9&amp;flashvars[streamerType]=auto&amp;flashvars[localizationCode]=en&amp;flashvars[leadWithHTML5]=true&amp;flashvars[sideBarContainer.plugin]=true&amp;flashvars[sideBarContainer.position]=left&amp;flashvars[sideBarContainer.clickToClose]=true&amp;flashvars[chapters.plugin]=true&amp;flashvars[chapters.layout]=vertical&amp;flashvars[chapters.thumbnailRotator]=false&amp;flashvars[streamSelector.plugin]=true&amp;flashvars[EmbedPlayer.SpinnerTarget]=videoHolder&amp;flashvars[dualScreen.plugin]=true&amp;flashvars[hotspots.plugin]=1&amp;flashvars[Kaltura.addCrossoriginToIframe]=true&amp;&amp;wid=0_79jz6no0" width="400" height="285" sandbox="allow-downloads allow-forms allow-same-origin allow-scripts allow-top-navigation allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" allowfullscreen="allowfullscreen" webkitallowfullscreen="webkitallowfullscreen" mozallowfullscreen="mozallowfullscreen" allow="autoplay *; fullscreen *; encrypted-media *"></iframe></p>
+<p>&nbsp;</p>
+<p>Creating Java-based examples for cloud patterns is a bit challenging, as many of these patterns rely on specific cloud infrastructure elements that Java by itself doesn't encapsulate, so these are rudimentary examples. In real-world cloud scenarios, these patterns might be implemented using cloud-specific libraries, services, or frameworks.</p>
+<h3>Asynchronous request and reply pattern</h3>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">public class</span> AsyncRequestReply {
+    <span style="color: #0000ff;">public void</span> sendRequest(<span style="color: #0000ff;">String</span> message) {
+        <span style="color: #007700;">// Logic to send an asynchronous request</span>
+    }
+    
+    <span style="color: #0000ff;">public</span> Response receiveReply() {
+        <span style="color: #007700;">// Logic to receive a reply asynchronously</span>
+        <span style="color: #0000ff;">return</span> new Response();
+    }
+}
+
+</pre>
+<p><a class="inline_disabled" href="https://learn.microsoft.com/en-us/azure/architecture/patterns/async-request-reply" target="_blank">Additional information and concrete example</a></p>
+<h3>CQRS pattern</h3>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">public interface</span> Command {
+    <span style="color: #0000ff;">void</span> execute();
+}
+
+<span style="color: #0000ff;">public interface</span> Query {
+    <span style="color: #0000ff;">Object</span> fetch();
+}
+
+</pre>
+<p><a class="inline_disabled" href="https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs" target="_blank">Additional information and concrete example</a></p>
+<h3>Event sourcing pattern</h3>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">public class</span> Event {
+    <span style="color: #0000ff;">private final</span> <span style="color: #0000ff;">String</span> action;
+    <span style="color: #0000ff;">private final</span> <span style="color: #0000ff;">Date</span> timestamp;
+    
+    <span style="color: #007700;">// Constructor, getters and setters</span>
+}
+
+</pre>
+<p><a class="inline_disabled" href="https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing" target="_blank">Additional information and concrete example</a></p>
+<h3>Retry pattern</h3>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">public class</span> RetryOperation {
+    <span style="color: #0000ff;">private static final int</span> MAX_RETRIES = 3;
+    
+    <span style="color: #0000ff;">public void</span> operationWithRetry() {
+        <span style="color: #0000ff;">int</span> retryCount = 0;
+        <span style="color: #0000ff;">while</span> (retryCount &lt; MAX_RETRIES) {
+            <span style="color: #007700;">// Try the operation</span>
+            
+            <span style="color: #0000ff;">if</span> (<span style="color: #007700;">/* operation is successful */</span>) {
+                <span style="color: #0000ff;">break</span>;
+            }
+            retryCount++;
+        }
+    }
+}
+
+</pre>
+<p><a class="inline_disabled" href="https://learn.microsoft.com/en-us/azure/architecture/patterns/retry" target="_blank">Additional information and concrete example</a></p>
+<h3>Circuit breaker pattern</h3>
+<p>(Note: This is a highly simplified version; real-world usage might rely on libraries like Resilience4j)</p>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">public class</span> CircuitBreaker {
+    <span style="color: #007700;">// Logic for monitoring failures and opening/closing the circuit</span>
+    
+    <span style="color: #0000ff;">public void</span> execute() {
+        <span style="color: #0000ff;">if</span> (<span style="color: #007700;">/* circuit is closed */</span>) {
+            <span style="color: #007700;">// Perform the operation</span>
+        }
+    }
+}
+
+</pre>
+<p><a class="inline_disabled" href="https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker" target="_blank">Additional information and concrete example</a></p>
+<h3>Bulkhead pattern</h3>
+<p>(Conceptual example)</p>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">public class</span> Bulkhead {
+    <span style="color: #007700;">// Logic to limit the number of concurrent operations</span>
+    
+    <span style="color: #0000ff;">public void</span> performLimitedOperation() {
+        <span style="color: #007700;">// Ensure only a limited number of operations occur concurrently</span>
+    }
+}
+
+</pre>
+<p><a class="inline_disabled" href="https://learn.microsoft.com/en-us/azure/architecture/patterns/bulkhead" target="_blank">Additional information and concrete example</a></p>
+<h3>Throttling pattern</h3>
+<p>(Conceptual example)</p>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">public class</span> Throttle {
+    <span style="color: #007700;">// Logic to ensure rate limits are not exceeded</span>
+    
+    <span style="color: #0000ff;">public void</span> performRateLimitedOperation() {
+        <span style="color: #007700;">// Ensure operation does not exceed rate limits</span>
+    }
+}
+
+</pre>
+<p><a class="inline_disabled" href="https://learn.microsoft.com/en-us/azure/architecture/patterns/throttling" target="_blank">Additional information and concrete example</a></p>
+<h3>Queue-based load levelling pattern</h3>
+<p>(Conceptual example)</p>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">public class</span> LoadLeveler {
+    <span style="color: #007700;">// Logic to place requests into a queue</span>
+    
+    <span style="color: #0000ff;">public void</span> enqueueRequest(Request request) {
+        <span style="color: #007700;">// Add request to queue for later processing</span>
+    }
+}
+
+</pre>
+<p><a class="inline_disabled" href="https://learn.microsoft.com/en-us/azure/architecture/patterns/queue-based-load-leveling" target="_blank">Additional information and concrete example</a></p>

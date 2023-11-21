@@ -1,0 +1,183 @@
+<h3>SOLID Principles</h3>
+<h3 style="padding-left: 40px;">1. Single Responsibility Principle (SRP):</h3>
+<p style="padding-left: 40px;"><strong>Exercise:</strong><br>Given the following class, identify any violations of the Single Responsibility Principle and suggest ways to refactor the code to adhere to the SRP.</p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">class</span> User {
+    <span style="color: #d94848;">String</span> name;
+    <span style="color: #d94848;">String</span> email;
+
+    <span style="color: #0074d9;">void</span> saveToDatabase() {
+        // Code to save user data to the database
+    }
+
+    <span style="color: #0074d9;">void</span> sendEmail() {
+        // Code to send an email
+    }
+}
+</code></pre>
+<h3 style="padding-left: 40px;">2. Open/Closed Principle (OCP):</h3>
+<p style="padding-left: 40px;"><strong>Exercise:</strong><br>You are building a geometry application. Given the following class, enhance the design so that in the future it is possible to add support for more shapes without modifying the redesigned AreaCalculator class.</p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">class</span> Rectangle {
+    <span style="color: #0074d9;">public double</span> width;
+    <span style="color: #0074d9;">public double</span> height;
+}
+
+<span style="color: #0074d9;">class</span> AreaCalculator {
+    <span style="color: #0074d9;">public double</span> computeArea(Rectangle rect) {
+        <span style="color: #0074d9;">return</span> rect.width * rect.height;
+    }
+}
+</code></pre>
+<h3 style="padding-left: 40px;">3. Liskov Substitution Principle (LSP):</h3>
+<p style="padding-left: 40px;"><strong>Exercise:</strong><br>The following code has a violation of the Liskov Substitution Principle. Identify the problem and suggest a solution.</p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">class</span> Bird {
+    <span style="color: #0074d9;">void</span> fly() {
+        // Implementation for flying
+    }
+}
+
+<span style="color: #0074d9;">class</span> Ostrich <span style="color: #0074d9;">extends</span> Bird {
+    @Override
+    <span style="color: #0074d9;">void</span> fly() {
+        <span style="color: #d94848;">throw new</span> UnsupportedOperationException("Ostrich can't fly");
+    }
+}
+</code></pre>
+<h3 style="padding-left: 40px;">4. Interface Segregation Principle (ISP):</h3>
+<p style="padding-left: 40px;"><strong>Exercise:</strong><br>The following Worker interface violates the Interface Segregation Principle. Refactor the code to adhere to the ISP.</p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">interface</span> Worker {
+    <span style="color: #0074d9;">void</span> work();
+    <span style="color: #0074d9;">void</span> eat();
+    <span style="color: #0074d9;">void</span> sleep();
+}
+
+<span style="color: #0074d9;">class</span> Robot <span style="color: #0074d9;">implements</span> Worker {
+    @Override
+    <span style="color: #0074d9;">public void</span> work() {
+        // work
+    }
+
+    @Override
+    <span style="color: #0074d9;">public void</span> eat() {
+        // Robots don't eat!
+    }
+
+    @Override
+    <span style="color: #0074d9;">public void</span> sleep() {
+        // Robots don't sleep!
+    }
+}
+</code></pre>
+<h3 style="padding-left: 40px;">5. Dependency Inversion Principle (DIP):</h3>
+<p style="padding-left: 40px;"><strong>Exercise:</strong><br>The following LightBulb and Switch class setup violates the Dependency Inversion Principle. Modify the design to adhere to the DIP.</p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">class</span> LightBulb {
+    <span style="color: #0074d9;">void</span> turnOn() {
+        // turn on
+    }
+    <span style="color: #0074d9;">void</span> turnOff() {
+        // turn off
+    }
+}
+
+<span style="color: #0074d9;">class</span> Switch {
+    <span style="color: #d94848;">private</span> LightBulb bulb;
+    
+    <span style="color: #0074d9;">void</span> operate() {
+        // toggle bulb's state
+    }
+}
+</code></pre>
+<hr>
+<h3>Booch's metrics</h3>
+<h3 style="padding-left: 40px;">1. Cohesion Exercise:</h3>
+<p style="padding-left: 40px;">Given the following class, identify its level of cohesion and suggest ways to improve it:</p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">class</span> UserHandler {
+    <span style="color: #555;">private</span> <span style="color: #0074d9;">String</span> name;
+    <span style="color: #555;">private</span> <span style="color: #0074d9;">String</span> email;
+    
+    <span style="color: #555;">public void</span> saveToDatabase() {
+        <span style="color: #888;">// saves user to database</span>
+    }
+
+    <span style="color: #555;">public void</span> sendEmail() {
+        <span style="color: #888;">// sends email to user</span>
+    }
+
+    <span style="color: #555;">public double</span> calculateDiscount() {
+        <span style="color: #888;">// calculates discount for user based on purchase history</span>
+    }
+}
+</code></pre>
+<h3 style="padding-left: 40px;">2. Coupling Exercise:</h3>
+<p style="padding-left: 40px;">Review the following two classes and identify the level of coupling between them. Provide suggestions on how to reduce the coupling:</p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">class</span> Inventory {
+    <span style="color: #555;">public</span> <span style="color: #0074d9;">List&lt;Item&gt;</span> items;
+
+    <span style="color: #555;">public double</span> getTotalPrice() {
+        <span style="color: #0074d9;">double</span> total = 0;
+        <span style="color: #0074d9;">for</span> (Item item : items) {
+            total += item.price;
+        }
+        <span style="color: #0074d9;">return</span> total;
+    }
+}
+
+<span style="color: #0074d9;">class</span> Item {
+    <span style="color: #555;">public double</span> price;
+
+    <span style="color: #555;">public double</span> getPrice() {
+        <span style="color: #0074d9;">return</span> price;
+    }
+}
+</code></pre>
+<h3 style="padding-left: 40px;">3. Primitiveness Exercise:</h3>
+<p style="padding-left: 40px;">Inspect the following class and determine if the methods provided are primitive enough, or if they need further decomposition:</p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">class</span> Order {
+    <span style="color: #555;">private</span> <span style="color: #0074d9;">List&lt;Item&gt;</span> items;
+
+    <span style="color: #555;">public void</span> processOrder() {
+        validateOrder();
+        calculateTotalPrice();
+        applyDiscount();
+        initiateShipping();
+    }
+
+    <span style="color: #555;">private void</span> validateOrder() {
+        <span style="color: #888;">// validate the order items</span>
+    }
+
+    <span style="color: #555;">private void</span> calculateTotalPrice() {
+        <span style="color: #888;">// calculate total price</span>
+    }
+
+    <span style="color: #555;">private void</span> applyDiscount() {
+        <span style="color: #888;">// apply any applicable discounts</span>
+    }
+
+    <span style="color: #555;">private void</span> initiateShipping() {
+        <span style="color: #888;">// initiate the shipping process</span>
+    }
+}
+</code></pre>
+<h3 style="padding-left: 40px;">4. Sufficiency Exercise:</h3>
+<p style="padding-left: 40px;">Consider an online book store system. What methods and properties would you expect in the <code>Book</code> class to ensure its sufficiency in representing all necessary aspects of a book?</p>
+<h3 style="padding-left: 40px;">5. Completeness Exercise:</h3>
+<p style="padding-left: 40px;">Given the following class representing a simple calculator, identify if the class is complete. If not, what methods would you add to make it complete?</p>
+<pre style="background-color: #f6f8fa; padding: 10px 10px 10px 50px; border-radius: 5px; margin: 15px 0px;"><code style="color: #333;">
+<span style="color: #0074d9;">class</span> Calculator {
+    <span style="color: #555;">public double</span> add(<span style="color: #0074d9;">double</span> a, <span style="color: #0074d9;">double</span> b) {
+        <span style="color: #0074d9;">return</span> a + b;
+    }
+
+    <span style="color: #555;">public double</span> subtract(<span style="color: #0074d9;">double</span> a, <span style="color: #0074d9;">double</span> b) {
+        <span style="color: #0074d9;">return</span> a - b;
+    }
+}
+</code></pre>

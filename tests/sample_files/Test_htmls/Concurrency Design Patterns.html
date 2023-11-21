@@ -1,0 +1,103 @@
+<p>This video will cover concurrency design patterns. As we venture into the world of concurrent and parallel programming, certain challenges arise, such as ensuring data consistency, managing thread access, and optimizing performance. Concurrency design patterns provide us with tried-and-true solutions to tackle these challenges. In this video, we'll delve into:</p>
+<ol>
+<li>
+<p><strong>Monitor Pattern</strong>: This pattern synchronizes method calls, ensuring that only one method is active at a time in a given object, thus preserving the object's state integrity.</p>
+</li>
+<li>
+<p><strong>Lock Pattern</strong>: A strategy that provides mutual exclusion to ensure that only one thread can execute the lock-protected region of the code at a time. This pattern is fundamental for preventing race conditions.</p>
+</li>
+<li>
+<p><strong>Read-write Lock Pattern</strong>: This pattern allows concurrent reading of data while still ensuring that writes are atomic and isolated. This ensures that while multiple threads can read data simultaneously, only one can write to it, thus ensuring data integrity.</p>
+</li>
+<li>
+<p><strong>Scheduler Pattern</strong>: It determines how threads or tasks get access to resources or processors based on scheduling algorithms. This ensures fairness and optimizes the overall system's performance.</p>
+</li>
+<li>
+<p><strong>Thread Pool Pattern</strong>: Instead of initiating and destroying threads on the fly, which can be resource-intensive, this pattern keeps a pool of worker threads ready to perform tasks. It optimizes system resources and ensures efficient execution of concurrent tasks.</p>
+</li>
+</ol>
+<p>Each pattern is a tool in our concurrency toolkit, ensuring our applications are robust, efficient, and maintainable. Let's dive deep into each of these and see how they help us build better concurrent software.</p>
+<p><iframe id="kaltura_player" title="Concurrency patterns" src="https://api.kaltura.nordu.net/p/306/sp/30600/embedIframeJs/uiconf_id/23449820/partner_id/306?iframeembed=true&amp;playerId=kaltura_player&amp;entry_id=0_fue6re0k&amp;flashvars[streamerType]=auto&amp;flashvars[localizationCode]=en&amp;flashvars[leadWithHTML5]=true&amp;flashvars[sideBarContainer.plugin]=true&amp;flashvars[sideBarContainer.position]=left&amp;flashvars[sideBarContainer.clickToClose]=true&amp;flashvars[chapters.plugin]=true&amp;flashvars[chapters.layout]=vertical&amp;flashvars[chapters.thumbnailRotator]=false&amp;flashvars[streamSelector.plugin]=true&amp;flashvars[EmbedPlayer.SpinnerTarget]=videoHolder&amp;flashvars[dualScreen.plugin]=true&amp;flashvars[hotspots.plugin]=1&amp;flashvars[Kaltura.addCrossoriginToIframe]=true&amp;&amp;wid=0_lfp639ae" width="400" height="285" sandbox="allow-downloads allow-forms allow-same-origin allow-scripts allow-top-navigation allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" allowfullscreen="allowfullscreen" webkitallowfullscreen="webkitallowfullscreen" mozallowfullscreen="mozallowfullscreen" allow="autoplay *; fullscreen *; encrypted-media *"></iframe></p>
+<h3>Monitor pattern</h3>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">public class</span> MonitorObject {}
+
+<span style="color: #0000ff;">public class</span> SynchronizedObject {
+    <span style="color: #2b547e;">private final</span> MonitorObject monitor = <span style="color: #0000ff;">new</span> MonitorObject();
+
+    <span style="color: #0000ff;">public void</span> doSynchronizedWork() {
+        <span style="color: #0000ff;">synchronized</span>(monitor) {
+            <span style="color: #008000;">// Critical section</span>
+        }
+    }
+}
+</pre>
+<h3>Lock pattern</h3>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">import java.util.concurrent.locks.Lock;</span>
+<span style="color: #0000ff;">import java.util.concurrent.locks.ReentrantLock;</span>
+
+<span style="color: #0000ff;">public class</span> LockExample {
+    <span style="color: #2b547e;">private final</span> Lock lock = <span style="color: #0000ff;">new</span> ReentrantLock();
+
+    <span style="color: #0000ff;">public void</span> doLockedWork() {
+        lock.lock();
+        <span style="color: #0000ff;">try</span> {
+            <span style="color: #008000;">// Critical section</span>
+        } <span style="color: #0000ff;">finally</span> {
+            lock.unlock();
+        }
+    }
+}
+</pre>
+<h3>Read-write lock pattern</h3>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">import java.util.concurrent.locks.ReadWriteLock;</span>
+<span style="color: #0000ff;">import java.util.concurrent.locks.ReentrantReadWriteLock;</span>
+
+<span style="color: #0000ff;">public class</span> ReadWriteLockExample {
+    <span style="color: #2b547e;">private final</span> ReadWriteLock lock = <span style="color: #0000ff;">new</span> ReentrantReadWriteLock();
+
+    <span style="color: #0000ff;">public void</span> readData() {
+        lock.readLock().lock();
+        <span style="color: #0000ff;">try</span> {
+            <span style="color: #008000;">// Read data</span>
+        } <span style="color: #0000ff;">finally</span> {
+            lock.readLock().unlock();
+        }
+    }
+
+    <span style="color: #0000ff;">public void</span> writeData() {
+        lock.writeLock().lock();
+        <span style="color: #0000ff;">try</span> {
+            <span style="color: #008000;">// Write data</span>
+        } <span style="color: #0000ff;">finally</span> {
+            lock.writeLock().unlock();
+        }
+    }
+}
+</pre>
+<h3>Scheduler pattern</h3>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">import java.util.concurrent.Executors;</span>
+<span style="color: #0000ff;">import java.util.concurrent.ScheduledExecutorService;</span>
+<span style="color: #0000ff;">import java.util.concurrent.TimeUnit;</span>
+
+<span style="color: #0000ff;">public class</span> SchedulerExample {
+    <span style="color: #2b547e;">private final</span> ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    <span style="color: #0000ff;">public void</span> startTask() {
+        scheduler.scheduleAtFixedRate(() -&gt; {
+            <span style="color: #008000;">// Task to run</span>
+        }, 0, 10, TimeUnit.SECONDS);
+    }
+}
+</pre>
+<h3>Thread pool pattern</h3>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">import java.util.concurrent.ExecutorService;</span>
+<span style="color: #0000ff;">import java.util.concurrent.Executors;</span>
+
+<span style="color: #0000ff;">public class</span> ThreadPoolExample {
+    <span style="color: #2b547e;">private final</span> ExecutorService executor = Executors.newFixedThreadPool(5);
+
+    <span style="color: #0000ff;">public void</span> startTask(<span style="color: #0000ff;">Runnable</span> task) {
+        executor.submit(task);
+    }
+}
+</pre>

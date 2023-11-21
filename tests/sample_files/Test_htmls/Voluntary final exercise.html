@@ -1,0 +1,61 @@
+<h3>Integrated Exercise: E-Commerce System Design</h3>
+<p><strong>Scenario:</strong></p>
+<p>You are given a simplified prototype of an e-commerce system. This system has classes for <code>User</code>, <code>Product</code>, <code>Cart</code>, <code>Order</code>, and <code>Payment</code>. The system allows a user to browse products, add them to their cart, create an order, and make a payment.</p>
+<p>The <code>Payment</code> class has methods for different payment types: <code>creditCardPayment()</code>, <code>paypalPayment()</code>, and <code>bitCoinPayment()</code>.</p>
+<p>Here's a basic representation of the system:</p>
+<pre style="background-color: #f6f8fa; padding: 10px; border-radius: 5px; margin: 15px 0;"><code style="color: #333;">
+<span style="color: #0074d9;">class</span> User {
+    String name;
+    String email;
+    Cart userCart;
+}
+
+<span style="color: #0074d9;">class</span> Product {
+    String productName;
+    double price;
+}
+
+<span style="color: #0074d9;">class</span> Cart {
+    List&lt;Product&gt; products;
+
+    <span style="color: #555;">void</span> addProduct(Product product) {
+        products.add(product);
+    }
+}
+
+<span style="color: #0074d9;">class</span> Order {
+    User orderedBy;
+    Cart orderCart;
+}
+
+<span style="color: #0074d9;">class</span> Payment {
+    <span style="color: #555;">void</span> creditCardPayment() {
+        // process credit card payment
+    }
+
+    <span style="color: #555;">void</span> paypalPayment() {
+        // process PayPal payment
+    }
+
+    <span style="color: #555;">void</span> bitCoinPayment() {
+        // process Bitcoin payment
+    }
+}
+</code></pre>
+<p><strong>Tasks:</strong></p>
+<ol>
+<li><strong>Software Quality Attributes</strong>: Identify and explain potential issues in the given code with respect to modifiability and testability. How would you improve the system considering these quality attributes?</li>
+<li><strong>SOLID Principles</strong>: Point out any violations of SOLID principles in the given prototype. How can the code be refactored to better adhere to these principles?</li>
+<li><strong>Booch's Metrics</strong>:
+<ul>
+<li><strong>Cohesion</strong>: Discuss the cohesion of the <code>Payment</code> class. How can it be improved?</li>
+<li><strong>Coupling</strong>: Is there any unwanted coupling between the classes? How might you reduce it?</li>
+</ul>
+</li>
+<li><strong>Design Patterns</strong>:
+<ul>
+<li>Identify a scenario in the given prototype where the Factory Method pattern might be beneficial.</li>
+<li>Considering the <code>Payment</code> class, suggest a design pattern to simplify the process of adding new payment methods in the future.</li>
+</ul>
+</li>
+</ol>

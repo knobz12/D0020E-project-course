@@ -1,0 +1,82 @@
+<p>These videos cover the Modifiability Software Quality Attribute. <span>In the rapidly evolving landscape of technology, software systems cannot remain static; they must adapt, evolve, and grow in response to user needs, environmental changes, and business dynamics. Modifiability captures the system's ability to gracefully accommodate these changes without inducing high costs or unexpected side-effects. The videos will present why it's a coveted attribute, the challenges in achieving it, and strategies to design software that can easily be modified, extended, or restructured.</span></p>
+<h3>Overview</h3>
+<p><iframe id="kaltura_player" title="Modifiability quality attribute part 1" src="https://api.kaltura.nordu.net/p/306/sp/30600/embedIframeJs/uiconf_id/23449820/partner_id/306?iframeembed=true&amp;playerId=kaltura_player&amp;entry_id=0_vcucgget&amp;flashvars[streamerType]=auto&amp;flashvars[localizationCode]=en&amp;flashvars[leadWithHTML5]=true&amp;flashvars[sideBarContainer.plugin]=true&amp;flashvars[sideBarContainer.position]=left&amp;flashvars[sideBarContainer.clickToClose]=true&amp;flashvars[chapters.plugin]=true&amp;flashvars[chapters.layout]=vertical&amp;flashvars[chapters.thumbnailRotator]=false&amp;flashvars[streamSelector.plugin]=true&amp;flashvars[EmbedPlayer.SpinnerTarget]=videoHolder&amp;flashvars[dualScreen.plugin]=true&amp;flashvars[hotspots.plugin]=1&amp;flashvars[Kaltura.addCrossoriginToIframe]=true&amp;&amp;wid=0_oa3o894r" width="400" height="285" sandbox="allow-downloads allow-forms allow-same-origin allow-scripts allow-top-navigation allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" allowfullscreen="allowfullscreen" webkitallowfullscreen="webkitallowfullscreen" mozallowfullscreen="mozallowfullscreen" allow="autoplay *; fullscreen *; encrypted-media *"></iframe></p>
+<p>&nbsp;</p>
+<h3>Tactics</h3>
+<p><iframe id="kaltura_player" title="Modifiability quality attribute part 2" src="https://api.kaltura.nordu.net/p/306/sp/30600/embedIframeJs/uiconf_id/23449820/partner_id/306?iframeembed=true&amp;playerId=kaltura_player&amp;entry_id=0_bhvft41f&amp;flashvars[streamerType]=auto&amp;flashvars[localizationCode]=en&amp;flashvars[leadWithHTML5]=true&amp;flashvars[sideBarContainer.plugin]=true&amp;flashvars[sideBarContainer.position]=left&amp;flashvars[sideBarContainer.clickToClose]=true&amp;flashvars[chapters.plugin]=true&amp;flashvars[chapters.layout]=vertical&amp;flashvars[chapters.thumbnailRotator]=false&amp;flashvars[streamSelector.plugin]=true&amp;flashvars[EmbedPlayer.SpinnerTarget]=videoHolder&amp;flashvars[dualScreen.plugin]=true&amp;flashvars[hotspots.plugin]=1&amp;flashvars[Kaltura.addCrossoriginToIframe]=true&amp;&amp;wid=0_svocvtha" width="400" height="285" sandbox="allow-downloads allow-forms allow-same-origin allow-scripts allow-top-navigation allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" allowfullscreen="allowfullscreen" webkitallowfullscreen="webkitallowfullscreen" mozallowfullscreen="mozallowfullscreen" allow="autoplay *; fullscreen *; encrypted-media *"></iframe></p>
+<p>&nbsp;</p>
+<h3>Design and implementation</h3>
+<p><iframe id="kaltura_player" title="Modifiability quality attribute part 3" src="https://api.kaltura.nordu.net/p/306/sp/30600/embedIframeJs/uiconf_id/23449820/partner_id/306?iframeembed=true&amp;playerId=kaltura_player&amp;entry_id=0_464n20pb&amp;flashvars[streamerType]=auto&amp;flashvars[localizationCode]=en&amp;flashvars[leadWithHTML5]=true&amp;flashvars[sideBarContainer.plugin]=true&amp;flashvars[sideBarContainer.position]=left&amp;flashvars[sideBarContainer.clickToClose]=true&amp;flashvars[chapters.plugin]=true&amp;flashvars[chapters.layout]=vertical&amp;flashvars[chapters.thumbnailRotator]=false&amp;flashvars[streamSelector.plugin]=true&amp;flashvars[EmbedPlayer.SpinnerTarget]=videoHolder&amp;flashvars[dualScreen.plugin]=true&amp;flashvars[hotspots.plugin]=1&amp;flashvars[Kaltura.addCrossoriginToIframe]=true&amp;&amp;wid=0_bixxafvj" width="400" height="285" sandbox="allow-downloads allow-forms allow-same-origin allow-scripts allow-top-navigation allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" allowfullscreen="allowfullscreen" webkitallowfullscreen="webkitallowfullscreen" mozallowfullscreen="mozallowfullscreen" allow="autoplay *; fullscreen *; encrypted-media *"></iframe></p>
+<p>Here are some applied examples from a source code and code structure perspective:</p>
+<hr>
+<p><strong>1. Refactoring Legacy Code</strong></p>
+<ul>
+<li>
+<p><strong>Scenario</strong>: An old payroll application has a single class that calculates salary, taxes, and bonuses.</p>
+</li>
+<li>
+<p><strong>Modifiability Practice</strong>:</p>
+<ul>
+<li><strong>Extract Method</strong>: Segregate the large functions into smaller ones, such as <code>calculateSalary()</code>, <code>calculateTax()</code>, and <code>calculateBonus()</code>.</li>
+<li><strong>Move Method</strong>: Move related functionalities to appropriate classes – tax calculations might be moved to a <code>TaxCalculator</code> class.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>2. Expanding a Web Application's Capabilities</strong></p>
+<ul>
+<li>
+<p><strong>Scenario</strong>: A basic web application serves static content. There's a need to introduce user authentication.</p>
+</li>
+<li>
+<p><strong>Modifiability Practice</strong>:</p>
+<ul>
+<li><strong>Use Middleware</strong>: Incorporate middleware like Express.js's middleware for user authentication. This modular approach ensures that the core application remains unchanged while new features are layered on.</li>
+<li><strong>Separate Concerns</strong>: The user authentication logic should not mingle with content-serving logic. Separate modules or classes should be introduced.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>3. Adapting to Different Database Systems</strong></p>
+<ul>
+<li>
+<p><strong>Scenario</strong>: A product was initially developed using a relational database. Due to scalability needs, there's a switch to NoSQL databases.</p>
+</li>
+<li>
+<p><strong>Modifiability Practice</strong>:</p>
+<ul>
+<li><strong>Repository Pattern</strong>: Use a repository pattern to abstract database operations. Whether it's SQL or NoSQL, the underlying operations are abstracted away.</li>
+<li><strong>Strategy Pattern</strong>: This allows the application to switch between different database strategies without altering the code that uses the database.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>4. Changing UI Themes in Desktop Applications</strong></p>
+<ul>
+<li>
+<p><strong>Scenario</strong>: A desktop application with a fixed theme now requires multiple theme support.</p>
+</li>
+<li>
+<p><strong>Modifiability Practice</strong>:</p>
+<ul>
+<li><strong>Bridge Pattern</strong>: Separate the application's abstraction from its implementation, allowing the themes to vary independently.</li>
+<li><strong>Encapsulation</strong>: Encapsulate theme-related properties and behaviors in dedicated classes, such as <code>DarkTheme</code> or <code>LightTheme</code>.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>5. Integrating New Payment Methods in E-commerce Systems</strong></p>
+<ul>
+<li>
+<p><strong>Scenario</strong>: An e-commerce system supporting credit card payments now needs to include cryptocurrency payments.</p>
+</li>
+<li>
+<p><strong>Modifiability Practice</strong>:</p>
+<ul>
+<li><strong>Factory Pattern</strong>: Use a payment factory to instantiate appropriate payment methods. This way, adding a new payment method just requires extending the factory, without changing existing code.</li>
+<li><strong>Decorator Pattern</strong>: Allows functionalities to be added to objects dynamically. For instance, if there’s a need to add a transaction fee for a specific payment method, this can be achieved without altering the core payment class.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>In each of these cases, the emphasis is on ensuring that the source code is organized, modular, and follows well-defined principles and patterns, making it easier to modify, extend, and maintain.</p>
