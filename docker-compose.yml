@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  chroma:
+    image: ghcr.io/chroma-core/chroma:latest
+    volumes:
+      - chroma_vol:/chroma
+    ports:
+      - 8000:8000
+
+volumes:
+  chroma_vol:
