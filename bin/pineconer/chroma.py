@@ -14,10 +14,9 @@ import time
 import pathlib
 
 from argparse import ArgumentParser
-import sys
 
 parser = ArgumentParser()
-parser.add_argument("--model-path", help="The path to the llama-cpp supported LLM model")
+parser.add_argument("--model-path", help="The path to the llama-cpp supported LLM model",required=True)
 args = parser.parse_args()
 print('args',args)
 path = args.model_path
@@ -88,7 +87,11 @@ def run_llm():
     Context: {context}
     Answer:"""
 
-    retriever = vectorstore.as_retriever(search_kwargs={'k': 2})
+    retriever = vectorstore.as_retriever(
+        # search_type="similarity_score_threshold",
+        # search_kwargs={'score_threshold': 0.5,'k':2}
+        search_kwargs={'k':2}
+    )
 
     prompt = ChatPromptTemplate.from_template(prompt_str)
 
@@ -101,12 +104,14 @@ def run_llm():
     )
 
     questions: list[str] = [
-        "How many workshops will ther be?",
+        "How many workshops will there be?",
         "What will the projects be about?"
         # "How many hidden units does P2NN have and how were they selected?",
         # "For SMLP, what were the test errors?"
     ]
 
+    import langchain
+    langchain.debug = True
     for (idx, question) in enumerate(questions):
         # for chunk in rag_chain.stream("CNN when switching GTX gpu"):
         print(f"Asking question {idx}")
@@ -122,7 +127,7 @@ def run_llm():
     # rag_chain.strea
 
 # Upsert the result.jsonl data
-upsert_data()
+# upsert_data()
 
 # Run RAG with the dataset
-# run_llm()
+run_llm()
