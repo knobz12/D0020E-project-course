@@ -1,0 +1,72 @@
+<p><span>In this video, we delve into the realm of Creational design patterns. These patterns deal primarily with object creation mechanisms, striving to create objects in a manner best suited to the situation. While direct object construction in a system can lead to design problems or add to its complexity, Creational patterns provide ways to instantiate single objects or groups of related objects.&nbsp;</span>As you progress through this video, we'll explore four pivotal structural design patterns, each offering unique solutions to common challenges:</p>
+<ul>
+    <li>
+        <p><strong>The Singleton Pattern</strong>: Ensures that a particular class has only one instance throughout the application and provides a global point of access to that instance. Useful for controlling access to shared resources.</p>
+    </li>
+    <li>
+        <p><strong>The Factory Method Pattern</strong>: A method for creating objects in a superclass but allows subclasses to alter the type of created objects. This provides a way to delegate the instantiation logic to child classes.</p>
+    </li>
+    <li>
+        <p><strong>The Abstract Factory Method</strong>: Produces families of related objects without specifying their concrete classes. It usually involves multiple Factory Methods, one for each type of object to be created.</p>
+    </li>
+    <li>
+        <p><strong>The Builder Pattern</strong>: Separates the construction of a complex object from its representation, allowing the same construction process to create different representations. Especially beneficial when an object needs to be created with many optional components or configurations.</p>
+    </li>
+</ul>
+<p>&nbsp;</p>
+<p><iframe id="kaltura_player" title="Creational design patterns" src="https://api.kaltura.nordu.net/p/306/sp/30600/embedIframeJs/uiconf_id/23449820/partner_id/306?iframeembed=true&amp;playerId=kaltura_player&amp;entry_id=0_wk47pisy&amp;flashvars[streamerType]=auto&amp;flashvars[localizationCode]=en&amp;flashvars[leadWithHTML5]=true&amp;flashvars[sideBarContainer.plugin]=true&amp;flashvars[sideBarContainer.position]=left&amp;flashvars[sideBarContainer.clickToClose]=true&amp;flashvars[chapters.plugin]=true&amp;flashvars[chapters.layout]=vertical&amp;flashvars[chapters.thumbnailRotator]=false&amp;flashvars[streamSelector.plugin]=true&amp;flashvars[EmbedPlayer.SpinnerTarget]=videoHolder&amp;flashvars[dualScreen.plugin]=true&amp;flashvars[hotspots.plugin]=1&amp;flashvars[Kaltura.addCrossoriginToIframe]=true&amp;&amp;wid=0_33yts65x" width="400" height="285" sandbox="allow-downloads allow-forms allow-same-origin allow-scripts allow-top-navigation allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" allowfullscreen="allowfullscreen" webkitallowfullscreen="webkitallowfullscreen" mozallowfullscreen="mozallowfullscreen" allow="autoplay *; fullscreen *; encrypted-media *"></iframe></p>
+<p>&nbsp;</p>
+<div style="font-family: Arial, sans-serif;">
+    <h3>Singleton</h3>
+    <pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; display: block; overflow: auto; white-space: pre; margin-bottom: 20px;">        <span style="color: #0000ff;">public class</span> <span style="color: #2b547e;">Singleton</span> {
+            <span style="color: #0000ff;">private static</span> Singleton instance;
+            <span style="color: #0000ff;">private</span> Singleton() {}
+            <span style="color: #0000ff;">public static</span> Singleton getInstance() {
+                <span style="color: #0000ff;">if</span> (instance == <span style="color: #0000ff;">null</span>) {
+                    instance = <span style="color: #0000ff;">new</span> Singleton();
+                }
+                <span style="color: #0000ff;">return</span> instance;
+            }
+        }</pre>
+    <p><a class="inline_disabled" href="https://refactoring.guru/design-patterns/singleton" target="_blank">Additional information and concrete example</a></p>
+    <h3>Factory Method</h3>
+    <pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; display: block; overflow: auto; white-space: pre; margin-bottom: 20px;">        <span style="color: #0000ff;">abstract class</span> <span style="color: #2b547e;">Product</span> {}
+        <span style="color: #2b547e;">class ConcreteProduct</span> <span style="color: #0000ff;">extends</span> Product {}
+  
+        <span style="color: #0000ff;">abstract class</span> <span style="color: #2b547e;">Creator</span> {
+            <span style="color: #0000ff;">public abstract</span> Product factoryMethod();
+        }
+        <span style="color: #2b547e;">class ConcreteCreator</span> <span style="color: #0000ff;">extends</span> Creator {
+            <span style="color: #0000ff;">public</span> Product factoryMethod() { <span style="color: #0000ff;">return new</span> ConcreteProduct(); }
+        }</pre>
+    <p><a class="inline_disabled" href="https://refactoring.guru/design-patterns/factory-method" target="_blank">Additional information and concrete example</a></p>
+    <h3>Abstract Factory</h3>
+    <pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; display: block; overflow: auto; white-space: pre; margin-bottom: 20px;">        <span style="color: #0000ff;">interface</span> <span style="color: #2b547e;">Button</span> {}
+        <span style="color: #2b547e;">class WinButton</span> <span style="color: #0000ff;">implements</span> Button {}
+        <span style="color: #2b547e;">class MacButton</span> <span style="color: #0000ff;">implements</span> Button {}
+  
+        <span style="color: #0000ff;">interface</span> <span style="color: #2b547e;">Factory</span> {
+            Button createButton();
+        }
+        <span style="color: #2b547e;">class WinFactory</span> <span style="color: #0000ff;">implements</span> Factory {
+            <span style="color: #0000ff;">public</span> Button createButton() { <span style="color: #0000ff;">return new</span> WinButton(); }
+        }
+        <span style="color: #2b547e;">class MacFactory</span> <span style="color: #0000ff;">implements</span> Factory {
+            <span style="color: #0000ff;">public</span> Button createButton() { <span style="color: #0000ff;">return new</span> MacButton(); }
+        }</pre>
+    <p><a class="inline_disabled" href="https://refactoring.guru/design-patterns/abstract-factory" target="_blank">Additional information and concrete example</a></p>
+    <h3>Builder</h3>
+    <pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; display: block; overflow: auto; white-space: pre; margin-bottom: 20px;">        <span style="color: #2b547e;">class Product</span> {
+            String partA;
+            String partB;
+            <span style="color: #008000;">// setters and getters...</span>
+        }
+  
+        <span style="color: #2b547e;">class Builder</span> {
+            Product product = <span style="color: #0000ff;">new</span> Product();
+            <span style="color: #0000ff;">void</span> buildPartA(String part) { product.setPartA(part); }
+            <span style="color: #0000ff;">void</span> buildPartB(String part) { product.setPartB(part); }
+            Product getResult() { <span style="color: #0000ff;">return</span> product; }
+        }</pre>
+</div>
+<p><a class="inline_disabled" href="https://refactoring.guru/design-patterns/builder" target="_blank">Additional information and concrete example</a></p>

@@ -1,0 +1,93 @@
+<p>This video covers Structural Design Patterns.&nbsp;</p>
+<p>These patterns are essential in ensuring that individual components of a system come together to form a cohesive, unified whole. As you'll soon discover, they provide ways to manage relationships and dependencies between classes and objects.</p>
+<p>Here are the patterns we'll explore:</p>
+<ul>
+<li>
+<p><strong>Adapter pattern:</strong> Just like a physical adapter helps two different plugs connect, the Adapter pattern allows two incompatible interfaces to work together. It's all about creating an intermediary that transforms one interface into another.</p>
+</li>
+<li>
+<p><strong>Bridge pattern:</strong> This pattern decouples an abstraction from its implementation, allowing both to vary independently. Think of it as a bridge between the functionality abstraction and its actual implementation.</p>
+</li>
+<li>
+<p><strong>Decorator pattern:</strong> Enhancing an object's functionalities without altering its structure is where the Decorator pattern shines. It allows us to add responsibilities to objects dynamically.</p>
+</li>
+<li>
+<p><strong>Facade pattern:</strong> Offering a simplified, unified interface to a set of interfaces in a subsystem, the Facade pattern helps hide the complexities of the system and provides a clearer, straightforward access point.</p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p><iframe id="kaltura_player" title="Structional design patterns" src="https://api.kaltura.nordu.net/p/306/sp/30600/embedIframeJs/uiconf_id/23449820/partner_id/306?iframeembed=true&amp;playerId=kaltura_player&amp;entry_id=0_915god18&amp;flashvars[streamerType]=auto&amp;flashvars[localizationCode]=en&amp;flashvars[leadWithHTML5]=true&amp;flashvars[sideBarContainer.plugin]=true&amp;flashvars[sideBarContainer.position]=left&amp;flashvars[sideBarContainer.clickToClose]=true&amp;flashvars[chapters.plugin]=true&amp;flashvars[chapters.layout]=vertical&amp;flashvars[chapters.thumbnailRotator]=false&amp;flashvars[streamSelector.plugin]=true&amp;flashvars[EmbedPlayer.SpinnerTarget]=videoHolder&amp;flashvars[dualScreen.plugin]=true&amp;flashvars[hotspots.plugin]=1&amp;flashvars[Kaltura.addCrossoriginToIframe]=true&amp;&amp;wid=0_voyytmty" width="400" height="285" sandbox="allow-downloads allow-forms allow-same-origin allow-scripts allow-top-navigation allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation" allowfullscreen="allowfullscreen" webkitallowfullscreen="webkitallowfullscreen" mozallowfullscreen="mozallowfullscreen" allow="autoplay *; fullscreen *; encrypted-media *"></iframe></p>
+<p>&nbsp;</p>
+<h3 style="font-family: Arial, sans-serif;">Adapter Pattern</h3>
+<p><strong>Object Adapter</strong> - <span>This pattern uses composition to achieve adaptability between interfaces. Generally the preferred way due to having weaker coupling compared to the Class Adapter.</span></p>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">interface</span> <span style="color: #2b547e;">Target</span> {
+    <span style="color: #0000ff;">void</span> request();
+}
+<span style="color: #2b547e;">class Adaptee</span> {
+    <span style="color: #0000ff;">void</span> specificRequest() { <span style="color: #008000;">// Some specific logic here</span> }
+}
+<span style="color: #2b547e;">class Adapter</span> <span style="color: #0000ff;">implements</span> Target {
+    <span style="color: #2b547e;">Adaptee</span> adaptee = <span style="color: #0000ff;">new</span> <span style="color: #2b547e;">Adaptee</span>();
+    <span style="color: #0000ff;">public void</span> request() { adaptee.specificRequest(); }
+}
+</pre>
+<p><strong>Class Adapter</strong> - <span>This pattern uses inheritance to achieve adaptability. This is useful when the Adapter need to work in conjunction of both the Target system and the original system at the same time.</span></p>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">interface</span> <span style="color: #2b547e;">Target</span> {
+    <span style="color: #0000ff;">void</span> request();
+}
+<span style="color: #2b547e;">class Adaptee</span> {
+    <span style="color: #0000ff;">void</span> specificRequest() { <span style="color: #008000;">// Some specific logic here</span> }
+}
+<span style="color: #2b547e;">class ClassAdapter</span> <span style="color: #0000ff;">extends</span> <span style="color: #2b547e;">Adaptee</span> <span style="color: #0000ff;">implements</span> <span style="color: #2b547e;">Target</span> {
+    <span style="color: #0000ff;">public void</span> request() { specificRequest(); }
+}
+</pre>
+<p><a class="inline_disabled" href="https://refactoring.guru/design-patterns/adapter" target="_blank">Additional information and concrete example</a></p>
+<h3 style="font-family: Arial, sans-serif;">Bridge Pattern</h3>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">interface</span> <span style="color: #2b547e;">Implementation</span> {
+    <span style="color: #0000ff;">void</span> operationImpl();
+}
+<span style="color: #0000ff;">abstract class</span> <span style="color: #2b547e;">Abstraction</span> {
+    <span style="color: #2b547e;">Implementation</span> impl;
+    <span style="color: #0000ff;">abstract void</span> operation();
+}
+<span style="color: #2b547e;">class RefinedAbstraction</span> <span style="color: #0000ff;">extends</span> <span style="color: #2b547e;">Abstraction</span> {
+    <span style="color: #0000ff;">void</span> operation() { impl.operationImpl(); }
+}
+</pre>
+<p><a class="inline_disabled" href="https://refactoring.guru/design-patterns/bridge" target="_blank">Additional information and concrete example</a></p>
+<h3 style="font-family: Arial, sans-serif;">Decorator Pattern</h3>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #0000ff;">interface</span> <span style="color: #2b547e;">Component</span> {
+    <span style="color: #0000ff;">void</span> operation();
+}
+<span style="color: #2b547e;">class ConcreteComponent</span> <span style="color: #0000ff;">implements</span> <span style="color: #2b547e;">Component</span> {
+    <span style="color: #0000ff;">public void</span> operation() { <span style="color: #008000;">// Original operation</span> }
+}
+<span style="color: #0000ff;">abstract class</span> <span style="color: #2b547e;">Decorator</span> <span style="color: #0000ff;">implements</span> <span style="color: #2b547e;">Component</span> {
+    <span style="color: #2b547e;">Component</span> component;
+}
+<span style="color: #2b547e;">class ConcreteDecorator</span> <span style="color: #0000ff;">extends</span> <span style="color: #2b547e;">Decorator</span> {
+    <span style="color: #0000ff;">public void</span> operation() { 
+        component.operation(); 
+        <span style="color: #008000;">// Additional operation</span> 
+    }
+}
+</pre>
+<p><a class="inline_disabled" href="https://refactoring.guru/design-patterns/decorator" target="_blank">Additional information and concrete example</a></p>
+<h3 style="font-family: Arial, sans-serif;">Facade Pattern</h3>
+<pre style="font-family: 'Courier New', monospace; border: 1px solid #ddd; padding: 10px; background-color: #f7f7f7; overflow: auto; white-space: pre;"><span style="color: #2b547e;">class SubsystemA</span> {
+    <span style="color: #0000ff;">void</span> operationA() { <span style="color: #008000;">// Operation A logic</span> }
+}
+<span style="color: #2b547e;">class SubsystemB</span> {
+    <span style="color: #0000ff;">void</span> operationB() { <span style="color: #008000;">// Operation B logic</span> }
+}
+<span style="color: #2b547e;">class Facade</span> {
+    <span style="color: #2b547e;">SubsystemA</span> a = <span style="color: #0000ff;">new</span> <span style="color: #2b547e;">SubsystemA</span>();
+    <span style="color: #2b547e;">SubsystemB</span> b = <span style="color: #0000ff;">new</span> <span style="color: #2b547e;">SubsystemB</span>();
+    <span style="color: #0000ff;">void</span> unifiedOperation() {
+        a.operationA();
+        b.operationB();
+    }
+}
+</pre>
+<p><a class="inline_disabled" href="https://refactoring.guru/design-patterns/facade" target="_blank">Additional information and concrete example</a></p>
