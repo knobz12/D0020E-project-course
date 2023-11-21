@@ -1,0 +1,416 @@
+D0020E PROJEKT I DATATEKNIK 2020/2021
+LEKTION 1: KURSINTRODUKTION
+Ulf Bodin 
+LTU 30.10.2023
+VAD ÄR SYFTET MED KURSEN? 
+Enligt kursplanen (såklart) – kortversion
+▪
+Kunskap och förståelse  
+–
+Ingenjörsmässig programvaruutveckling (inom industrin), 
+enskilt och i grupp, med beprövade metoder och teorier
+–
+Systemanalys, modellering, iterativ och lättviktig 
+systemdesign, roller, jämlikhet och genus 
+▪
+Färdighet och förmåga 
+–
+Planera och utföra grundläggande uppgifter inom utveckling av programvarubaserade (PVB) system
+–
+Kritiskt och strukturerat identifiera, formulera, analysera och utvärdera system design och implementation 
+–
+Genom muntlig och skriftlig redovisning på svenska beskriva ett PVB system
+▪
+Värderingsförmåga och förhållningssätt
+–
+Bedöma samhälleliga och etiska aspekter kring utveckling av PVB system
+–
+Bedöma PVB system utifrån samhällets mål för ekonomisk, social och ekologisk hållbar utveckling
+–
+Arbeta i grupp med heterogen sammansättning, i grupper om 4-6 studenter (väljs av studenterna)
+–
+Söka ny kunskap och att fortlöpande utveckla färdigheter (individuellt och genom samarbete med andra)
+•
+Workshop om verktyg gruppvis
+•
+Kunskapskontroll (t.ex. Scrum och test), individuell inl.  
+•
+Workshops ev. kompletterande individuell inlämning 
+•
+Projektrapport gruppvis inlämningar
+•
+Avstämningar springplanering och veckomöten 
+•
+Workshop efter Sprint 1 kopplat till aktivitetslogg
+•
+Seminarier två tillfällen i LP3 
+VAD SKA VI GÖRA I KURSEN? 
+▪
+Projektarbete med ett datorbaserat problem
+–
+Fokus på konkret (iterativt) arbete
+•
+Krav, ansats, utveckling, testning och dokumentation 
+–
+Projektgenomförande följer Scrum (med veckovisa möten) 
+•
+Litteratur (självstudier): Scrum and XP from the Trenches 
+•
+Projektgrupper om 4 – 6 studenter (väljs av studenterna) 
+–
+Föreläsningar och laborationer (tidigt i kursen)
+•
+Verktyg för mjukvaruutveckling, testmetodik, Scrum/Agile produktutveckling, etik, etc. 
+–
+Seminarier för presentation av projektresultat och planering
+▪
+Projektens förutsättningar 
+–
+Mängden resurser (arbetstid) och tidsram (löptid) – FIXT (konstanta)  
+•
+Ges av antal projektmedlemmar och kursens omfattning och placering i LP2 och LP3 LÅ 21/22
+–
+Funktionsmängd (omfattning) och mognadsgrad (kvalité) – VARIABLER 
+–
+Hur jobbar man med variabel omfattning (och kvalité) i projekt? 
+HUR SKA VI JOBBA I PROJEKTEN? 
+▪
+Varje projekt kommer att ha en kravställare (produktägare, handledare)  
+▪
+Kontinuerlig dialog med kravställare för att dynamiskt hantera 
+–
+Omfattning och kvalité i förhållande till krav
+–
+Gradvis ökat kunskap om problem och möjliga lösningar
+▪
+Projektuppgifterna och övergripande design definieras av produktägare
+–
+Dialog om uppgift övergripande design, med grundtanken är att produktägare tar ansvar 
+▪
+Ni bryter ned övergripande design i deluppgifter som tidsuppskattas och summeras
+–
+Hanteras i en s.k. ”Product backlogg” 
+•
+Lista med beställda produktegenskaper med prioritet 
+(definierat med testfall i samråd mellan produktägare och projektgrupp), 
+•
+och tidsestimat (gjorda av projektgrupp) 
+–
+Delmängd av Product backlogg väljs för en s.k. ”Sprint”
+•
+Grundtanken är att all planering görs tillsammans inför en Sprint, 
+och att man jobbar helt eller delvis parallellt under Sprinten 
+VAD DOKUMENTERAR VI I PROJEKTEN? 
+Under arbetets gång
+▪
+Verktyg för att spåra progress och avvikelser, GitHub issues/project
+–
+Såvida inget annat överenskommes med handledare 
+▪
+Project backlogg (v1 12.23, v2 01.24, v3 02.24) och Sprint backlogg (01.24 och 02.24) 
+–
+Kanban board, task burndown, etc. 
+Projektrapporten 
+▪
+Följer mallen på Canvas, fråga om oklart!
+–
+MS Word och Latex 
+▪
+Kontinuerligt arbete med projektrapporten 
+–
+Flera (iterativa) inlämningar kopplat till förberedelser, planering och redovisningar  
+▪
+Seminarium och workshops om verktyg, jämlikhet, genus, etik, och hållbarhet  
+VAD EXAMINERAR VI? 
+Kursens kunskapsmål (rapporter, inlämningar, möten och presentation)
+▪
+Ingen tentamen ☺ 
+▪
+Examinationen sker gruppvis och 
+individuellt förlöpande genom kursen
+▪
+Kunskapsmålen examineras genom 
+seminarier, diskussion, inlämningsuppgifter, 
+deltagande i möten med produktägare, 
+laborationer/rapport, samt projektrapport
+▪
+Krav för godkänt är att vid dessa tillfällen/inlämningar visa uppfyllande av kunskapsmålen, 
+OCH att aktivt delta i projektarbetet tillsammans med övriga projektdeltagare 
+–
+Utvärderas/examineras löpande med beslut efter LP2, efter Sprint 1 och efter Sprint 2 
+–
+Otillräcklig medverkan medför att kursen måste slutföras vid nästa kurstillfälle 
+▪
+Examination görs i samråd med huvudlärare och 
+kravställare (produktägare) för respektive projekt
+•
+Workshop om verktyg gruppvis
+•
+Kunskapskontroll (t.ex. Scrum och test), individuell inl.  
+•
+Workshops ev. kompletterande individuell inlämning 
+•
+Projektrapport gruppvis inlämningar
+•
+Avstämningar springplanering och veckomöten 
+•
+Workshop efter Sprint 1 kopplat till aktivitetslogg
+•
+Seminarier två tillfällen i LP3 
+VILKA KURSMOMENT INGÅR? 
+▪
+Föreläsningar (kunskapskontroll med kryssfrågor)
+–
+Projektarbete, introduktion och specifikt om SCRUM (Ulf) 
+–
+Verktyg för mjukvaruutveckling (Ulf) 
+•
+System- och mjukvarudesign, kravhantering, användarinteraktion, snabbt prototypbyggande
+–
+Testning (Ulf) 
+•
+Komponenttestning, delsystemtestning, systemtestning och regressionstestning
+–
+Etik (Ulf) 
+–
+Hållbarhet (Josef) 
+▪
+Sprints (utvecklingssteg / iterationer) 
+–
+Sprint 0 för inläsning, installation, experiment… 
+–
+Två utvecklingssprinter, som avslutas med seminarier 
+•
+Presentation av temat/fokus för aktuell Sprint 
+•
+Demonstration av fungerande funktioner 
+•
+Presentation av resultat som demonstreras OCH som inte demonstreras
+▪
+Veckovisa projektmöten 
+–
+Med handledning  
+Olika målgrupper:
+•
+Seminarium 1: utvecklare 
+•
+Seminarium 2: intressenter  
+30/10
+LP2 (2023) ≈ 10 veckor 
+LP3 (2024) ≈ 10 veckor 
+Föreläsningar
+VERKTYG, etik,
+hållbarhet, osv. 
+Bygga
+kapacitet
+Verktyg/inläsning/förberedelser
+Sprint 1
+Sprint 2
+Seminarie 2 
+sprint demo
+6/11
+14/2
+Projektförberedelser
+(mötas i grupperna, 
+med kravställare, 
+sätta upp verktyg, etc.) 
+Sprint 1
+planering
+START
+Sprint 1 
+Sprint 1 genomgång
+/ återblick, samt 
+Sprint 2 planering
+7/2
+START
+Sprint 2 
+Rapport
+KLAR!!
+Seminarie 1 
+sprint demo
+15/1
+Omtentor
+Workshops
+44        45        46       47        48        49        50       51        52       01        02       03        04       05       06        07       08        09       10       11        12
+Jul
+Ordinarie
+tentor
+Workshop, erfarenheter
+Omtentor
+Ordinarie
+tentor
+Aktivitetslogg
+7/3
+Kursstart
+HUR PLANERAR VI ARBETET I PROJEKTEN? 
+▪
+Ni planerar själva tid för projektarbetet och redovisar arbetsplan och uppföljning 
+▪
+Planering av arbetstid görs i tre perioder
+–
+Inläsning, förberedelser och uppbyggnad av miljö/plattform i LP 2 (Sprint 0)
+–
+Genomförande av två Sprinter i LP 3 (Sprint 1 och 2)
+▪
+Den planerade arbetstiden utgör den kapacitet som finns tillgänglig för en period, t.ex. en Sprint 
+–
+Mängden resurser (antal personer) och tidsram (löptid) ger tillgänglig kapacitet
+–
+Arbetstiden måste planeras inom tidsramen för att kapaciteten ska finnas
+▪
+Förväntning på resultat kopplas till 
+kapacitet (antal personer gånger löptid), 
+funktionsmängd (total omfattning) och 
+mognadsgrad (kvalitetsnivå)
+–
+Verktyg/metoder för att genomföra, följa upp och för att hantera oförutsedda händelser
+–
+Tidsuppföljning för att
+•
+Följa upp kostnader 
+•
+Träna tidsuppskattning
+HUR LOGGAR VI ARBETE? 
+▪
+Aktivitetslogg – vad har blivit gjort och hur mycket tid har använts (hela timmar) 
+–
+Ett dokument (enligt mall) som lämnas in i Canvas 
+–
+Ska uppdateras på veckobasis, och vara uppdelad i aktiviteter 
+▪
+Uppföljning av handledare/projektägare, referentgranskning (eng. peer review), vid workshops 
+–
+Värdera och reflektera om t.ex. 
+•
+Producerat resultat motsvarar använd tid 
+•
+Aktiviteter som tagit längre 
+•
+Kod som pushats relaterat till typ av aktivitet 
+–
+Referentgranskning roteras inom projektgruppen (byts varje vecka) 
+–
+Infor workshops delats aktivitetsloggar med annat projekt (samt sprintplanering) 
+▪
+Inlämning av komplett aktivitetslogg i samband med slutrapport 
+KURSVÄRDERING 
+2022/23
+Ungefär samma bedömning
+som tidigare år
+•
+Endast 19.5% svar 
+Förändringar 23/24
+•
+Studenterna får välja grupp 
+(men projektuppgifterna lottas)
+•
+Workshop om jämställdhet i LP3
+•
+Något förändrad handledargrupp 
+KURSUTVECKLING
+Kommentarer på kursen och kursvärderingen
+▪
+Styrkor med kursen inkluderar projektuppgifterna och projektarbetet. Veckovisa möten med handledare är viktigt och har 
+uppskattats av studenterna (även om det alltid finns utrymme för ytterligare förbättringar). 
+▪
+Svagheter med kursen inkluderar problem med att följa upp och säkerhetsställa att samtliga studenter arbetar aktivt genom 
+hela kursen och på det sätter inhämtar avsedda kunskaper och når kursmålen. 
+Kursen, dess examination, kurslitteratur/kursmaterial och undervisningsformer
+▪
+Styrkor med kursen är att studenterna får arbeta fritt på ett sätt som liknar hur mjukvaruutveckling utförs idag inom industrin. 
+De tränar att arbeta Agilt med verktyg för planering, genomförande och uppföljning. 
+▪
+Svagheter med kursen är framförallt att på ett fullgott sätt examinera i tillräcklig grad på individnivå. Det sker i huvudsak genom 
+gruppvisa redovisningar/diskussioner och gruppmöten där studenterna bedöms på individnivå av handledare och examinator. 
+Planerade åtgärder/beslut 
+▪
+Studenterna får själva välja grupper (så lång  det går) i syfte att minska problem med inaktivitet på 
+grund av gruppdynamik (till priset av minskade möjligheter att ska erfarenhet om gruppdynamik) 
+▪
+Ny workshop om jämställdhet, uppföljning från föreläsning i åk1/åk2 samt föreläsning i den här kursen 
+VILKA PROJEKT BLIR DET 2022/2023?
+1.
+Digital Product Passports (DPPs), federated system (Eric Chiquito, Ulf) 
+2.
+Digital Product Passports (DPPs), key services (Eric Chiquito, Ulf) 
+3.
+Demand-Supply Matching (DSM) service (Eric Chiquito, Ulf) 
+4.
+Web-scraping for demand-supply matchmaking (Carl Borngrund, Ulf) 
+5.
+Natural Language Processing (NLP) to find underlying meaning in scraped data (Carl Borngrund, Ulf) 
+6.
+Simulation environment for DSM models and double auctioning bid-behaviors (Shai Fernandez, Ulf)
+7.
+Micro-services for lawn-mower zero/low administration service delivery (Ulf, Olov Schelén) 
+8.
+Decentralized Identifiers (DIDs) system (Malte Kerl, Ulf) 
+9.
+Portal for snow and ice detection and prognoses (Johan Casselgren, Ulf) 
+10.
+AI study buddy (Josef) 
+11.
+Battle maze game (Josef) 
+12.
+Course catalog generation (Josef) 
+13.
+Open house demo game (Josef) 
+4-5 studenter 
+per projekt 
+HUR KOMMER VI IGÅNG MED PROJEKTEN? 
+▪
+Ni anmäler till lottningen genom att lämna in uppgiften ”Assign to project” i Canvas (senast 31/10 !!!) 
+▪
+Ni väljer projekt, 4 – 5 personer per projekt (fixt antal grupper och gruppstorlekar) 
+▪
+Läsanvisningar/instruktioner delas ut i samband med fördelning av projekten 
+–
+Bakgrund och grundläggande kunskaper för projektgenomförande
+–
+Vidare inläsning vid behov i samråd med handledare 
+▪
+Regelbundna möten med handledare (kravställare och produktägare)
+–
+Planeringsmöten vecka 2 och 3, ~ 30-45 minuter (längre vid behov) 
+•
+Tider bokas med handledare (gruppen tar kontakt med handledare) 
+–
+Veckomöten (utom under tentamensperioder) ~ 15-30 minuter (längre vid behov)
+•
+Korta möten med sammanfattning av gruppens arbete (en ansvarig för varje möte, rullande schema) 
+–
+Föregående vecka
+»
+Övergripande för projektet, progress 
+»
+Viktiga händelser, t.ex. vägval
+»
+Problem som uppstått 
+–
+Plan för kommande vecka 
+»
+Arbetsfördelning 
+»
+Strategi för att hantera problem 
+VART KAN NI HÅLLA TILL?
+▪
+Projekthall A1203 tillgänglig för möten (och projektarbete)
+•
+Passerkortsläsaren 
+–
+Accepterar passerkort med er vanliga kod
+–
+Om det inte funkar, meddela mig
+▪
+Datorer
+•
+Egna datorer i första hand
+•
+Virtuella maskiner via t.ex. LUDD eller kommersiell plattform vid behov 
+▪
+Övrig utrustning?
+•
+Övriga projekt – troligen behövas inte annan utrustning än datorer för projekten
+–
+Skulle det behövas så löser vi förstås det (t.ex. licens för mjukvara)  
+
