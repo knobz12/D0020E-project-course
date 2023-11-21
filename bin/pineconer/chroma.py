@@ -12,19 +12,23 @@ from langchain.schema.runnable import RunnablePassthrough
 from langchain.schema.output_parser import StrOutputParser
 import time
 import pathlib
+import os
 
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
-parser.add_argument("--model-path", help="The path to the llama-cpp supported LLM model",required=True)
+parser.add_argument("--model-path", help="The path to the llama-cpp supported LLM model")
 args = parser.parse_args()
-print('args',args)
-path = args.model_path
-import os
-model_path = str(pathlib.Path(path).resolve())
-exists = os.path.exists(model_path)
-if not exists:
-    raise FileNotFoundError("Model does not exist at path: "+ model_path)
+
+global model_path
+model_path: str = ""
+if args.model_path != None:
+    print(args)
+    path = args.model_path
+    model_path = str(pathlib.Path(path).resolve())
+    exists = os.path.exists(model_path)
+    if not exists:
+        raise FileNotFoundError("Model does not exist at path: "+ model_path)
 
 collection_name = "llama-2-papers"
 client = chromadb.HttpClient(settings=Settings(allow_reset=True))
@@ -127,7 +131,8 @@ def run_llm():
     # rag_chain.strea
 
 # Upsert the result.jsonl data
-# upsert_data()
-
-# Run RAG with the dataset
-run_llm()
+if args.model_path != None:
+    # Run RAG with the dataset
+    run_llm()
+else:
+    upsert_data()
