@@ -168,7 +168,7 @@ Answer:"""
 
         print(f"Answer: ",end="")
         llm(resulting_prompt+"\n")
-        llm("\n")
+        print("\n")
         print(f"############## Finished\n\n")
 
 
