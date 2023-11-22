@@ -1,0 +1,10 @@
+In Lab3 what is the excercise about?
+What kind of classifier will Lab3 be about?
+What operator can be used in rapidminer to take data and a pretrained model and get labeled dataset as an output?
+Give me an example of a hyperparameter
+What is a k-nearest neighbors classifier?
+How many tasks are there in lab3?
+What dataset do you need to load for task 4?
+How does the K-NN model work?
+What happens when the dimensions increase when using k-NN?
+Are there any extra tasks in lab3?

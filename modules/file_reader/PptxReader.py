@@ -2,7 +2,6 @@ from pptx import Presentation
 import time
 import textwrap
 
-
 class PPTXToText():
     def __init__(self):
         pass
