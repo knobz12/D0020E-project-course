@@ -12,41 +12,54 @@ from langchain.schema.runnable import RunnablePassthrough
 from langchain.schema.output_parser import StrOutputParser
 import time
 import pathlib
+import os
 
 from argparse import ArgumentParser
 
-parser = ArgumentParser()
-parser.add_argument("--model-path", help="The path to the llama-cpp supported LLM model",required=True)
-args = parser.parse_args()
-print('args',args)
-path = args.model_path
-import os
-model_path = str(pathlib.Path(path).resolve())
-exists = os.path.exists(model_path)
-if not exists:
-    raise FileNotFoundError("Model does not exist at path: "+ model_path)
+def main():
+    parser = ArgumentParser()
+    parser.add_argument("--model-path", help="The path to the llama-cpp supported LLM model")
+    args = parser.parse_args()
 
-collection_name = "llama-2-papers"
-client = chromadb.HttpClient(settings=Settings(allow_reset=True))
+    model_path: str = ""
+    if args.model_path != None:
+        path = args.model_path
+        model_path = str(pathlib.Path(path).resolve())
+        exists = os.path.exists(model_path)
+        if not exists:
+            raise FileNotFoundError("Model does not exist at path: "+ model_path)
 
-print("Creating embedding function")
-embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    collection_name = "llama-2-papers"
+    client = chromadb.HttpClient(settings=Settings(allow_reset=True))
 
-collection: chromadb.Collection
-try:
-    collection = client.get_collection(collection_name)
-except Exception:
-    print(f"Creating missing collection '{collection_name}'...")
-    collection = client.create_collection(collection_name)
+    print("Creating embedding function")
+    embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
-# Chroma.from_texts
-print(collection)
-print("Document count:", collection.count())
-vectorstore = Chroma(embedding_function=embedding_function,client=client,collection_name=collection_name)
-# result = db.similarity_search("CNN when switching GTX gpu")
-# print(result)
+    collection: chromadb.Collection
+    try:
+        collection = client.get_collection(collection_name)
+    except Exception:
+        print(f"Creating missing collection '{collection_name}'...")
+        collection = client.create_collection(collection_name)
 
-def upsert_data() -> None:
+    # Chroma.from_texts
+    print(collection)
+    print("Document count:", collection.count())
+    vectorstore = Chroma(embedding_function=embedding_function,client=client,collection_name=collection_name)
+    # result = db.similarity_search("CNN when switching GTX gpu")
+    # print(result)
+    # Upsert the result.jsonl data
+    if args.model_path != None:
+        # Run RAG with the dataset
+        run_llm(args.model_path, vectorstore)
+    else:
+        upsert_data(collection)
+    
+
+
+
+
+def upsert_data(collection) -> None:
     dataset_file_path = pathlib.Path("./result.jsonl")
     print("Loading dataset...")
     data = load_dataset("json", data_files=str(dataset_file_path.resolve()),split="train")
@@ -65,12 +78,12 @@ def upsert_data() -> None:
         collection.add([ident],metadatas={'course':course,'text': text},documents=[text])
 
 
-def run_llm():
+def run_llm(model_path, vectorstore):
     # callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
     llm = LlamaCpp(
         model_path=model_path,
         # model_path="S:\models\llama-2-70b-chat.Q2_K.gguf",
-        n_gpu_layers=43,
+        n_gpu_layers=20,
         n_batch=256,
         use_mmap=True,
         n_ctx=2048,
@@ -104,30 +117,28 @@ def run_llm():
     )
 
     questions: list[str] = [
-        "How many workshops will there be?",
-        "What will the projects be about?"
+        "Are there any SPRINT's?",
+        "Are you an AI model?"
         # "How many hidden units does P2NN have and how were they selected?",
         # "For SMLP, what were the test errors?"
     ]
 
     import langchain
-    langchain.debug = True
+    langchain.debug = False
     for (idx, question) in enumerate(questions):
         # for chunk in rag_chain.stream("CNN when switching GTX gpu"):
         print(f"Asking question {idx}")
         for chunk in rag_chain.stream(question):
             print(chunk, end="")
-            time.sleep(0.1)
+
         print("\n")
         print(f"Done with question {idx}")
-        time.sleep(1)
 
-    time.sleep(10)
         # llm.
     # rag_chain.strea
 
-# Upsert the result.jsonl data
-# upsert_data()
 
-# Run RAG with the dataset
-run_llm()
+
+
+if __name__ == "__main__":
+    main()
