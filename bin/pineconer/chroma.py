@@ -60,7 +60,8 @@ def main():
 
 
 def upsert_data(collection) -> None:
-    dataset_file_path = pathlib.Path("./result.jsonl")
+    # dataset_file_path = pathlib.Path("./result.jsonl")
+    dataset_file_path = pathlib.Path("./result-D0038E.jsonl")
     print("Loading dataset...")
     data = load_dataset("json", data_files=str(dataset_file_path.resolve()),split="train")
     print("Loaded dataset:")
@@ -78,64 +79,97 @@ def upsert_data(collection) -> None:
         collection.add([ident],metadatas={'course':course,'text': text},documents=[text])
 
 
-def run_llm(model_path, vectorstore):
-    # callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+# from langchain.vectorstores.chroma import Chroma
+def run_llm(model_path, vectorstore: Chroma):
+    callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
     llm = LlamaCpp(
         model_path=model_path,
         # model_path="S:\models\llama-2-70b-chat.Q2_K.gguf",
-        n_gpu_layers=20,
+        n_gpu_layers=43,
         n_batch=256,
         use_mmap=True,
         n_ctx=2048,
         f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
-        # callback_manager=callback_manager,
-        verbose=True,
+        callback_manager=callback_manager,
+        # verbose=True,
     )
+    llm.client.verbose = False
 
-    prompt_str = """Human: You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. 
-    If you don't know the answer, just say that you don't know. 
-    Use three sentences maximum and keep the answer concise. 
-    Don't directly refer to the context text, pretend like you already knew the context information.
-    Question: {question}
-    Context: {context}
-    Answer:"""
+# You will be talking to a student taking the course D7032E. Use the following pieces of retrieved context to answer the question. 
 
-    retriever = vectorstore.as_retriever(
-        # search_type="similarity_score_threshold",
-        # search_kwargs={'score_threshold': 0.5,'k':2}
-        search_kwargs={'k':2}
-    )
+# Course summary: The course will have an emphasis on selected topics from: Project planning and management, problem analysis,
+# software management and interpretation, code complexity, API design, debugging and testing, configuration
+# management, documentation, design patterns, build support and tools of the trade, packaging, release management
+# and deployment, modeling and structuring of software, reuse, components, architectures, maintenance and
+# documentation. The course includes a number of assignments, which are to be completed in groups, and that are
+# evaluated in both written and oral form. Individual examination is given through tests and a home exam. 
 
-    prompt = ChatPromptTemplate.from_template(prompt_str)
+#     prompt_str = """Human: You are an assistant for question-answering tasks.
+# You will be talking to a student taking the AI course D0038E. Use the following pieces of retrieved context to answer the question. 
+# If you don't know the answer, just say that you don't know. 
+# Use ten sentences maximum and keep the answer concise. 
+# Don't directly refer to the context text, pretend like you already knew the context information.
 
-    # print(retriever.get_relevant_documents("CNN when switching GTX gpu"))
-    rag_chain = (
-        {"context": retriever, "question": RunnablePassthrough()}
-        | prompt
-        | llm
-        | StrOutputParser()
-    )
+# Question: {question}
+
+# Context: {context}
+
+# Answer:"""
+
+#     prompt_str = """Human: You are an assistant for question-answering tasks.
+# If you don't know the answer, just say that you don't know. 
+# Use ten sentences maximum and keep the answer concise. 
+# Don't directly refer to the context text, pretend like you already knew the context information.
+
+# Question: {question}
+
+# Answer:"""
+
+    # retriever = vectorstore.as_retriever(
+    #     # search_type="similarity_score_threshold",
+    #     # search_kwargs={'score_threshold': 0.5,'k':2}
+    #     search_kwargs={'k':2, 'filter':{'course':'D0038E'}}
+    # )
+
+    prompt_str = """Human: You are an assistant for question-answering tasks.
+You will be talking to a student taking the AI course D0038E. Use the following pieces of retrieved context to answer the question. 
+If you don't know the answer, just say that you don't know. 
+Use ten sentences maximum and keep the answer concise. 
+Don't directly refer to the context text, pretend like you already knew the context information.
+
+Question: {question}
+
+Context: {context}
+
+Answer:"""
+
 
     questions: list[str] = [
-        "Are there any SPRINT's?",
-        "Are you an AI model?"
+        "In lab 6 do we use boosting?",
+        "Explain what we are doing in lab 6 task 1.",
+        # "What is the course about?",
+        # "Are there any SPRINT's?",
+        # "Are you an AI model?"
         # "How many hidden units does P2NN have and how were they selected?",
         # "For SMLP, what were the test errors?"
     ]
 
     import langchain
     langchain.debug = False
-    for (idx, question) in enumerate(questions):
-        # for chunk in rag_chain.stream("CNN when switching GTX gpu"):
-        print(f"Asking question {idx}")
-        for chunk in rag_chain.stream(question):
-            print(chunk, end="")
 
-        print("\n")
-        print(f"Done with question {idx}")
+    for question in questions:
+        docs = vectorstore.similarity_search(question,filter={'course':'D0038E'})
+        context = ""
+        for doc in docs:
+            context += doc.page_content
+        resulting_prompt = prompt_str.format(question = question, context = context)
+        print(f"############## Start")
+        print(f"Question: {question}\n")
 
-        # llm.
-    # rag_chain.strea
+        print(f"Answer: ",end="")
+        llm(resulting_prompt+"\n")
+        llm("\n")
+        print(f"############## Finished\n\n")
 
 
 
