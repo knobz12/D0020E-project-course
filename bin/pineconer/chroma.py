@@ -83,7 +83,7 @@ def run_llm(model_path, vectorstore):
     llm = LlamaCpp(
         model_path=model_path,
         # model_path="S:\models\llama-2-70b-chat.Q2_K.gguf",
-        n_gpu_layers=43,
+        n_gpu_layers=20,
         n_batch=256,
         use_mmap=True,
         n_ctx=2048,
@@ -117,8 +117,8 @@ def run_llm(model_path, vectorstore):
     )
 
     questions: list[str] = [
-        "How many workshops will there be?",
-        "What will the projects be about?"
+        "Are there any SPRINT's?",
+        "Are you an AI model?"
         # "How many hidden units does P2NN have and how were they selected?",
         # "For SMLP, what were the test errors?"
     ]
