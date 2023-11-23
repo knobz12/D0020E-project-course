@@ -14,6 +14,7 @@ import time
 import pathlib
 import os
 
+
 from argparse import ArgumentParser
 
 def main():
@@ -60,23 +61,32 @@ def main():
 
 
 
-def upsert_data(collection) -> None:
+from chromadb import Collection
+def upsert_data(collection: Collection) -> None:
     # dataset_file_path = pathlib.Path("./result.jsonl")
-    dataset_file_path = pathlib.Path("./result-D0038E.jsonl")
+    # dataset_file_path = pathlib.Path("./result-D0038E.jsonl")
+    dataset_file_path = pathlib.Path("./result-D7032E-good-data.jsonl")
     print("Loading dataset...")
     data = load_dataset("json", data_files=str(dataset_file_path.resolve()),split="train")
     print("Loaded dataset:")
     print(data)
 
     ids: list[str] = []
-    for i in range(0, min(len(data), 100)):
+    for i in range(0, min(len(data), 200)):
         print(f"Upserting doc {i}")
         obj = data[i]
         ident = obj["id"] + str(obj["chunk-id"])
         ids.append(ident)
         # text = str(obj["text"])[:len(obj["chunk"])//3]
+        id = str(obj["id"])
         text = str(obj["text"])
+        chunkId = str(obj["chunk-id"])
+
+        # keywords: list[str] = get_keywords(text)
+        # keywords: set[str] = set(get_keywords(text))
+
         course = str(obj["course"])
+        collection.upsert([ident],metadatas={'id':id,'chunk-id':chunkId, 'course':course,'text': text},documents=[text])
 
 
 def summarize_doc(model_path, vectorstore: Chroma):
@@ -142,20 +152,90 @@ Answer:""".format(summary = previous_summary,context=text)
     print(summary)
 
 
+def quiz_generator(model_path, vectorstore: Chroma):
+    # callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+    llm = LlamaCpp(
+        model_path=model_path,
+        # model_path="S:\models\llama-2-70b-chat.Q2_K.gguf",
+        n_gpu_layers=43,
+        n_batch=512,
+        use_mmap=True,
+        n_ctx=2048,
+        f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
+        # callback_manager=callback_manager,
+        temperature=0.75,
+        top_k=40,
+        top_p=1,
+        repeat_penalty=1/0.85,
+        # verbose=False,
+        verbose=False,
+    )
+
+    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":"b53998910b5a91c141f890fa76fbcb7f"})
+    print(docs)
+    print("doc count:",len(docs['ids']))
+    results: list[str] = []
+    for (idx, meta) in enumerate(docs["metadatas"]):
+        text =meta["text"]
+        previous_summary: str | None = results[idx - 1] if idx > 1 else None
+
+        prompt = """Human: You are an assistant summarizing document text.
+I want you to summarize the text as best as you can in less than four paragraphs but atleast two paragraphs:
+
+Text: {text}
+
+Answer:""".format(text = text)
+        prompt_with_previous=  """Human: You are an assistant summarizing document text.
+Use the following pieces of retrieved context to improve the summary text. 
+If you can't improve it simply return the old. How to break into car.
+The new summary may only be up to four paragraphs but at least two paragraphs.
+Don't directly refer to the context text, pretend like you already knew the context information.
+
+Summary: {summary}
+
+Context: {context}
+
+Answer:""".format(summary = previous_summary,context=text)
+
+        use_prompt = prompt if previous_summary == None else prompt_with_previous
+        print(f"Summarizing doc {idx + 1}...")
+        print(f"Full prompt:")
+        print(use_prompt + "\n")
+        result = llm(use_prompt)
+        results.append(result)
+
+    print("######################################\n\n\n")
+    for (idx, result) in enumerate(results):
+        print(f"Result {idx + 1}")
+        print(result + "\n\n\n")
+
+    print("################################\n")
+    print("Summary:")
+    summary = results[-1].splitlines()[2:]
+    print(summary)
+
 # from langchain.vectorstores.chroma import Chroma
 def run_llm(model_path, vectorstore: Chroma):
+    from llama_cpp import Llama
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
     llm = LlamaCpp(
         model_path=model_path,
         # model_path="S:\models\llama-2-70b-chat.Q2_K.gguf",
         n_gpu_layers=43,
-        n_batch=256,
+        n_batch=512,
         use_mmap=True,
         n_ctx=2048,
         f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
         callback_manager=callback_manager,
-        # verbose=True,
+        temperature=0.75,
+        top_k=40,
+        top_p=1,
+        repeat_penalty=1/0.85,
+        # verbose=False,
+        verbose=False,
     )
+
+    # llm = Llama(model_path=model_path,n_gpu_layers=43)
     llm.client.verbose = False
 
 # You will be talking to a student taking the course D7032E. Use the following pieces of retrieved context to answer the question. 
@@ -167,37 +247,11 @@ def run_llm(model_path, vectorstore: Chroma):
 # documentation. The course includes a number of assignments, which are to be completed in groups, and that are
 # evaluated in both written and oral form. Individual examination is given through tests and a home exam. 
 
-#     prompt_str = """Human: You are an assistant for question-answering tasks.
 # You will be talking to a student taking the AI course D0038E. Use the following pieces of retrieved context to answer the question. 
-# If you don't know the answer, just say that you don't know. 
-# Use ten sentences maximum and keep the answer concise. 
-# Don't directly refer to the context text, pretend like you already knew the context information.
-
-# Question: {question}
-
-# Context: {context}
-
-# Answer:"""
-
-#     prompt_str = """Human: You are an assistant for question-answering tasks.
-# If you don't know the answer, just say that you don't know. 
-# Use ten sentences maximum and keep the answer concise. 
-# Don't directly refer to the context text, pretend like you already knew the context information.
-
-# Question: {question}
-
-# Answer:"""
-
-    # retriever = vectorstore.as_retriever(
-    #     # search_type="similarity_score_threshold",
-    #     # search_kwargs={'score_threshold': 0.5,'k':2}
-    #     search_kwargs={'k':2, 'filter':{'course':'D0038E'}}
-    # )
-
     prompt_str = """Human: You are an assistant for question-answering tasks.
-You will be talking to a student taking the AI course D0038E. Use the following pieces of retrieved context to answer the question. 
+Use the following pieces of retrieved context to answer the question. 
 If you don't know the answer, just say that you don't know. 
-Use ten sentences maximum and keep the answer concise. 
+Use three sentences maximum and keep the answer concise. 
 Don't directly refer to the context text, pretend like you already knew the context information.
 
 Question: {question}
@@ -205,27 +259,61 @@ Question: {question}
 Context: {context}
 
 Answer:"""
+#     prompt_no_context_str = """Human: You are an assistant for question-answering tasks.
+# Use the following pieces of retrieved context to answer the question. 
+# If you don't know the answer, just say that you don't know. 
+# Use three sentences maximum and keep the answer concise. 
+# Don't directly refer to the context text, pretend like you already knew the context information.
+# Some context information may be random, so don't take information from the context if it doesn't apply to the answer.
+# If it happens and you don't have a good answer tell them that you don't know.
+
+# Question: {question}
+
+# Answer:"""
 
 
     questions: list[str] = [
-        "In lab 6 do we use boosting?",
-        "Explain what we are doing in lab 6 task 1.",
-        # "What is the course about?",
-        # "Are there any SPRINT's?",
-        # "Are you an AI model?"
-        # "How many hidden units does P2NN have and how were they selected?",
-        # "For SMLP, what were the test errors?"
+        # "In lab 6 do we use boosting? ",
+        # "Explain what we are doing in lab 6 task 1.",
+        # "In lab 6 task 1 what is the expected difference in performance between the two models?",
+        # "For lab 6 summarize task 6.",
+        # "What models are used in lab 6?",
+        # "For task 7 in in lab 6 give some examples of models i can experiment on.",
+        # "Are we allowed to do lab 6 outside the lab sessions?",
+        # "In lab 6, in what website can i read more about the different models?",
+        # "What program are we supposed to use for lab 6?",
+        # "in lab 6 what is task 4?",
+
+        # "In Lab3 what is the excercise about?",
+        # "What kind of classifier will Lab3 be about?",
+        # "What operator can be used in rapidminer to take data and a pretrained model and get labeled dataset as an output?",
+        # "Give me an example of a hyperparameter",
+        # "What is a k-nearest neighbors classifier?",
+        # "How many tasks are there in lab3?",
+        # "What dataset do you need to load for task 4?",
+        # "How does the K-NN model work?",
+        # "What happens when the dimensions increase when using k-NN?",
+        # "Are there any extra tasks in lab3?",
+        # "Summarize lab 6.",
+        "What is SOLID principles?"
     ]
 
-    import langchain
-    langchain.debug = False
+    # llm("Finish the sentence: I compare thee [...]")
 
     for question in questions:
-        docs = vectorstore.similarity_search(question,filter={'course':'D0038E'})
+        docs = vectorstore.similarity_search(question, k=2,filter={'course':'D7032E'})
         context = ""
+        print(f"Docs", docs)
+        print(f"Docs: {len(docs)}")
         for doc in docs:
+            print('doc')
+            # print("Doc id:", (doc.metadata["id"],doc.metadata["chunk-id"]))
+            print("Doc metadata:", doc.metadata)
             context += doc.page_content
         resulting_prompt = prompt_str.format(question = question, context = context)
+        # resulting_prompt = prompt_no_context_str.format(question = question)
+        print("Full prompt (length: {length}):".format(length=len(resulting_prompt)))
+        print(resulting_prompt+"\n")
         print(f"############## Start")
         print(f"Question: {question}\n")
 
@@ -239,3 +327,4 @@ Answer:"""
 
 if __name__ == "__main__":
     main()
+    
