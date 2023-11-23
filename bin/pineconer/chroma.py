@@ -151,6 +151,15 @@ Answer:""".format(summary = previous_summary,context=text)
     summary = results[-1].splitlines()[2:]
     print(summary)
 
+@guidance()
+def determineQuestionBias(lm, question: str):
+    lm += f"""I want you to determine if a question for a quiz is factual or opinion based.
+    For example a question about your opinion about something would be opinion based and a question about a fact is factual.
+
+    Question: {question}
+
+    Answer: {select(options=["factual", "opinion"])}"""
+    return lm
 
 @guidance()
 def questionJSONGenerator(lm, question: str):
@@ -200,23 +209,42 @@ def quiz_generator(model_path):
     )
 
     questions: list[str] = [
-        "What is the closest planet to the sun?",
-        "What are the eight planets?",
-        "Which country is known as the 'Land of the Rising Sun'?",
+        # Opinion based
+        "What is your favorite book of all time, and why?",
+        "Do you believe that social media has a positive or negative impact on society?",
+        "In your opinion, what is the most important quality in a leader?",
+        "Should governments prioritize environmental conservation over economic development, or vice versa?",
+        "Is it better to pursue a college education or start working right after high school?",
+
+        # Fact question
+        "What is the capital city of France?",
+        "How many planets are there in our solar system?",
+        "When did World War II end?",
         "What is the chemical symbol for gold?",
-        "Who wrote the play 'Romeo and Juliet'?",
-        "In which year did Christopher Columbus first reach the Americas?",
-        "What does the acronym 'CPU' stand for?",
-        "Who is known as the 'King of Pop'?",
-        "In which sport would you perform a slam dunk?",
-        "Who painted the Mona Lisa?",
-        "What is the capital city of Australia?",
-        "Which film won the Academy Award for Best Picture in 2020?",
+        "How many continents are there in the world?",
+
+        # "Who is the best tech CEO of all time?",
+        # "What is the closest planet to the sun?",
+        # "What are the eight planets?",
+        # "Which country is known as the 'Land of the Rising Sun'?",
+        # "What is the chemical symbol for gold?",
+        # "Who wrote the play 'Romeo and Juliet'?",
+        # "In which year did Christopher Columbus first reach the Americas?",
+        # "What does the acronym 'CPU' stand for?",
+        # "Who is known as the 'King of Pop'?",
+        # "In which sport would you perform a slam dunk?",
+        # "Who painted the Mona Lisa?",
+        # "What is the capital city of Australia?",
+        # "Which film won the Academy Award for Best Picture in 2020?",
     ]
 
-    for (idx, question) in enumerate(questions[:2]):
+    for (idx, question) in enumerate(questions[:1]):
         print(f"Generating quiz {idx}")
         quizJson = str(guid + questionJSONGenerator(question))
+        res = str(guid + determineQuestionBias(question))
+        factual = res.__contains__("Answer: factual")
+        f = "factual" if factual == True else "opinion"
+        print(f"Question {idx + 1}: {f}")
 
         import regex
         pattern = regex.compile(r'{(?:[^{}]|(?R))*}')
