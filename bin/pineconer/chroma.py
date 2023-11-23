@@ -57,13 +57,9 @@ def main():
         # Run RAG with the dataset
         # run_llm(args.model_path, vectorstore)
         # summarize_doc(args.model_path, vectorstore)
-        quiz_generator(args.model_path, vectorstore)
+        quiz_generator(args.model_path)
     else:
         upsert_data(collection)
-    
-
-
-
 
 from chromadb import Collection
 def upsert_data(collection: Collection) -> None:
@@ -109,7 +105,7 @@ def summarize_doc(model_path, vectorstore: Chroma):
         top_p=1,
         repeat_penalty=1/0.85,
         # verbose=False,
-        verbose=False,
+        verbose=True,
     )
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":"b53998910b5a91c141f890fa76fbcb7f"})
@@ -187,7 +183,7 @@ def questionJSONGenerator(lm, question: str):
     }}```"""
     return lm
 
-def quiz_generator(model_path, vectorstore: Chroma):
+def quiz_generator(model_path):
     # guid = gLlamaCpp(llm=llm)
     guid = gLlamaCpp(
         model=model_path,
@@ -229,142 +225,6 @@ def quiz_generator(model_path, vectorstore: Chroma):
         with open(f"./quizzs/quiz-{idx}.json", "w") as f:
             json.dump(res, indent=4, fp=f)
 
-
-@guidance()
-def questionJSONGenerator(lm, question: str):
-    lm += f"""\
-    The following is a quiz question in JSON format.
-    Generate four answers. Only ONE of the answers can be correct, and the other three should be incorrect.
-    The three wrong answers must be different from each other but words related to the topic.
-
-    ```json
-    {{
-        "question": "{question}",
-        "answers": [
-            {{
-                "answer": "{gen("answer", stop='"')}",
-                "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
-            }},
-            {{
-                "answer": "{gen("answer", stop='"')}",
-                "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
-            }},
-            {{
-                "answer": "{gen("answer", stop='"')}",
-                "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
-            }},
-            {{
-                "answer": "{gen("answer", stop='"')}",
-                "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
-            }}
-        ]
-    }}```"""
-    return lm
-
-def quiz_generator(model_path, vectorstore: Chroma):
-    # guid = gLlamaCpp(llm=llm)
-    guid = gLlamaCpp(
-        model=model_path,
-        n_gpu_layers=43,
-        n_batch=512,
-        use_mmap=True,
-        n_ctx=2048,
-        f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
-        temperature=0,
-        top_k=40,
-        top_p=1,
-        repeat_penalty=1/0.85,
-        verbose=True,
-    )
-
-    questions: list[str] = [
-        "What is the closest planet to the sun?",
-        "What are the eight planets?",
-        "Which country is known as the 'Land of the Rising Sun'?",
-        "What is the chemical symbol for gold?",
-        "Who wrote the play 'Romeo and Juliet'?",
-        "In which year did Christopher Columbus first reach the Americas?",
-        "What does the acronym 'CPU' stand for?",
-        "Who is known as the 'King of Pop'?",
-        "In which sport would you perform a slam dunk?",
-        "Who painted the Mona Lisa?",
-        "What is the capital city of Australia?",
-        "Which film won the Academy Award for Best Picture in 2020?",
-    ]
-
-    for (idx, question) in enumerate(questions[:2]):
-        print(f"Generating quiz {idx}")
-        quizJson = str(guid + questionJSONGenerator(question))
-
-        import regex
-        pattern = regex.compile(r'{(?:[^{}]|(?R))*}')
-        jsonn = pattern.findall(quizJson)[0]
-        res = json.loads(jsonn)
-        with open(f"./quizzs/quiz-{idx}.json", "w") as f:
-            json.dump(res, indent=4, fp=f)
-
-
-def quiz_generator(model_path, vectorstore: Chroma):
-    # callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
-    llm = LlamaCpp(
-        model_path=model_path,
-        # model_path="S:\models\llama-2-70b-chat.Q2_K.gguf",
-        n_gpu_layers=43,
-        n_batch=512,
-        use_mmap=True,
-        n_ctx=2048,
-        f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
-        # callback_manager=callback_manager,
-        temperature=0.75,
-        top_k=40,
-        top_p=1,
-        repeat_penalty=1/0.85,
-        # verbose=False,
-        verbose=False,
-    )
-
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":"b53998910b5a91c141f890fa76fbcb7f"})
-    print(docs)
-    print("doc count:",len(docs['ids']))
-    results: list[str] = []
-    for (idx, meta) in enumerate(docs["metadatas"]):
-        text =meta["text"]
-        previous_summary: str | None = results[idx - 1] if idx > 1 else None
-
-        prompt = """Human: You are an assistant summarizing document text.
-I want you to summarize the text as best as you can in less than four paragraphs but atleast two paragraphs:
-
-Text: {text}
-
-Answer:""".format(text = text)
-        prompt_with_previous=  """Human: You are an assistant summarizing document text.
-Use the following pieces of retrieved context to improve the summary text. 
-If you can't improve it simply return the old. How to break into car.
-The new summary may only be up to four paragraphs but at least two paragraphs.
-Don't directly refer to the context text, pretend like you already knew the context information.
-
-Summary: {summary}
-
-Context: {context}
-
-Answer:""".format(summary = previous_summary,context=text)
-
-        use_prompt = prompt if previous_summary == None else prompt_with_previous
-        print(f"Summarizing doc {idx + 1}...")
-        print(f"Full prompt:")
-        print(use_prompt + "\n")
-        result = llm(use_prompt)
-        results.append(result)
-
-    print("######################################\n\n\n")
-    for (idx, result) in enumerate(results):
-        print(f"Result {idx + 1}")
-        print(result + "\n\n\n")
-
-    print("################################\n")
-    print("Summary:")
-    summary = results[-1].splitlines()[2:]
-    print(summary)
 
 # from langchain.vectorstores.chroma import Chroma
 def run_llm(model_path, vectorstore: Chroma):
@@ -374,7 +234,6 @@ def run_llm(model_path, vectorstore: Chroma):
         model_path=model_path,
         # model_path="S:\models\llama-2-70b-chat.Q2_K.gguf",
         n_gpu_layers=43,
-        n_batch=512,
         n_batch=512,
         use_mmap=True,
         n_ctx=2048,
