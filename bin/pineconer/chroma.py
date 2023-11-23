@@ -60,7 +60,9 @@ def main():
 
 
 
-def upsert_data(collection) -> None:
+from chromadb import Collection
+def upsert_data(collection: Collection) -> None:
+def upsert_data(collection: Collection) -> None:
     # dataset_file_path = pathlib.Path("./result.jsonl")
     dataset_file_path = pathlib.Path("./result-D0038E.jsonl")
     print("Loading dataset...")
@@ -69,14 +71,21 @@ def upsert_data(collection) -> None:
     print(data)
 
     ids: list[str] = []
-    for i in range(0, min(len(data), 100)):
+    for i in range(0, min(len(data), 200)):
         print(f"Upserting doc {i}")
         obj = data[i]
         ident = obj["id"] + str(obj["chunk-id"])
         ids.append(ident)
         # text = str(obj["text"])[:len(obj["chunk"])//3]
+        id = str(obj["id"])
         text = str(obj["text"])
+        chunkId = str(obj["chunk-id"])
+
+        # keywords: list[str] = get_keywords(text)
+        # keywords: set[str] = set(get_keywords(text))
+
         course = str(obj["course"])
+        collection.upsert([ident],metadatas={'id':id,'chunk-id':chunkId, 'course':course,'text': text},documents=[text])
 
 
 def summarize_doc(model_path, vectorstore: Chroma):
