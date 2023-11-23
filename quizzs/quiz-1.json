@@ -1,0 +1,21 @@
+{
+    "question": "What are the eight planets?",
+    "answers": [
+        {
+            "answer": "The eight planets are Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune.",
+            "isAnswer": "true"
+        },
+        {
+            "answer": "The eight planets are Sun, Moon, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune.",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "The eight planets are Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Pluto.",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "The eight planets are Earth, Mars, Jupiter, Saturn, Uranus, Neptune, and Pluto.",
+            "isAnswer": "false"
+        }
+    ]
+}

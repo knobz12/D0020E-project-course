@@ -1,0 +1,21 @@
+{
+    "question": "What is the closest planet to the sun?",
+    "answers": [
+        {
+            "answer": "Mars",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "Venus",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "Earth",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "Mercury",
+            "isAnswer": "true"
+        }
+    ]
+}

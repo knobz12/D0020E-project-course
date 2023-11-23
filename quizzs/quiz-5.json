@@ -1,0 +1,21 @@
+{
+    "question": "In which year did Christopher Columbus first reach the Americas?",
+    "answers": [
+        {
+            "answer": "1492",
+            "isAnswer": "true"
+        },
+        {
+            "answer": "1491",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "1500",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "1485",
+            "isAnswer": "false"
+        }
+    ]
+}

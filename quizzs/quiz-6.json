@@ -1,0 +1,21 @@
+{
+    "question": "What does the acronym 'CPU' stand for?",
+    "answers": [
+        {
+            "answer": "Central Processing Unit",
+            "isAnswer": "true"
+        },
+        {
+            "answer": "Critical Processing Unit",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "Control Processing Unit",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "Computer Processing Unit",
+            "isAnswer": "false"
+        }
+    ]
+}

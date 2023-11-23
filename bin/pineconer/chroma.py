@@ -13,9 +13,12 @@ from langchain.schema.output_parser import StrOutputParser
 import time
 import pathlib
 import os
-
-
+import guidance
+from guidance import gen, select, Guidance
+from guidance.models._llama_cpp import LlamaCpp as gLlamaCpp
+from llama_cpp import Llama
 from argparse import ArgumentParser
+import json
 
 def main():
     parser = ArgumentParser()
@@ -53,7 +56,8 @@ def main():
     if args.model_path != None:
         # Run RAG with the dataset
         # run_llm(args.model_path, vectorstore)
-        summarize_doc(args.model_path, vectorstore)
+        # summarize_doc(args.model_path, vectorstore)
+        quiz_generator(args.model_path, vectorstore)
     else:
         upsert_data(collection)
     
@@ -64,7 +68,7 @@ def main():
 from chromadb import Collection
 def upsert_data(collection: Collection) -> None:
     # dataset_file_path = pathlib.Path("./result.jsonl")
-    # dataset_file_path = pathlib.Path("./result-D0038E.jsonl")
+    # # dataset_file_path = pathlib.Path("./result-D0038E.jsonl")
     dataset_file_path = pathlib.Path("./result-D7032E-good-data.jsonl")
     print("Loading dataset...")
     data = load_dataset("json", data_files=str(dataset_file_path.resolve()),split="train")
@@ -152,6 +156,154 @@ Answer:""".format(summary = previous_summary,context=text)
     print(summary)
 
 
+@guidance()
+def questionJSONGenerator(lm, question: str):
+    lm += f"""\
+    The following is a quiz question in JSON format.
+    Generate four answers. Only ONE of the answers can be correct, and the other three should be incorrect.
+    The three wrong answers must be different from each other but words related to the topic.
+
+    ```json
+    {{
+        "question": "{question}",
+        "answers": [
+            {{
+                "answer": "{gen("answer", stop='"')}",
+                "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
+            }},
+            {{
+                "answer": "{gen("answer", stop='"')}",
+                "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
+            }},
+            {{
+                "answer": "{gen("answer", stop='"')}",
+                "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
+            }},
+            {{
+                "answer": "{gen("answer", stop='"')}",
+                "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
+            }}
+        ]
+    }}```"""
+    return lm
+
+def quiz_generator(model_path, vectorstore: Chroma):
+    # guid = gLlamaCpp(llm=llm)
+    guid = gLlamaCpp(
+        model=model_path,
+        n_gpu_layers=43,
+        n_batch=512,
+        use_mmap=True,
+        n_ctx=2048,
+        f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
+        temperature=0,
+        top_k=40,
+        top_p=1,
+        repeat_penalty=1/0.85,
+        verbose=True,
+    )
+
+    questions: list[str] = [
+        "What is the closest planet to the sun?",
+        "What are the eight planets?",
+        "Which country is known as the 'Land of the Rising Sun'?",
+        "What is the chemical symbol for gold?",
+        "Who wrote the play 'Romeo and Juliet'?",
+        "In which year did Christopher Columbus first reach the Americas?",
+        "What does the acronym 'CPU' stand for?",
+        "Who is known as the 'King of Pop'?",
+        "In which sport would you perform a slam dunk?",
+        "Who painted the Mona Lisa?",
+        "What is the capital city of Australia?",
+        "Which film won the Academy Award for Best Picture in 2020?",
+    ]
+
+    for (idx, question) in enumerate(questions[:2]):
+        print(f"Generating quiz {idx}")
+        quizJson = str(guid + questionJSONGenerator(question))
+
+        import regex
+        pattern = regex.compile(r'{(?:[^{}]|(?R))*}')
+        jsonn = pattern.findall(quizJson)[0]
+        res = json.loads(jsonn)
+        with open(f"./quizzs/quiz-{idx}.json", "w") as f:
+            json.dump(res, indent=4, fp=f)
+
+
+@guidance()
+def questionJSONGenerator(lm, question: str):
+    lm += f"""\
+    The following is a quiz question in JSON format.
+    Generate four answers. Only ONE of the answers can be correct, and the other three should be incorrect.
+    The three wrong answers must be different from each other but words related to the topic.
+
+    ```json
+    {{
+        "question": "{question}",
+        "answers": [
+            {{
+                "answer": "{gen("answer", stop='"')}",
+                "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
+            }},
+            {{
+                "answer": "{gen("answer", stop='"')}",
+                "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
+            }},
+            {{
+                "answer": "{gen("answer", stop='"')}",
+                "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
+            }},
+            {{
+                "answer": "{gen("answer", stop='"')}",
+                "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
+            }}
+        ]
+    }}```"""
+    return lm
+
+def quiz_generator(model_path, vectorstore: Chroma):
+    # guid = gLlamaCpp(llm=llm)
+    guid = gLlamaCpp(
+        model=model_path,
+        n_gpu_layers=43,
+        n_batch=512,
+        use_mmap=True,
+        n_ctx=2048,
+        f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
+        temperature=0,
+        top_k=40,
+        top_p=1,
+        repeat_penalty=1/0.85,
+        verbose=True,
+    )
+
+    questions: list[str] = [
+        "What is the closest planet to the sun?",
+        "What are the eight planets?",
+        "Which country is known as the 'Land of the Rising Sun'?",
+        "What is the chemical symbol for gold?",
+        "Who wrote the play 'Romeo and Juliet'?",
+        "In which year did Christopher Columbus first reach the Americas?",
+        "What does the acronym 'CPU' stand for?",
+        "Who is known as the 'King of Pop'?",
+        "In which sport would you perform a slam dunk?",
+        "Who painted the Mona Lisa?",
+        "What is the capital city of Australia?",
+        "Which film won the Academy Award for Best Picture in 2020?",
+    ]
+
+    for (idx, question) in enumerate(questions[:2]):
+        print(f"Generating quiz {idx}")
+        quizJson = str(guid + questionJSONGenerator(question))
+
+        import regex
+        pattern = regex.compile(r'{(?:[^{}]|(?R))*}')
+        jsonn = pattern.findall(quizJson)[0]
+        res = json.loads(jsonn)
+        with open(f"./quizzs/quiz-{idx}.json", "w") as f:
+            json.dump(res, indent=4, fp=f)
+
+
 def quiz_generator(model_path, vectorstore: Chroma):
     # callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
     llm = LlamaCpp(
@@ -223,6 +375,7 @@ def run_llm(model_path, vectorstore: Chroma):
         # model_path="S:\models\llama-2-70b-chat.Q2_K.gguf",
         n_gpu_layers=43,
         n_batch=512,
+        n_batch=512,
         use_mmap=True,
         n_ctx=2048,
         f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
@@ -259,18 +412,6 @@ Question: {question}
 Context: {context}
 
 Answer:"""
-#     prompt_no_context_str = """Human: You are an assistant for question-answering tasks.
-# Use the following pieces of retrieved context to answer the question. 
-# If you don't know the answer, just say that you don't know. 
-# Use three sentences maximum and keep the answer concise. 
-# Don't directly refer to the context text, pretend like you already knew the context information.
-# Some context information may be random, so don't take information from the context if it doesn't apply to the answer.
-# If it happens and you don't have a good answer tell them that you don't know.
-
-# Question: {question}
-
-# Answer:"""
-
 
     questions: list[str] = [
         # "In lab 6 do we use boosting? ",
@@ -297,6 +438,32 @@ Answer:"""
         # "Summarize lab 6.",
         "What is SOLID principles?"
     ]
+
+    # llm("Finish the sentence: I compare thee [...]")
+        # "In lab 6 do we use boosting? ",
+        # "Explain what we are doing in lab 6 task 1.",
+        # "In lab 6 task 1 what is the expected difference in performance between the two models?",
+        # "For lab 6 summarize task 6.",
+        # "What models are used in lab 6?",
+        # "For task 7 in in lab 6 give some examples of models i can experiment on.",
+        # "Are we allowed to do lab 6 outside the lab sessions?",
+        # "In lab 6, in what website can i read more about the different models?",
+        # "What program are we supposed to use for lab 6?",
+        # "in lab 6 what is task 4?",
+
+        # "In Lab3 what is the excercise about?",
+        # "What kind of classifier will Lab3 be about?",
+        # "What operator can be used in rapidminer to take data and a pretrained model and get labeled dataset as an output?",
+        # "Give me an example of a hyperparameter",
+        # "What is a k-nearest neighbors classifier?",
+        # "How many tasks are there in lab3?",
+        # "What dataset do you need to load for task 4?",
+        # "How does the K-NN model work?",
+        # "What happens when the dimensions increase when using k-NN?",
+        # "Are there any extra tasks in lab3?",
+        # "Summarize lab 6.",
+    #     "What is SOLID principles?"
+    # ]
 
     # llm("Finish the sentence: I compare thee [...]")
 

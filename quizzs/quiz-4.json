@@ -1,0 +1,21 @@
+{
+    "question": "Who wrote the play 'Romeo and Juliet'?",
+    "answers": [
+        {
+            "answer": "William Shakespeare",
+            "isAnswer": "true"
+        },
+        {
+            "answer": "Leonardo da Vinci",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "Queen Elizabeth I",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "The Bard",
+            "isAnswer": "false"
+        }
+    ]
+}

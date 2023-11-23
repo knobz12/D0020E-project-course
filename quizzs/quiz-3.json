@@ -1,0 +1,21 @@
+{
+    "question": "What is the chemical symbol for gold?",
+    "answers": [
+        {
+            "answer": "silver",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "platinum",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "iridium",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "gold",
+            "isAnswer": "true"
+        }
+    ]
+}
