@@ -1,0 +1,21 @@
+{
+    "question": "Which film won the Academy Award for Best Picture in 2020?",
+    "answers": [
+        {
+            "answer": "The Irishman",
+            "isAnswer": "true"
+        },
+        {
+            "answer": "Joker",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "1917",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "Parasite",
+            "isAnswer": "false"
+        }
+    ]
+}

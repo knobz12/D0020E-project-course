@@ -1,0 +1,21 @@
+{
+    "question": "Who is known as the 'King of Pop'?",
+    "answers": [
+        {
+            "answer": "Michael Jackson",
+            "isAnswer": "true"
+        },
+        {
+            "answer": "Elvis Presley",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "The Beatles",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "Justin Bieber",
+            "isAnswer": "false"
+        }
+    ]
+}

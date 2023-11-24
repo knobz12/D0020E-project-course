@@ -1,0 +1,21 @@
+{
+    "question": "Which country is known as the 'Land of the Rising Sun'?",
+    "answers": [
+        {
+            "answer": "Japan",
+            "isAnswer": "true"
+        },
+        {
+            "answer": "China",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "Korea",
+            "isAnswer": "false"
+        },
+        {
+            "answer": "Thailand",
+            "isAnswer": "false"
+        }
+    ]
+}
