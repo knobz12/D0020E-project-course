@@ -35,6 +35,7 @@ def create_llm() -> LangLlamaCpp:
         use_mmap=True,
         n_ctx=2048,
         f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
+        max_tokens=1000,
         temperature=0,
         top_k=40,
         top_p=1,
