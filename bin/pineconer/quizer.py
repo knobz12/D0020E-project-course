@@ -3,12 +3,99 @@ Creating quizes based on document(s)
 
 # Improvements:
 * Amount of quiz answers per question
-* Function for creating string encoded JSON array of multiple quiz questions with answers
 """
 
 import json
 from utils.llm import create_llm_guidance
-from utils.guider import questionJSONGenerator, determineQuestionBias
+
+import guidance
+from guidance import select, gen
+
+import textwrap
+import regex
+
+@guidance()
+def determineQuestionBias(lm, question: str):
+    lm += f"""I want you to determine if a question for a quiz is factual or opinion based.
+    For example a question about your opinion about something would be opinion based and a question about a fact is factual.
+
+    Question: {question}
+
+    Answer: {select(options=["factual", "opinion"])}"""
+    return lm
+
+
+@guidance()
+def questionJSONGenerator(lm, question: str, answer_count: int):
+
+    def gen_answer() -> str:
+        answer: str = f"""\
+        {{
+            "answer": "{gen("answer", stop='"')}",
+            "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
+        }}"""
+        return answer
+
+    answers: str = ""
+    for i in range(0, answer_count):
+        if (i != answer_count - 1):
+            answers += gen_answer() + ",\n"
+        else:
+            answers += gen_answer() + "\n"
+
+
+    res = f"""\
+    The following is a quiz question in JSON format.
+    Generate answers. Only ONE of the answers can be true, and the others shall be false.
+    The incorrect answers must be different from each other but still related to the topic.
+
+    {{
+        "question": "{question}",
+        "answers": [
+            {answers}
+        ]
+    }}"""
+
+    lm += res 
+    
+    return lm
+
+
+def create_quiz(guid, questions: list[str], answer_count: int) -> str:
+
+
+    json_output: str = """\
+    {
+        "questions": [\n"""
+
+    for (idx, question) in enumerate(questions):
+        print(f"Generating quiz {idx}")
+        quizJson = str(guid + questionJSONGenerator(question, answer_count))
+        res = str(guid + determineQuestionBias(question))
+        factual = res.__contains__("Answer: factual")
+        f = "factual" if factual == True else "opinion"
+        print(f"Question {idx + 1}: {f}")
+
+        pattern = regex.compile(r'{(?:[^{}]|(?R))*}')
+        jsonn = pattern.findall(quizJson)[0]
+        val = json.loads(jsonn)
+        res = str(json.dumps(val, indent=4))
+        res = textwrap.indent(res, 12 * ' ')
+
+        if (idx != len(questions) - 1):
+            json_output += res + ",\n"
+        else:
+            json_output += res + "\n"
+
+
+
+    json_output += """\
+        ]
+    }
+    """
+
+
+    return json_output
 
 def quiz_generator():
     guid = create_llm_guidance()
@@ -42,21 +129,8 @@ def quiz_generator():
         # "What is the capital city of Australia?",
         # "Which film won the Academy Award for Best Picture in 2020?",
     ]
+    print(create_quiz(guid, questions, answer_count=3))
 
-    for (idx, question) in enumerate(questions[:1]):
-        print(f"Generating quiz {idx}")
-        quizJson = str(guid + questionJSONGenerator(question))
-        res = str(guid + determineQuestionBias(question))
-        factual = res.__contains__("Answer: factual")
-        f = "factual" if factual == True else "opinion"
-        print(f"Question {idx + 1}: {f}")
-
-        import regex
-        pattern = regex.compile(r'{(?:[^{}]|(?R))*}')
-        jsonn = pattern.findall(quizJson)[0]
-        res = json.loads(jsonn)
-        with open(f"./quizzs/quiz-{idx}.json", "w") as f:
-            json.dump(res, indent=4, fp=f)
 
 if __name__ == "__main__":
     quiz_generator()
