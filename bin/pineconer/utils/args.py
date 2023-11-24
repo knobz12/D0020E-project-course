@@ -14,7 +14,7 @@ def get_args() -> Args:
     parser.add_argument("--gpu-layers", type=int, default=0, help="The amount of GPU layers to use")
     args = parser.parse_args()
 
-    gpu_layers: int | None = args.gpu_layers
+    gpu_layers: int = args.gpu_layers
     model_path: str = ""
     if args.model_path != None:
         path = args.model_path
