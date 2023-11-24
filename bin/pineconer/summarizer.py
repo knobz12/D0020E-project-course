@@ -15,25 +15,30 @@ def summarize_doc() -> str:
     llm = create_llm()
     vectorstore = create_vectorstore()
 
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":"b53998910b5a91c141f890fa76fbcb7f"})
+    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":"42aab736fb5841a9990b50adc0c418b1"})
     print(docs)
     print("doc count:",len(docs['ids']))
     results: list[str] = []
+    texts = ""
     for (idx, meta) in enumerate(docs["metadatas"]):
         text =meta["text"]
         previous_summary: str | None = results[idx - 1] if idx > 1 else None
 
         prompt = """Human: You are an assistant summarizing document text.
-I want you to summarize the text as best as you can in less than four paragraphs but atleast two paragraphs:
+I want you to summarize the text as best as you can in less than four paragraphs but atleast two paragraphs and when only include the summaraztion and nothing else:
+Also end the summary with by adding "END" and start with "START"
 
 Text: {text}
 
 Answer:""".format(text = text)
         prompt_with_previous=  """Human: You are an assistant summarizing document text.
-Use the following pieces of retrieved context to improve the summary text. 
-If you can't improve it simply return the old.
-The new summary may only be up to four paragraphs but at least two paragraphs.
+Use the following pieces of retrieved context to add to the summary text. 
+If you can't add to it simply return the old.
+The most important part is to add "END" when ending the summary and "START" when starting summary.
+The new summary has to be at least two paragraphs.
+Dont Ever talk about improving the summary
 Don't directly refer to the context text, pretend like you already knew the context information.
+
 
 Summary: {summary}
 
@@ -47,6 +52,8 @@ Answer:""".format(summary = previous_summary,context=text)
         print(use_prompt + "\n")
         result = llm(use_prompt)
         results.append(result)
+        texts = texts + text
+        
 
     print("######################################\n\n\n")
     for (idx, result) in enumerate(results):
@@ -55,8 +62,16 @@ Answer:""".format(summary = previous_summary,context=text)
 
     print("################################\n")
     print("Summary:")
-    summary = results[-1].splitlines()[2:]
-    print(summary)
+    summary = results[-1]
+    print("\n")
+    summaryTrim = summary[results[-1].find(start:='START')+len(start):summary.find('END')]
+    print(summaryTrim)
+    print("\n")
+    print("Original text:")
+    print(texts)
+    return summaryTrim
+
+
 
 if __name__ == "__main__":
     summarize_doc()
