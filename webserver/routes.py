@@ -59,6 +59,7 @@ def hello_world():
     return "<p>Hello, World!</p>"
 
 @app.route('/hello/<name>')
+@flask_login.login_required
 def hello(name):
     return f"<p>Goodbye world {name} killed you</p>"#render_template('hello.html', name=name)
 
