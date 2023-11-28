@@ -22,8 +22,8 @@ from guidance import gen, select, Guidance
 from guidance.models._llama_cpp import LlamaCpp as gLlamaCpp
 from llama_cpp import Llama, ChatCompletionMessage
 from argparse import ArgumentParser
-from utils.vectorstore import create_vectorstore
-from utils.llm import create_llm
+from modules.ai.utils.vectorstore import create_vectorstore
+from modules.ai.utils.llm import create_llm
 import json
 
 # from langchain.vectorstores.chroma import Chroma

@@ -1,11 +1,18 @@
-from utils.args import get_args
+from modules.ai.utils.args import get_args
 from guidance.models._llama_cpp import LlamaCpp
 from llama_cpp import Llama
 from langchain.llms.llamacpp import LlamaCpp as LangLlamaCpp
 
+guid: LlamaCpp = None
+
 def create_llm_guidance() -> LlamaCpp:
     """Create instance of LLaMA 2 model for use with guidance"""
 
+    global guid
+    if guid != None:
+        return guid
+
+    print("Creating llm instance")
     args = get_args()
     llm = LlamaCpp(
         model=args.model_path,
@@ -18,8 +25,10 @@ def create_llm_guidance() -> LlamaCpp:
         top_k=40,
         top_p=1,
         repeat_penalty=1/0.85,
-        verbose=True,
+        verbose=False,
     )
+
+    guid = llm
 
     return llm
 

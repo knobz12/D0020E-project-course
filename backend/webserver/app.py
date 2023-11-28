@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask
 import flask_login
 from flask_cors import CORS
 
@@ -13,8 +13,13 @@ app = Flask(__name__)
 app.secret_key = 'knobz'
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+# guid = create_llm_guidance()
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
-import routes
-app.run(debug=True, port=3030)
+from flask import g
+
+import webserver.routes
+
+def start_app():
+    app.run(debug=True, port=3030,)

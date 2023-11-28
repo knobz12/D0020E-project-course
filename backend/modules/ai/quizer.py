@@ -6,7 +6,7 @@ Creating quizes based on document(s)
 """
 
 import json
-from utils.llm import create_llm_guidance
+from modules.ai.utils.llm import create_llm_guidance
 
 import guidance
 from guidance import select, gen
