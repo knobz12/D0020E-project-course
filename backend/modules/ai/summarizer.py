@@ -11,11 +11,11 @@ from langchain.vectorstores import Chroma
 from modules.ai.utils.llm import create_llm
 from modules.ai.utils.vectorstore import  create_vectorstore
 
-def summarize_doc() -> str:
+def summarize_doc(id: str) -> str:
     llm = create_llm()
     vectorstore = create_vectorstore()
 
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":"42aab736fb5841a9990b50adc0c418b1"})
+    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
     print(docs)
     print("doc count:",len(docs['ids']))
     results: list[str] = []
