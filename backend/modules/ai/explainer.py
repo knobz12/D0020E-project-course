@@ -2,9 +2,9 @@
 Creating more detailed explanations from text documents
 """
 from typing import Any
-from utils.llm import create_llm
-from utils.llm import create_llm_guidance
-from utils.vectorstore import  create_vectorstore
+from modules.ai.utils.llm import create_llm
+from modules.ai.utils.llm import create_llm_guidance
+from modules.ai.utils.vectorstore import  create_vectorstore
 from summarizer import summarize_doc
 
 def summarize_doc(id: str) -> str:

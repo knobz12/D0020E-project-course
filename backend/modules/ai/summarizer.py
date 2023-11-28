@@ -8,8 +8,8 @@ Creating summary of document(s) in the database
 * Argument for document id in database to create summary for
 """
 from langchain.vectorstores import Chroma
-from utils.llm import create_llm
-from utils.vectorstore import  create_vectorstore
+from modules.ai.utils.llm import create_llm
+from modules.ai.utils.vectorstore import  create_vectorstore
 
 def summarize_doc() -> str:
     llm = create_llm()

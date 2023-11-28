@@ -6,7 +6,7 @@ Creating quizes based on document(s)
 """
 
 import json
-from utils.llm import create_llm_guidance
+from modules.ai.utils.llm import create_llm_guidance
 
 import guidance
 from guidance import select, gen
@@ -99,8 +99,6 @@ def create_quiz(guid, questions: list[str], answer_count: int) -> str:
 
 
 def create_quiz_stream(guid, questions: list[str], answer_count: int) -> str:
-
-
     yield """\
     {
         "questions": [\n"""
@@ -108,6 +106,7 @@ def create_quiz_stream(guid, questions: list[str], answer_count: int) -> str:
     for (idx, question) in enumerate(questions):
         print(f"Generating quiz {idx}")
         quizJson = str(guid + questionJSONGenerator(question, answer_count))
+
         res = str(guid + determineQuestionBias(question))
         factual = res.__contains__("Answer: factual")
         f = "factual" if factual == True else "opinion"

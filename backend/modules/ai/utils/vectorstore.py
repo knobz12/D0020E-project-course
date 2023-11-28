@@ -3,7 +3,7 @@ from chromadb.config import Settings
 from guidance.models._llama_cpp import LlamaCpp
 from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from langchain.vectorstores.chroma import Chroma
-from utils.args import get_args
+from modules.ai.utils.args import get_args
 
 vectorstore: Chroma | None = None
 
