@@ -1,9 +1,9 @@
 import textwrap
 import magic
-from file_reader.PdfReader import PDFToText
-from file_reader.PptxReader import PPTXToText
-from file_reader.DocxReader import DocxToText
-from file_reader.HtmlReader import HtmlToText
+from modules.files.file_reader.PdfReader import PDFToText
+from modules.files.file_reader.PptxReader import PPTXToText
+from modules.files.file_reader.DocxReader import DocxToText
+from modules.files.file_reader.HtmlReader import HtmlToText
 
 
 
@@ -14,7 +14,7 @@ class NotSupportedFiletype(Exception):
 
 class chunkerizer():
     def __init__(self):
-        self.PDFReader = PDFToText()
+        # self.PDFReader = PDFToText()
         self.PPTXReader = PPTXToText()
         self.htmlReader = HtmlToText()
     def make_chunk(self, text: str, chunk_size: int) -> list[str]:
@@ -34,10 +34,10 @@ class chunkerizer():
                 case "":
                     filetype = "jpeg"
 
-                case "application/pdf":
-                    filetype = "pdf"
-                    # extracted_text = self.PDFReader.ConvertToText(input_file)
-                    extracted_text = self.PDFReader.ConvertToImage(input_file)
+                # case "application/pdf":
+                #     filetype = "pdf"
+                #     # extracted_text = self.PDFReader.ConvertToText(input_file)
+                #     extracted_text = self.PDFReader.ConvertToImage(input_file)
 
                 case "text/plain":
                     filetype = "html"

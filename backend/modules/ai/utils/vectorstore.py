@@ -7,7 +7,7 @@ from modules.ai.utils.args import get_args
 
 vectorstore: Chroma | None = None
 
-def create_vectorstore() -> LlamaCpp:
+def create_vectorstore() -> Chroma:
     """Create instance of LLaMA 2 model with LlamaCpp API"""
     if vectorstore != None:
         return vectorstore

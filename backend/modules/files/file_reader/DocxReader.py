@@ -1,4 +1,4 @@
-import file_reader.docx3txt as docx3txt
+import modules.files.file_reader.docx3txt as docx3txt
 
 class DocxToText():
     def __init__(self, file_path: str):
@@ -9,6 +9,3 @@ class DocxToText():
     
     def ConvertImageToText(self) -> str:
         return self.image_text
-
-d = DocxToText("tests/sample_files/Test_docx/AIPR_Lab1-1.docx")
-d.ConvertToText()
