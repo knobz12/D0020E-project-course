@@ -1,0 +1,14 @@
+.git
+node_modules
+.env
+
+.next
+next-env.d.ts
+
+models/*
+
+.eslintrc.json
+
+Dockerfile
+.dockerignore
+.docker-compose
