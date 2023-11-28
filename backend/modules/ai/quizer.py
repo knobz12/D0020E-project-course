@@ -130,7 +130,7 @@ def create_quiz_stream(guid, questions: list[str], answer_count: int) -> str:
     }
     """
     
-def quiz_generator():
+def quiz_test():
     guid = create_llm_guidance()
 
     questions: list[str] = [
@@ -166,4 +166,4 @@ def quiz_generator():
 
 
 if __name__ == "__main__":
-    quiz_generator()
+    quiz_test()
