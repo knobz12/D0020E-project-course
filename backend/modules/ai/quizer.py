@@ -7,12 +7,14 @@ Creating quizes based on document(s)
 
 import json
 from modules.ai.utils.llm import create_llm_guidance
+from modules.ai.utils.vectorstore import create_vectorstore
 
 import guidance
 from guidance import select, gen
 
 import textwrap
 import regex
+
 
 @guidance()
 def determineQuestionBias(lm, question: str):
@@ -61,7 +63,14 @@ def questionJSONGenerator(lm, question: str, answer_count: int):
     return lm
 
 
-def create_quiz(guid, questions: list[str], answer_count: int) -> str:
+
+@guidance()
+def question_generator(lm, ):
+    pass
+
+
+
+def create_quiz_from_questions(guid, questions: list[str], answer_count: int) -> str:
 
 
     json_output: str = """\
@@ -98,7 +107,7 @@ def create_quiz(guid, questions: list[str], answer_count: int) -> str:
     return json_output
 
 
-def create_quiz_stream(guid, questions: list[str], answer_count: int) -> str:
+def create_quiz_from_questions_stream(guid, questions: list[str], answer_count: int) -> str:
     yield """\
     {
         "questions": [\n"""
@@ -129,9 +138,24 @@ def create_quiz_stream(guid, questions: list[str], answer_count: int) -> str:
         ]
     }
     """
-    
+
+def create_quiz(id: str) -> str:
+    glmm = create_llm_guidance()
+    vectorstore = create_vectorstore()
+
+
+    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
+    print(docs)
+
+
+
+    yield create_quiz_from_questions_stream()
+
+
+
+
+
 def quiz_test():
-    guid = create_llm_guidance()
 
     questions: list[str] = [
         # Opinion based
@@ -162,7 +186,7 @@ def quiz_test():
         # "What is the capital city of Australia?",
         # "Which film won the Academy Award for Best Picture in 2020?",
     ]
-    print(create_quiz(guid, questions, answer_count=3))
+    print(create_quiz("0")) 
 
 
 if __name__ == "__main__":
