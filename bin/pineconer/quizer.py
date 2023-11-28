@@ -97,6 +97,40 @@ def create_quiz(guid, questions: list[str], answer_count: int) -> str:
 
     return json_output
 
+
+def create_quiz_stream(guid, questions: list[str], answer_count: int) -> str:
+
+
+    yield """\
+    {
+        "questions": [\n"""
+
+    for (idx, question) in enumerate(questions):
+        print(f"Generating quiz {idx}")
+        quizJson = str(guid + questionJSONGenerator(question, answer_count))
+        res = str(guid + determineQuestionBias(question))
+        factual = res.__contains__("Answer: factual")
+        f = "factual" if factual == True else "opinion"
+        print(f"Question {idx + 1}: {f}")
+
+        pattern = regex.compile(r'{(?:[^{}]|(?R))*}')
+        jsonn = pattern.findall(quizJson)[0]
+        val = json.loads(jsonn)
+        res = str(json.dumps(val, indent=4))
+        res = textwrap.indent(res, 12 * ' ')
+
+        if (idx != len(questions) - 1):
+            yield res + ",\n"
+        else:
+            yield res + "\n"
+
+
+
+    yield """\
+        ]
+    }
+    """
+    
 def quiz_generator():
     guid = create_llm_guidance()
 
