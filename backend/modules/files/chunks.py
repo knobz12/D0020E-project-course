@@ -1,71 +1,113 @@
 import textwrap
 import magic
-from modules.files.file_reader.PdfReader import PDFToText
-from modules.files.file_reader.PptxReader import PPTXToText
-from modules.files.file_reader.DocxReader import DocxToText
-from modules.files.file_reader.HtmlReader import HtmlToText
 
+import modules.files.docx3txt as docx3txt
 
+import pytesseract
+from PIL import Image
+from bs4 import BeautifulSoup
+
+import pptx
+import io
+import PyPDF2
 
 class NotSupportedFiletype(Exception):
     def __init__(self, message = "Type not currently supported. We are working on a fix in later versions."):
         super().__init__(message)
 
 
-class chunkerizer():
-    def __init__(self):
-        # self.PDFReader = PDFToText()
-        self.PPTXReader = PPTXToText()
-        self.htmlReader = HtmlToText()
-    def make_chunk(self, text: str, chunk_size: int) -> list[str]:
+class Chunkerizer:
+    
+    def make_chunk(text: str, chunk_size: int) -> list[str]:
         return textwrap.wrap(text, chunk_size)
 
-    def check_mimetype_convert_to_text(self, input_file: str):
-        input_file = input_file
-        try:
-            fileformat = magic.from_file(input_file, mime = True)
-            match fileformat:
-                case "image/png":
-                    import pytesseract
-                    from PIL import Image
-                    filetype = "png"
-                    image = Image.open(input_file)
-                    extracted_text = pytesseract.image_to_string(image)
-                case "":
-                    filetype = "jpeg"
+    def text_and_image_text_from_file(filepath: str) -> tuple[str, str, str]:
+        with open(filepath, "rb") as f:
+            return Chunkerizer.text_and_image_text_from_file_bytes(f.read())
 
-                # case "application/pdf":
-                #     filetype = "pdf"
-                #     # extracted_text = self.PDFReader.ConvertToText(input_file)
-                #     extracted_text = self.PDFReader.ConvertToImage(input_file)
+    def text_and_image_text_from_file_bytes(buf: bytes) -> tuple[str, str, str]:
+        try:
+            mime_type = magic.from_buffer(buf, mime = True)
+            match mime_type:
+                case "image/png":
+                    filetype = "png"
+                    img = Image.open(io.BytesIO(buf))
+                    extracted_text = pytesseract.image_to_string(img)
+                    extracted_image_text = extracted_text
+                case "image/jpeg":
+                    filetype = "jpeg"
+                    img = Image.open(io.BytesIO(buf))
+                    extracted_text = pytesseract.image_to_string(img)
+                    extracted_image_text = extracted_text
+
+                case "application/pdf":
+                    filetype = "pdf"
+
+                    io_buf = io.BytesIO(buf)
+                    pdf = PyPDF2.PdfReader(io_buf)
+                    
+                    extracted_text = ""
+                    extracted_image_text = ""
+                    image_list = []
+                    for page in pdf.pages:
+                        extracted_text += page.extract_text()
+                        for img in page.images:
+                            if img not in image_list:
+                                image_list.append(img)
+
+
+                    for img_obj in image_list:
+                        io_buf = io.BytesIO(img_obj.data)
+                        img = Image.open(io_buf)
+                        extracted_image_text += pytesseract.image_to_string(img)
+
+                    pass
 
                 case "text/plain":
+                    filetype = "txt"
+                    extracted_text = bytes.decode(buf, "utf-8")
+                case "text/html":
                     filetype = "html"
-                    extracted_text = self.htmlReader.ConvertToText(input_file)
-                    
-                    
+                    soup = BeautifulSoup(buf, features="html.parser")
+                    extracted_text = soup.get_text()
 
-                # TODO: Fix this
+
                 case "application/zip" | "application/vnd.openxmlformats-officedocument.presentationml.presentation":
                     filetype = "ppt"
-                    extracted_text = self.PPTXReader.ConvertToText(input_file)
+
+                    extracted_text = ""
+                    extracted_image_text = ""
+                    # may crash later because pptx might expect a file
+                    io_buf = io.BytesIO(buf)
+                    powerpoint = pptx.Presentation(io_buf)
+
+                    for slide in powerpoint.slides:
+                        for shape in slide.shapes:
+                            if hasattr(shape, "text"):
+                                extracted_text = extracted_text + " " + shape.text
+                            elif(hasattr(shape, "image")):
+                                io_buf = io.BytesIO(shape.image.blob)
+                                img = Image.open(io_buf)
+                                extracted_image_text += pytesseract.image_to_string(img)
+
+
                 case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
                     filetype = "docx"
-                    instance = DocxToText(input_file)
-                    instance = DocxToText(input_file)
-                    extracted_text = instance.ConvertToText()
-                    extracted_image_text = instance.ConvertImageToText()
+                    io_buf = io.BytesIO(buf)
+                    (extracted_text, extracted_image_text) = docx3txt.process(io_buf)
 
                 case _:
                     raise NotSupportedFiletype
                     
-            return filetype, extracted_text
+            return filetype, extracted_text, extracted_image_text
             
         except Exception as error:
             print(type(error).__name__, "-", error)
             return None
         
         
+
+
 
 import os
 import pathlib
@@ -117,17 +159,17 @@ def create_jsonls():
         files = get_course_files(course)
         # for file in files:
         for file in files:
-            c = chunkerizer()
             filepath = pathlib.Path(code_dir, file).resolve()
             print(filepath)
-            result = c.check_mimetype_convert_to_text(str(filepath))
+
+            result = Chunkerizer.text_and_image_text_from_file(str(filepath))
 
             if result == None:
                 continue
 
             (_, text) = result
 
-            chunks = c.make_chunk(text, 512)
+            chunks = Chunkerizer.make_chunk(text, 512)
             file_hash = get_file_hash(text)
 
             if file_hash == None:
@@ -148,8 +190,7 @@ if __name__ == "__main__":
     
     f.close()
 
-    # c = chunkerizer()
-    # x = c.check_mimetype_convert_to_text("./tests/sample_files/Test_ppts/D0020E_Sustainability.pptx")
-    # x = c.check_mimetype_convert_to_text("tests\sample_files\Test_htmls\Architectural Design Patterns.html")
+    # x = Chunkerizer.text_and_image_text_from_file("./tests/sample_files/Test_ppts/D0020E_Sustainability.pptx")
+    # x = Chunkerizer.text_and_image_text_from_file("tests\sample_files\Test_htmls\Architectural Design Patterns.html")
     # if x is not None:
     #     print(x[0],x[1])
