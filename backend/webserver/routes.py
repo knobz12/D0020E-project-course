@@ -4,11 +4,36 @@ from modules.files.chunks import chunkerizer
 from webserver.app import app
 
 from modules.ai.utils.llm import create_llm_guidance
-# from modules.ai.quizer import create_quiz_stream
 from modules.files.hash_and_json.HashFunction import TextToHash
 from modules.ai.utils.vectorstore import create_collection
 
-from flask import request, make_response
+from flask import Response, request, make_response, send_from_directory
+from flask_caching import Cache
+
+cache = Cache(app,config={"CACHE_TYPE":"SimpleCache"})
+
+@app.route("/static/<path:path>")
+def static_serve(path: str):
+    res = app.send_static_file(path)
+    res.headers.set("cache-control","max-age: 60")
+    return res
+
+@app.route("/")
+def home_page():
+    return app.send_static_file("index.html")
+
+@app.after_request
+def add_cache_header(response: Response):
+    url = request.url
+    set_cache = url.endswith(".html") or url.endswith(".css")or url.endswith(".js") or url.endswith(".woff2")
+    if set_cache:
+        response.headers.set("cache-control","max-age: 60")
+
+    return response
+
+@app.route("/quiz")
+def quiz_page():
+    return app.send_static_file("quiz.html")
 
 @app.route("/api/quiz", methods=["POST"])
 def quiz():
@@ -39,6 +64,8 @@ def quiz():
     # 4. Generate quiz from chunks
 
     return make_response("hel",200)
+
+
 
 def upload_chunks(file_hash: str, chunks: list[str]):
     collection = create_collection()
