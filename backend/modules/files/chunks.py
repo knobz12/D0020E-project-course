@@ -5,7 +5,18 @@ from modules.files.file_reader.PptxReader import PPTXToText
 from modules.files.file_reader.DocxReader import DocxToText
 from modules.files.file_reader.HtmlReader import HtmlToText
 
+import modules.files.file_reader.docx3txt as docx3txt
 
+import pytesseract
+from PIL import Image
+
+from bs4 import BeautifulSoup
+
+import pptx
+
+import io
+
+import PyPDF2
 
 class NotSupportedFiletype(Exception):
     def __init__(self, message = "Type not currently supported. We are working on a fix in later versions."):
@@ -65,7 +76,90 @@ class chunkerizer():
             print(type(error).__name__, "-", error)
             return None
         
+
+    def check_mimetype(self, buf: bytes) -> tuple[str, str, str]:
+        try:
+            mime_type = magic.from_buffer(buf, mime = True)
+            match mime_type:
+                case "image/png":
+                    filetype = "png"
+                    img = Image.open(io.BytesIO(buf))
+                    extracted_text = pytesseract.image_to_string(img)
+                    extracted_image_text = extracted_text
+                case "image/jpeg":
+                    filetype = "jpeg"
+                    img = Image.open(io.BytesIO(buf))
+                    extracted_text = pytesseract.image_to_string(img)
+                    extracted_image_text = extracted_text
+
+                case "application/pdf":
+                    filetype = "pdf"
+
+                    io_buf = io.BytesIO(buf)
+                    pdf = PyPDF2.PdfReader(io_buf)
+                    
+                    extracted_text = ""
+                    extracted_image_text = ""
+                    image_list = []
+                    for page in pdf.pages:
+                        extracted_text += page.extract_text()
+                        for img in page.images:
+                            if img not in image_list:
+                                image_list.append(img)
+
+
+                    for img_obj in image_list:
+                        io_buf = io.BytesIO(img_obj.data)
+                        img = Image.open(io_buf)
+                        extracted_image_text += pytesseract.image_to_string(img)
+
+                    pass
+
+                case "text/plain":
+                    filetype = "txt"
+                    extracted_text = bytes.decode(buf, "utf-8")
+                case "text/html":
+                    filetype = "html"
+                    soup = BeautifulSoup(buf, features="html.parser")
+                    extracted_text = soup.get_text()
+
+
+                case "application/zip" | "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+                    filetype = "ppt"
+
+                    extracted_text = ""
+                    extracted_image_text = ""
+                    # may crash later because pptx might expect a file
+                    io_buf = io.BytesIO(buf)
+                    powerpoint = pptx.Presentation(io_buf)
+
+                    for slide in powerpoint.slides:
+                        for shape in slide.shapes:
+                            if hasattr(shape, "text"):
+                                extracted_text = extracted_text + " " + shape.text
+                            elif(hasattr(shape, "image")):
+                                io_buf = io.BytesIO(shape.image.blob)
+                                img = Image.open(io_buf)
+                                extracted_image_text += pytesseract.image_to_string(img)
+
+
+                case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                    filetype = "docx"
+                    io_buf = io.BytesIO(buf)
+                    (extracted_text, extracted_image_text) = docx3txt.process(io_buf)
+
+                case _:
+                    raise NotSupportedFiletype
+                    
+            return filetype, extracted_text, extracted_image_text
+            
+        except Exception as error:
+            print(type(error).__name__, "-", error)
+            return None
         
+        
+
+
 
 import os
 import pathlib
