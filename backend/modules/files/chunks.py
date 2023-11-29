@@ -1,21 +1,14 @@
 import textwrap
 import magic
-from modules.files.file_reader.PdfReader import PDFToText
-from modules.files.file_reader.PptxReader import PPTXToText
-from modules.files.file_reader.DocxReader import DocxToText
-from modules.files.file_reader.HtmlReader import HtmlToText
 
-import modules.files.file_reader.docx3txt as docx3txt
+import modules.files.docx3txt as docx3txt
 
 import pytesseract
 from PIL import Image
-
 from bs4 import BeautifulSoup
 
 import pptx
-
 import io
-
 import PyPDF2
 
 class NotSupportedFiletype(Exception):
