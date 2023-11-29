@@ -3,6 +3,7 @@ from guidance.models._llama_cpp import LlamaCpp
 from llama_cpp import Llama
 from langchain.llms.llamacpp import LlamaCpp as LangLlamaCpp
 
+llm: LangLlamaCpp = None
 guid: LlamaCpp = None
 
 def create_llm_guidance() -> LlamaCpp:
@@ -35,6 +36,10 @@ def create_llm_guidance() -> LlamaCpp:
 
 def create_llm() -> LangLlamaCpp:
     """Create instance of LLaMA 2 model with LlamaCpp API"""
+    global llm
+
+    if llm != None:
+        return llm
 
     args = get_args()
     llm = LangLlamaCpp(
