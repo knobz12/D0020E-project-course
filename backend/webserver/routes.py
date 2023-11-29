@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from modules.ai.summarizer import summarize_doc_stream
-from modules.files.chunks import chunkerizer
+from modules.files.chunks import Chunkerizer
 from webserver.app import app
 
 from modules.ai.utils.llm import create_llm_guidance
@@ -40,30 +40,55 @@ def quiz():
     if 'file' not in request.files:
         return make_response("Missing file", 406)
     
-    print(request.files["file"])
-    filebytes = request.files["file"].read()
-    print("File:", filebytes)
+    print("File:", request.files["file"].name)
+    file_bytes: bytes = request.files["file"].read()
+    file_str: str = file_bytes.decode("utf-8")
 
-    ### QUIZ
-    # Generate questions from chunks
-    # Generate quiz from chunks
+    soup = BeautifulSoup(file_str, features="html.parser")
+    html_text = soup.get_text()
+    hasher = TextToHash() 
+    (file_hash, _) = hasher.ConvertToHash(html_text)
+    collection = create_collection()
+    docs = collection.get(where={"id":file_hash})
 
-    ### SUMMARY
-    # Generate quiz from chunks
+    if len(docs['ids']) > 0:
+        from typing import Generator
+        from modules.ai.utils.llm import create_llm
 
-    ### EXPLANATION
-    # Generate questions from chunks
-    # Generate quiz from chunks
+        def quiz_gen() -> Generator[str,None,None]:
+            summary = ""
+            for part in summarize_doc_stream(file_hash):
+                summary += part
+                print(part, end="")
+                
+            print("\n\n")
+            # summary = "The text discusses several software engineering concepts related to architecture patterns and design principles that promote maintainability, scalability, resilience, and flexibility in developing applications. These include separating functions into distinct layers or components, using the Model-View-Controller (MVC) pattern for web application development, adopting microservices and event-driven architectures, utilizing lightweight mechanisms for communication between services, designing self-contained services, and creating reusable components that can be easily integrated into applications. These approaches allow developers to focus on implementing functionality in each component or layer without worrying about the details of other components or layers, making it easier to test, maintain, and scale individual components separately from the rest of the application. Additionally, these architecture patterns promote resilience by allowing individual components or services to fail independently without affecting the overall system. Overall, these concepts help ensure that applications are more flexible, adaptable, and scalable as new technologies emerge over time."
+            llm = create_llm()
+            prompt = f"""\
+<|system|>
+The user will provide you with a summary of a document.
+Generate a quiz consisting of 5 quiz questions each with 4 answers, there can only be one correct answer.
+Prefix the answers with ✅ and the wrong answers with ❌.
+The quiz questions and answers must only be about topics in the document text and nothing else.
+You MUST use the user given summary for the quiz questions and answers.
+Seperate the questions with newlines.
+<|user|>
+{summary}
+<|assistant|>
+"""
+            print("Prompt:")
+            print(prompt+"\n\n")
+            for chunk in llm.stream(prompt):
+                yield chunk
+        return app.response_class(quiz_gen(), mimetype='text/plain')
 
-    # 1. Get hash of file
-    # 2. Check if file is in vector database.
-    # If exists
-    # 3. Generate quiz from existing file chunks
-    # else
-    # 3. Generate chunks from quiz and upsert
-    # 4. Generate quiz from chunks
+    c = Chunkerizer()
+    chunks = c.make_chunk(html_text,512)
+    print("chunks length",len(chunks))
+    upload_chunks(file_hash,chunks)
 
-    return make_response("hel",200)
+    # print("chunks:",chunks)
+    return app.response_class(summarize_doc_stream(file_hash), mimetype='text/plain')
 
 
 
@@ -114,7 +139,7 @@ def summary():
     if len(docs['ids']) > 0:
         return app.response_class(summarize_doc_stream(file_hash), mimetype='text/plain')
 
-    c = chunkerizer()
+    c = Chunkerizer()
     chunks = c.make_chunk(html_text,512)
     print("chunks length",len(chunks))
     upload_chunks(file_hash,chunks)
