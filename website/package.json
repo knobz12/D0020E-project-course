@@ -1,0 +1,45 @@
+{
+    "name": "d0020e-ai-test",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.11.1",
+        "@emotion/server": "^11.11.0",
+        "@mantine/core": "^6.0.21",
+        "@mantine/dropzone": "^6",
+        "@mantine/form": "^6",
+        "@mantine/hooks": "^6.0.21",
+        "@mantine/modals": "^6.0.21",
+        "@mantine/next": "^6",
+        "@mantine/notifications": "^6.0.21",
+        "@mantine/nprogress": "^6.0.21",
+        "@tabler/icons-react": "^2.40.0",
+        "ai": "^2.2.23",
+        "clsx": "^2.0.0",
+        "next": "14.0.2",
+        "openai": "^4.18.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.9.0",
+        "@types/react": "^18.2.37",
+        "@types/react-dom": "^18.2.15",
+        "autoprefixer": "^10.4.16",
+        "eslint": "^8.53.0",
+        "eslint-config-next": "14.0.2",
+        "postcss": "^8.4.31",
+        "postcss-preset-mantine": "^1.11.0",
+        "postcss-simple-vars": "^7.0.1",
+        "prettier": "^3.1.0",
+        "prettier-plugin-tailwindcss": "^0.5.7",
+        "tailwindcss": "^3.3.5",
+        "typescript": "^5.2.2"
+    }
+}

@@ -6,18 +6,12 @@ from flask_cors import CORS
 class User(flask_login.UserMixin):
     pass
 
-#app.run()
-#context = ('server.crt', 'server.key')
-
-app = Flask(__name__)
+import os
+path = os.path.abspath("website\out")
+print(path)
+app = Flask(__name__, static_folder=path,template_folder=path)
 app.secret_key = 'knobz'
 CORS(app, resources={r"/*": {"origins": "*"}})
-
-# guid = create_llm_guidance()
-
-login_manager = flask_login.LoginManager()
-login_manager.init_app(app)
-from flask import g
 
 import webserver.routes
 
