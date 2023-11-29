@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from modules.ai.summarizer import summarize_doc_stream
-from modules.files.chunks import chunkerizer
+from modules.files.chunks import Chunkerizer
 from webserver.app import app
 
 from modules.ai.utils.llm import create_llm_guidance
@@ -82,7 +82,7 @@ Seperate the questions with newlines.
                 yield chunk
         return app.response_class(quiz_gen(), mimetype='text/plain')
 
-    c = chunkerizer()
+    c = Chunkerizer()
     chunks = c.make_chunk(html_text,512)
     print("chunks length",len(chunks))
     upload_chunks(file_hash,chunks)
@@ -139,7 +139,7 @@ def summary():
     if len(docs['ids']) > 0:
         return app.response_class(summarize_doc_stream(file_hash), mimetype='text/plain')
 
-    c = chunkerizer()
+    c = Chunkerizer()
     chunks = c.make_chunk(html_text,512)
     print("chunks length",len(chunks))
     upload_chunks(file_hash,chunks)
