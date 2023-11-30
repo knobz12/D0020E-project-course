@@ -34,6 +34,7 @@ class Chunkerizer:
     def text_and_image_text_from_file_bytes(buf: bytes) -> tuple[str, str, str]:
         try:
             mime_type = magic.from_buffer(buf, mime = True)
+            extracted_image_text: str = ""
             match mime_type:
                 case "image/png":
                     filetype = "png"
