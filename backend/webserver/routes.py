@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from modules.ai.summarizer import summarize_doc_stream
 from modules.files.chunks import Chunkerizer
+from modules.ai.quizer import create_quiz
 from webserver.app import app
 
 from modules.ai.utils.llm import create_llm_guidance
@@ -100,9 +101,10 @@ def quiz():
 
     if result == None:
         return make_response("Bad file format", 406)
-
+    
     (file_hash, _) = result
-    return app.response_class(summarize_doc_stream(file_hash), mimetype='text/plain')
+
+    return app.response_class(create_quiz(file_hash), mimetype='text/plain')
 
 @app.route("/api/summary", methods=["POST"])
 def summary():

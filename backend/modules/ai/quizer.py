@@ -71,8 +71,6 @@ def question_generator(lm, ):
 
 
 def create_quiz_from_questions(guid, questions: list[str], answer_count: int) -> str:
-
-
     json_output: str = """\
     {
         "questions": [\n"""
@@ -139,21 +137,65 @@ def create_quiz_from_questions_stream(guid, questions: list[str], answer_count: 
     }
     """
 
-def create_quiz(id: str) -> str:
+@guidance()
+def newQuestionJSONGenerator(lm, context: str, answer_count: int):
+
+    def gen_answer(idx: int) -> str:
+        answer: str = f"""\
+        {{
+            "answer": "{gen(f"answer{idx}", stop='"')}",
+            "isAnswer": "{select(options=['true', 'false'], name=f'isAnswer{idx}')}"
+        }}"""
+        return answer
+
+    answers: str = ""
+    for i in range(0, answer_count):
+        if (i != answer_count - 1):
+            answers += gen_answer(i) + ",\n"
+        else:
+            answers += gen_answer(i) + "\n"
+
+
+    res = f"""\
+    The following is a quiz question in JSON format.
+    Generate answers based on the provided context. Only ONE of the answers can be true, and the others shall be false.
+    The incorrect answers must be different from each other but still related to the topic.
+
+    Context: {context}
+
+    {{
+        "question": "{gen("question",stop='"')}",
+        "answers": [
+            {answers}
+        ]
+    }}"""
+
+    lm += res 
+    
+    return lm
+
+from typing import Generator
+def create_quiz(id: str) -> Generator[str, str, None]:
     glmm = create_llm_guidance()
     vectorstore = create_vectorstore()
-
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
     print(docs)
 
+    for doc in docs["metadatas"]:
+        result = glmm + newQuestionJSONGenerator(doc["text"], 4)
+        question = result["question"]
+        answers: list[tuple[str, bool]] = []
+        for i in range(0,4):
+            answer = (result[f"answer{i}"], True if result[f"isAnswer{i}"] == "true" else False)
+            answers.append(answer)
 
-
-    yield create_quiz_from_questions_stream()
-
-
-
-
+        res= [question]
+        for answer in answers:
+            symbol = "✅" if answer[1] == True else "💀"
+            res.append(f"{symbol} {answer[0]}: {answer[1]}")
+        complete = "\n".join(res)
+        yield complete + "\n\n"
 
 def quiz_test():
 
@@ -186,7 +228,7 @@ def quiz_test():
         # "What is the capital city of Australia?",
         # "Which film won the Academy Award for Best Picture in 2020?",
     ]
-    print(create_quiz("0")) 
+    print(create_quiz("b53998910b5a91c141f890fa76fbcb7f")) 
 
 
 if __name__ == "__main__":
