@@ -8,7 +8,7 @@ if __name__ == "__main__":
     #quiz_test()
 
 
-    path: str = "./backend/tests/sample_files/Test_pdfs/L01 Intro 2023 v02.pdf"
+    path: str = "./backend/tests/sample_files/courses/D7032E/2022_D7032E-04-Qualitative_attributes1.pptx"
 
     tup = Chunkerizer.text_and_image_text_from_file(path)
     print(tup[1])
