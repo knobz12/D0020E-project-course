@@ -35,63 +35,6 @@ def add_cache_header(response: Response):
 def quiz_page():
     return app.send_static_file("quiz.html")
 
-@app.route("/api/quiz", methods=["POST"])
-def quiz():
-    if 'file' not in request.files:
-        return make_response("Missing file", 406)
-    
-    print("File:", request.files["file"].name)
-    file_bytes: bytes = request.files["file"].read()
-    file_str: str = file_bytes.decode("utf-8")
-
-    soup = BeautifulSoup(file_str, features="html.parser")
-    html_text = soup.get_text()
-    hasher = TextToHash() 
-    (file_hash, _) = hasher.ConvertToHash(html_text)
-    collection = create_collection()
-    docs = collection.get(where={"id":file_hash})
-
-    if len(docs['ids']) > 0:
-        from typing import Generator
-        from modules.ai.utils.llm import create_llm
-
-        def quiz_gen() -> Generator[str,None,None]:
-            summary = ""
-            for part in summarize_doc_stream(file_hash):
-                summary += part
-                print(part, end="")
-                
-            print("\n\n")
-            # summary = "The text discusses several software engineering concepts related to architecture patterns and design principles that promote maintainability, scalability, resilience, and flexibility in developing applications. These include separating functions into distinct layers or components, using the Model-View-Controller (MVC) pattern for web application development, adopting microservices and event-driven architectures, utilizing lightweight mechanisms for communication between services, designing self-contained services, and creating reusable components that can be easily integrated into applications. These approaches allow developers to focus on implementing functionality in each component or layer without worrying about the details of other components or layers, making it easier to test, maintain, and scale individual components separately from the rest of the application. Additionally, these architecture patterns promote resilience by allowing individual components or services to fail independently without affecting the overall system. Overall, these concepts help ensure that applications are more flexible, adaptable, and scalable as new technologies emerge over time."
-            llm = create_llm()
-            prompt = f"""\
-<|system|>
-The user will provide you with a summary of a document.
-Generate a quiz consisting of 5 quiz questions each with 4 answers, there can only be one correct answer.
-Prefix the answers with ✅ and the wrong answers with ❌.
-The quiz questions and answers must only be about topics in the document text and nothing else.
-You MUST use the user given summary for the quiz questions and answers.
-Seperate the questions with newlines.
-<|user|>
-{summary}
-<|assistant|>
-"""
-            print("Prompt:")
-            print(prompt+"\n\n")
-            for chunk in llm.stream(prompt):
-                yield chunk
-        return app.response_class(quiz_gen(), mimetype='text/plain')
-
-    c = Chunkerizer()
-    chunks = c.make_chunk(html_text,512)
-    print("chunks length",len(chunks))
-    upload_chunks(file_hash,chunks)
-
-    # print("chunks:",chunks)
-    return app.response_class(summarize_doc_stream(file_hash), mimetype='text/plain')
-
-
-
 def upload_chunks(file_hash: str, chunks: list[str]):
     collection = create_collection()
     ids: list[str] = []
@@ -120,31 +63,60 @@ def upload_chunks(file_hash: str, chunks: list[str]):
     print(f"Uploading {len(ids)} doc chunks")
     collection.upsert(ids, metadatas=metadatas,documents=documents)
 
+
+from werkzeug.datastructures import FileStorage
+from chromadb import GetResult
+from modules.files.correct_chunks import TextSplit
+def upsert_file(file: FileStorage) -> tuple[str, GetResult] | None:
+    file_bytes: bytes = file.read()
+    res = Chunkerizer.text_and_image_text_from_file_bytes(file_bytes)
+
+    if res == None:
+        print(file_bytes.decode("utf-8",errors="ignore"))
+        return None
+    (_, text, __) = res
+
+    hasher = TextToHash() 
+    (file_hash, _) = hasher.ConvertToHash(text)
+    collection = create_collection()
+    docs = collection.get(where={"id":file_hash})
+
+    if len(docs['ids']) > 0:
+        return (file_hash, docs)
+
+    # chunks = Chunkerizer.make_chunk(text,512)
+    chunks = TextSplit(text, 512)
+    print("chunks length",len(chunks))
+    upload_chunks(file_hash,chunks)
+    return (file_hash, collection.get(where={"id":file_hash}))
+
+@app.route("/api/quiz", methods=["POST"])
+def quiz():
+    if 'file' not in request.files:
+        return make_response("Missing file", 406)
+    
+    file = request.files["file"]
+    result = upsert_file(file)
+
+    if result == None:
+        return make_response("Bad file format", 406)
+
+    (file_hash, _) = result
+    return app.response_class(summarize_doc_stream(file_hash), mimetype='text/plain')
+
 @app.route("/api/summary", methods=["POST"])
 def summary():
     if 'file' not in request.files:
         return make_response("Missing file", 406)
     
-    print("File:", request.files["file"].name)
-    file_bytes: bytes = request.files["file"].read()
-    file_str: str = file_bytes.decode("utf-8")
+    file = request.files["file"]
 
-    soup = BeautifulSoup(file_str, features="html.parser")
-    html_text = soup.get_text()
-    hasher = TextToHash() 
-    (file_hash, _) = hasher.ConvertToHash(html_text)
-    collection = create_collection()
-    docs = collection.get(where={"id":file_hash})
+    result = upsert_file(file)
+    if result == None:
+        return make_response("Bad file format", 406)
 
-    if len(docs['ids']) > 0:
-        return app.response_class(summarize_doc_stream(file_hash), mimetype='text/plain')
+    (file_hash, _) = result
 
-    c = Chunkerizer()
-    chunks = c.make_chunk(html_text,512)
-    print("chunks length",len(chunks))
-    upload_chunks(file_hash,chunks)
-
-    # print("chunks:",chunks)
     return app.response_class(summarize_doc_stream(file_hash), mimetype='text/plain')
 
 @app.route("/api/explanation", methods=["POST"])
