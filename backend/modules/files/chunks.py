@@ -68,7 +68,6 @@ class Chunkerizer:
                         img = Image.open(io_buf)
                         extracted_image_text += pytesseract.image_to_string(img)
 
-                    pass
 
                 case "text/plain":
                     filetype = "txt"
