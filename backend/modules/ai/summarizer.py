@@ -88,7 +88,6 @@ def summarize_doc_stream(id: str) -> Generator[str, str, None]:
 
         prompt = """Human: You are an assistant summarizing document text.
 I want you to summarize the text as best as you can in less than four paragraphs but atleast two paragraphs and when only include the summaraztion and nothing else:
-Also end the summary with by adding "END" and start with "START"
 
 Text: {text}
 
