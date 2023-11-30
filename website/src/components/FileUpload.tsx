@@ -10,6 +10,7 @@ import {
     rem,
     useMantineTheme,
 } from "@mantine/core"
+import { showNotification } from "@mantine/notifications"
 import { Page } from "@/components/Page"
 import { Dropzone } from "@mantine/dropzone"
 import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react"
@@ -38,7 +39,19 @@ export default function FileUpload({ apiUrl, title }: FileUploadProps) {
         const res = await fetch(apiUrl, {
             method: "POST",
             body: data,
-        })
+        }).catch((e) => null)
+
+        if (res === null) {
+            return showNotification({
+                color: "red",
+                message: "Failed to make request",
+            })
+        }
+
+        if (res.status !== 200) {
+            return showNotification({ color: "red", message: await res.text() })
+        }
+
         console.log(res)
         const reader = res.body?.getReader()
 
@@ -67,7 +80,7 @@ export default function FileUpload({ apiUrl, title }: FileUploadProps) {
     }
 
     return (
-        <Page>
+        <Page center>
             <Container size="xs" w="100%">
                 <Stack>
                     <Stack>

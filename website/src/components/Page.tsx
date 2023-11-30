@@ -7,9 +7,10 @@ const inter = Inter({ subsets: ["latin"] })
 
 interface PageProps {
     children: React.ReactNode
+    center?: boolean
 }
 
-export function Page({ children }: PageProps) {
+export function Page({ children, center = false }: PageProps) {
     return (
         <Box
             component="main"
@@ -19,10 +20,11 @@ export function Page({ children }: PageProps) {
             //         theme.colors.bluegray[9],
             //     ),
             // })}
-            // className={clsx(
-            //     inter.className,
-            //     "w-screen min-h-screen grid place-items-center",
-            // )}
+            className={clsx(
+                inter.className,
+                "min-h-screen",
+                center && "flex justify-center items-center",
+            )}
         >
             <Box
                 sx={(theme) => ({
@@ -31,7 +33,7 @@ export function Page({ children }: PageProps) {
                         theme.colors.bluegray[9],
                     ),
                 })}
-                className="fixed w-screen min-h-screen grid place-items-center -z-50"
+                className="top-0 fixed w-screen min-h-screen -z-50"
             ></Box>
             {children}
         </Box>

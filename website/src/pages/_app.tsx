@@ -1,5 +1,6 @@
 import "../../public/globals.css"
 import { MantineProvider } from "@mantine/core"
+import { Notifications } from "@mantine/notifications"
 import type { AppProps } from "next/app"
 import Head from "next/head"
 import React from "react"
@@ -45,6 +46,16 @@ export default function LlamaApp({ Component, pageProps }: AppProps) {
                     primaryColor: "emerald",
                     primaryShade: { dark: 6, light: 6 },
                     components: {
+                        // Paper: {
+                        //     styles(theme, params, context) {
+                        //         return {
+                        //             root: {
+                        //                 backgroundColor:
+                        //                     theme.colors.teal[6] + "AA",
+                        //             },
+                        //         }
+                        //     },
+                        // },
                         Title: {
                             defaultProps(theme) {
                                 return { color: "gray.1" }
@@ -66,6 +77,7 @@ export default function LlamaApp({ Component, pageProps }: AppProps) {
                     },
                 }}
             >
+                <Notifications />
                 <Component {...pageProps} />
             </MantineProvider>
         </>
