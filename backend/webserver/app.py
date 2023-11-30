@@ -7,7 +7,7 @@ class User(flask_login.UserMixin):
     pass
 
 import os
-path = os.path.abspath("website\out")
+path = os.path.abspath("website/out")
 print(path)
 app = Flask(__name__, static_folder=path,template_folder=path)
 app.secret_key = 'knobz'
