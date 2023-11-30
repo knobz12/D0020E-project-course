@@ -8,7 +8,24 @@ First, install the package manager:
 npm i -g pnpm
 ```
 
-Then, run the development server:
+## Install dependencies
+
+From the website folder, install dependencies by running:
+
+```bash
+pnpm install
+```
+
+## To run local development server
+
+When running local development server, for next.config.js hide the following:
+
+```javascript
+// output: "export",
+// assetPrefix: "/static",
+```
+
+Run the development server:
 
 ```bash
 pnpm run dev
@@ -18,16 +35,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `src/pages/index.tsx`. The page auto-updates as you edit the file.
 
-## Output
-
-### Development
-
-When running local development server, in next.config.js hide the following:
-
-```javascript
-// output: "export",
-// assetPrefix: "/static",
-```
+## Production
 
 ### HTML files
 
