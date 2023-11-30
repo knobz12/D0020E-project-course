@@ -27,11 +27,13 @@ class Chunkerizer:
     def make_chunk(text: str, chunk_size: int) -> list[str]:
         return textwrap.wrap(text, chunk_size)
 
-    def text_and_image_text_from_file(filepath: str) -> tuple[str, str, str]:
+    def text_and_image_text_from_file(filepath: str) -> tuple[str, str, str] | None:
         with open(filepath, "rb") as f:
             return Chunkerizer.text_and_image_text_from_file_bytes(f.read())
 
-    def text_and_image_text_from_file_bytes(buf: bytes) -> tuple[str, str, str]:
+    def text_and_image_text_from_file_bytes(buf: bytes) -> tuple[str, str, str] | None:
+        extracted_text = ""
+        extracted_image_text = ""
         try:
             mime_type = magic.from_buffer(buf, mime = True)
             extracted_image_text: str = ""
@@ -53,8 +55,6 @@ class Chunkerizer:
                     io_buf = io.BytesIO(buf)
                     pdf = PyPDF2.PdfReader(io_buf)
                     
-                    extracted_text = ""
-                    extracted_image_text = ""
                     image_list = []
                     for page in pdf.pages:
                         extracted_text += page.extract_text()
@@ -68,7 +68,6 @@ class Chunkerizer:
                         img = Image.open(io_buf)
                         extracted_image_text += pytesseract.image_to_string(img)
 
-                    pass
 
                 case "text/plain":
                     filetype = "txt"
@@ -82,9 +81,6 @@ class Chunkerizer:
                 case "application/zip" | "application/vnd.openxmlformats-officedocument.presentationml.presentation":
                     filetype = "ppt"
 
-                    extracted_text = ""
-                    extracted_image_text = ""
-                    # may crash later because pptx might expect a file
                     io_buf = io.BytesIO(buf)
                     powerpoint = pptx.Presentation(io_buf)
 
@@ -95,7 +91,10 @@ class Chunkerizer:
                             elif(hasattr(shape, "image")):
                                 io_buf = io.BytesIO(shape.image.blob)
                                 img = Image.open(io_buf)
+                                if img.format == "WMF" or img.format == "EMF":
+                                    continue
                                 extracted_image_text += pytesseract.image_to_string(img)
+                                img.close()
 
 
                 case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
