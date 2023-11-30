@@ -11,6 +11,12 @@ import pptx
 import io
 import PyPDF2
 
+import os
+import pathlib
+import sys
+
+files_dir = pathlib.Path("./bin/jsoneler/files")
+
 class NotSupportedFiletype(Exception):
     def __init__(self, message = "Type not currently supported. We are working on a fix in later versions."):
         super().__init__(message)
@@ -105,15 +111,6 @@ class Chunkerizer:
             print(type(error).__name__, "-", error)
             return None
         
-        
-
-
-
-import os
-import pathlib
-import sys
-
-files_dir = pathlib.Path("./bin/jsoneler/files")
 
 def get_course_codes() -> list[str]:
     # path = files_folder.resolve()
