@@ -85,9 +85,11 @@ cd D0020E-project-course
       - ```
       $env:CMAKE_ARGS="-DLLAMA_CUBLAS=on -DCMAKE_CUDA_ARCHITECTURES=all-major"
       pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir
+      ```
     - On Linux:
       - ```
       FORCE_CMAKE=1 CMAKE_ARGS="-DLLAMA_CUBLAS=1 -DCMAKE_CUDA_ARCHITECTURES=all-major" pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir
+      ```
 
 ### Prepare Data & Run
 
