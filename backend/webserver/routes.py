@@ -70,7 +70,7 @@ from chromadb import GetResult
 from modules.files.correct_chunks import TextSplit
 def upsert_file(file: FileStorage) -> tuple[str, GetResult] | None:
     file_bytes: bytes = file.read()
-    res = Chunkerizer.text_and_image_text_from_file_bytes(file_bytes)
+    res = Chunkerizer.text_and_image_text_from_file_bytes(file_bytes, file.filename)
 
     if res == None:
         print(file_bytes.decode("utf-8",errors="ignore"))
