@@ -32,8 +32,7 @@ class Chunkerizer:
         with open(filepath, "rb") as f:
             return Chunkerizer.text_and_image_text_from_file_bytes(f.read(), filename)
 
-    def text_and_image_text_from_file_bytes(buf: bytes, filename: str) -> tuple[str, str, str] | None:
-        
+    def text_and_image_text_from_file_bytes(buf: bytes, filename: str = "") -> tuple[str, str, str] | None:        
 
         def parse_html(buf: bytes) -> str:
             soup = BeautifulSoup(buf, features="html.parser")
@@ -69,7 +68,7 @@ class Chunkerizer:
 
                 extracted_image_text += pytesseract.image_to_string(img)
             elif mime_type == "text/plain":
-                if filename[filename.rfind(".") + 1] == "html":
+                if filename[filename.rfind(".") + 1:] == "html":
                     parse_html(buf)
                 else:
                     extracted_text = bytes.decode(buf, "utf-8")
