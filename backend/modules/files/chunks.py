@@ -49,7 +49,7 @@ class Chunkerizer:
                 img = Image.open(io.BytesIO(buf))
                 extracted_text = pytesseract.image_to_string(img)
                 extracted_image_text = extracted_text
-            elif "application/pdf": 
+            elif mime_type == "application/pdf": 
 
                 io_buf = io.BytesIO(buf)
                 pdf = PyPDF2.PdfReader(io_buf)
