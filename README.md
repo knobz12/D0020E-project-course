@@ -55,12 +55,13 @@ Something cool maybe
 - [x] Linux
 - [x] Windows (via CMake)
 - [x] Docker
-- [x] Mac OS(questionable)
+- [x] Mac OS(questionable) Needs to be fixed
 
 **Supported models:**
 
 - [X] LLaMA 🦙
 - [x] LLaMA 2 🦙🦙
+- [x] LLaMA 3 🦙🦙🦙
 
 ---
 
@@ -74,73 +75,65 @@ cd D0020E-project-course
 ```
 
 ### Build
+- #### For developers
+	- Install dependencies
 
-- Install dependencies
-
-  - ```
-    pip install -r requirements.txt
-    ```
-  - Install llama.cpp with right arguments
-    - On Windows:
-    ```
-    $env:CMAKE_ARGS="-DLLAMA_CUBLAS=on -DCMAKE_CUDA_ARCHITECTURES=all-major"
-    pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir
-    ```
-    - On Linux:
-    ```
-    FORCE_CMAKE=1 CMAKE_ARGS="-DLLAMA_CUBLAS=1 -DCMAKE_CUDA_ARCHITECTURES=all-major" pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir
-    ```
-
+      - ```
+        pip install -r requirements.txt
+        ```
+      - ### Install llama.cpp with right arguments for your operating system
+        - On Windows:
+        ```
+        pip uninstall llama-cpp-python -y
+        $env:CMAKE_ARGS="-DLLAMA_CUBLAS=on -DCMAKE_CUDA_ARCHITECTURES=all-major"
+        pip install -U llama-cpp-python --no-cache-dir
+        ```
+        - On Linux:
+        ```
+        pip uninstall llama-cpp-python -y
+        CMAKE_ARGS="-DLLAMA_CUBLAS=1 -DCMAKE_CUDA_ARCHITECTURES=all-major"
+        pip install -U llama-cpp-python --no-cache-dir
+        ```
+        - On Mac:
+        ```
+        pip uninstall llama-cpp-python -y
+    CMAKE_ARGS="-DLLAMA_METAL=on" pip install -U llama-cpp-python --no-cache-dir
+    pip install 'llama-cpp-python[server]
+        ```
+- #### For users
+	- On Windows
+	```
+	make install
+	```
+	- On Linux
+	- ```
+	make install
+	```
+	- On Mac
+	```
+	make install
+	```
 ### Prepare Data & Run
 
-Sample run:
+Run using the sample data:
 
 ```
-
-```
-
-### Docker
-
-#### Prerequisites
-* Docker must be installed and running on your system.
-
-#### Images
-Not done yet
-
-#### Usage
-
-The easiest way is to just do what you are told and don't question it
-
-### Docker With CUDA
-
-Assuming one has the [nvidia-container-toolkit](https://github.com/NVIDIA/nvidia-container-toolkit) properly installed on Linux, or is using a GPU enabled cloud, `cuBLAS` should be accessible inside the container.
-
-#### Building Locally
-
-```bash
-docker build -t local/llama.cpp:full-cuda -f .devops/full-cuda.Dockerfile .
-docker build -t local/llama.cpp:light-cuda -f .devops/main-cuda.Dockerfile .
-```
-
-You may want to pass in some different `ARGS`, depending on the CUDA environment supported by your container host, as well as the GPU architecture.
-
-The defaults are:
-
-- `CUDA_VERSION` set to `11.7.1`
-- `CUDA_DOCKER_ARCH` set to `all`
-
-#### Usage
-
-Some explaination
-
-```bash
-docker run
+python aistudybuddy.py
 ```
 
 ### Contributing
-
-- Best
-
+- Contributors can open PRs
+- Collaborators can push to branches in the `D0020E-project-course` repo and merge PRs into the `main` branch
+- Collaborators will be invited based on contributions
+- Any help with managing issues and PRs is very appreciated!
 ### Coding guidelines
 
-- Test
+- Avoid adding third-party dependencies, extra files, extra headers, etc.
+- Always consider cross-compatibility with other operating systems and architectures
+- Avoid fancy looking modern STL constructs, use basic `for` loops, avoid templates, keep it simple
+- There are no strict rules for the code style, but try to follow the patterns in the code (indentation, spaces, etc.). Vertical alignment makes things more readable and easier to batch edit
+### Docs
+
+- [main](./website//README.md)
+- [server](./backend/webserver/README.md)
+- [Performance troubleshooting](./docs/token_generation_performance_tips.md)
