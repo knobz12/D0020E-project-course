@@ -102,9 +102,11 @@ def quiz():
     if result == None:
         return make_response("Bad file format", 406)
     
+    questions = int(request.args.get("questions"))
+    print(f"Creating {questions} questions")
     (file_hash, _) = result
 
-    return app.response_class(create_quiz(file_hash), mimetype='text/plain')
+    return app.response_class(create_quiz(file_hash, questions), mimetype='text/plain')
 
 @app.route("/api/summary", methods=["POST"])
 def summary():
