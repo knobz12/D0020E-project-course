@@ -23,6 +23,11 @@ interface FileUploadProps {
 
 interface QuizProps {}
 
+async function onClick() {
+    //maybe generate/import quiz and make it possible to do the quiz
+    return showNotification({ color: "green", message: "It just works -a wise man" })
+}
+
 export default function Quiz({}: QuizProps) {
     return (
         <>
@@ -38,7 +43,7 @@ export default function Quiz({}: QuizProps) {
                 
                 </Container>
                 <Stack w="100%">
-                    <Button >Generate and do quiz</Button>
+                    <Button onClick={onClick}>Generate and do quiz</Button>
                 </Stack>
                 
             </Container>
