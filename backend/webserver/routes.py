@@ -73,7 +73,7 @@ def upsert_file(file: FileStorage) -> tuple[str, GetResult] | None:
     res = Chunkerizer.text_and_image_text_from_file_bytes(file_bytes, file.filename)
 
     if res == None:
-        print(file_bytes.decode("utf-8",errors="ignore"))
+        print("Chunky returned None")
         return None
     (_, text, __) = res
 
