@@ -22,7 +22,7 @@ export function Page({ children, center = false }: PageProps) {
             // })}
             className={clsx(
                 inter.className,
-                "min-h-screen",
+                //"min-h-screen",
                 center && "flex justify-center items-center",
             )}
         >
