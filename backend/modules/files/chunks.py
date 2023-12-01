@@ -28,15 +28,21 @@ class Chunkerizer:
         return textwrap.wrap(text, chunk_size)
 
     def text_and_image_text_from_file(filepath: str) -> tuple[str, str, str] | None:
+        filename = os.path.basename(filepath)
         with open(filepath, "rb") as f:
-            return Chunkerizer.text_and_image_text_from_file_bytes(f.read())
+            return Chunkerizer.text_and_image_text_from_file_bytes(f.read(), filename)
 
-    def text_and_image_text_from_file_bytes(buf: bytes) -> tuple[str, str, str] | None:
+    def text_and_image_text_from_file_bytes(buf: bytes, filename: str) -> tuple[str, str, str] | None:
+        
+
+        def parse_html(buf: bytes) -> str:
+            soup = BeautifulSoup(buf, features="html.parser")
+            return soup.get_text()
+
         extracted_text = ""
         extracted_image_text = ""
         try:
             mime_type = magic.from_buffer(buf, mime = True)
-            extracted_image_text: str = ""
 
             filetype = mime_type[mime_type.find("/") + 1:]
 
@@ -63,10 +69,12 @@ class Chunkerizer:
 
                 extracted_image_text += pytesseract.image_to_string(img)
             elif mime_type == "text/plain":
-                extracted_text = bytes.decode(buf, "utf-8")
+                if filename[filename.rfind(".") + 1] == "html":
+                    parse_html(buf)
+                else:
+                    extracted_text = bytes.decode(buf, "utf-8")
             elif mime_type == "text/html":
-                soup = BeautifulSoup(buf, features="html.parser")
-                extracted_text = soup.get_text()
+                parse_html(buf)
             elif mime_type == "application/zip" or mime_type == "application/vnd.openxmlformats-officedocument.presentationml.presentation":
                 filetype = "ppt"
 
