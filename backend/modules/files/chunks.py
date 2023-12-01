@@ -15,6 +15,8 @@ import os
 import pathlib
 import sys
 
+import glob
+
 files_dir = pathlib.Path("./bin/jsoneler/files")
 
 class NotSupportedFiletype(Exception):
@@ -33,15 +35,20 @@ class Chunkerizer:
             return Chunkerizer.text_and_image_text_from_file_bytes(f.read(), filename)
 
     def text_and_image_text_from_file_bytes(buf: bytes, filename: str = "") -> tuple[str, str, str] | None:        
-
         def parse_html(buf: bytes) -> str:
             soup = BeautifulSoup(buf, features="html.parser")
             return soup.get_text()
+        
+        def is_programming_lang(mime_type: str) -> bool:
+            return mime_type == "text/x-c++" or mime_type == "text/x-python" or mime_type == "text/x-java"
+
+        file_extenstion = filename[filename.rfind(".") + 1:] 
+
 
         extracted_text = ""
         extracted_image_text = ""
         try:
-            mime_type = magic.from_buffer(buf, mime = True)
+            mime_type = magic.from_buffer(buf[0:1024], mime = True)
 
             filetype = mime_type[mime_type.find("/") + 1:]
 
@@ -65,17 +72,25 @@ class Chunkerizer:
                 for img_obj in image_list:
                     io_buf = io.BytesIO(img_obj.data)
                     img = Image.open(io_buf)
-
-                extracted_image_text += pytesseract.image_to_string(img)
+                    extracted_image_text += pytesseract.image_to_string(img)
+            elif is_programming_lang(mime_type):
+                extracted_text = bytes.decode(buf, "utf-8", errors = "ignore")
             elif mime_type == "text/plain":
-                if filename[filename.rfind(".") + 1:] == "html":
-                    extracted_text = parse_html(buf)
+                if file_extenstion == "html":
                     filetype = "html"
+                    extracted_text = parse_html(buf)
                 else:
                     extracted_text = bytes.decode(buf, "utf-8", errors = "ignore")
             elif mime_type == "text/html":
                 extracted_text = parse_html(buf)
+            elif mime_type == "text/xml":
+                soup = BeautifulSoup(buf, 'xml')
+                extracted_text = soup.get_text()
             elif mime_type == "application/zip" or mime_type == "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+                if file_extenstion == "zip":
+                    # TODO(Johan) support zip correctly
+                    raise NotSupportedFiletype
+
                 filetype = "ppt"
 
                 io_buf = io.BytesIO(buf)
@@ -104,8 +119,23 @@ class Chunkerizer:
             
         except Exception as error:
             print(type(error).__name__, "-", error)
+            print(mime_type)
             return None
         
+    def text_extraction_test():
+        path_list = ["./backend/tests/sample_files/courses/D7032E/Apples2Apples.java"]
+        #path_list = glob.glob("./backend/tests/**/*.*", recursive = True)
+        try:
+            for path in path_list: 
+                print(f"###### testing {path}")
+                Chunkerizer.text_and_image_text_from_file(path)
+        except Exception as error:
+            pass
+        
+
+
+
+
 
 def get_course_codes() -> list[str]:
     # path = files_folder.resolve()
