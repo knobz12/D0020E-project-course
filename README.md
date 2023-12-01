@@ -55,7 +55,7 @@ Something cool maybe
 - [x] Linux
 - [x] Windows (via CMake)
 - [x] Docker
-- [x] Mac OS(questionable)
+- [x] Mac OS(questionable) Needs to be fixed
 
 **Supported models:**
 
@@ -83,12 +83,21 @@ cd D0020E-project-course
   - Install llama.cpp with right arguments
     - On Windows:
     ```
+    pip uninstall llama-cpp-python -y
     $env:CMAKE_ARGS="-DLLAMA_CUBLAS=on -DCMAKE_CUDA_ARCHITECTURES=all-major"
-    pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir
+    pip install -U llama-cpp-python --no-cache-dir
     ```
     - On Linux:
     ```
-    FORCE_CMAKE=1 CMAKE_ARGS="-DLLAMA_CUBLAS=1 -DCMAKE_CUDA_ARCHITECTURES=all-major" pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir
+    pip uninstall llama-cpp-python -y
+    CMAKE_ARGS="-DLLAMA_CUBLAS=1 -DCMAKE_CUDA_ARCHITECTURES=all-major"
+    pip install -U llama-cpp-python --no-cache-dir
+    ```
+    - On Mac:
+    ```
+    pip uninstall llama-cpp-python -y
+CMAKE_ARGS="-DLLAMA_METAL=on" pip install -U llama-cpp-python --no-cache-dir
+pip install 'llama-cpp-python[server]
     ```
 
 ### Prepare Data & Run
