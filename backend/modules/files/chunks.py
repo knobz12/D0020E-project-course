@@ -72,7 +72,7 @@ class Chunkerizer:
                     extracted_text = parse_html(buf)
                     filetype = "html"
                 else:
-                    extracted_text = bytes.decode(buf, "utf-8")
+                    extracted_text = bytes.decode(buf, "utf-8", errors = "ignore")
             elif mime_type == "text/html":
                 extracted_text = parse_html(buf)
             elif mime_type == "application/zip" or mime_type == "application/vnd.openxmlformats-officedocument.presentationml.presentation":
