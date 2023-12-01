@@ -69,11 +69,11 @@ class Chunkerizer:
                 extracted_image_text += pytesseract.image_to_string(img)
             elif mime_type == "text/plain":
                 if filename[filename.rfind(".") + 1:] == "html":
-                    parse_html(buf)
+                    extracted_text = parse_html(buf)
                 else:
                     extracted_text = bytes.decode(buf, "utf-8")
             elif mime_type == "text/html":
-                parse_html(buf)
+                extracted_text = parse_html(buf)
             elif mime_type == "application/zip" or mime_type == "application/vnd.openxmlformats-officedocument.presentationml.presentation":
                 filetype = "ppt"
 
