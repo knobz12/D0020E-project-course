@@ -70,6 +70,7 @@ class Chunkerizer:
             elif mime_type == "text/plain":
                 if filename[filename.rfind(".") + 1:] == "html":
                     extracted_text = parse_html(buf)
+                    filetype = "html"
                 else:
                     extracted_text = bytes.decode(buf, "utf-8")
             elif mime_type == "text/html":
