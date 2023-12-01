@@ -10,6 +10,7 @@ import {
     Group,
     Stack,
     Text,
+    TextInput,
     Title,
     rem,
     useMantineTheme,
@@ -53,10 +54,21 @@ function encode(input: Uint8Array) {
 interface FileUploadProps {
     title: string
     apiUrl: string
+    parameters?: {
+        type: "number"
+        id: string
+        name: string
+        placeholder: string
+    }[]
 }
 
-export default function FileUpload({ apiUrl, title }: FileUploadProps) {
+export default function FileUpload({
+    apiUrl,
+    title,
+    parameters,
+}: FileUploadProps) {
     const [data, setData] = useState<string | null>(null)
+    const [params, setParams] = useState<Record<string, string | number>>({})
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [inputFile, setFile] = useState<{ file: File; url?: string } | null>(
         null,
@@ -77,7 +89,14 @@ export default function FileUpload({ apiUrl, title }: FileUploadProps) {
             }
 
             data.set("file", file)
-            const res = await fetch(apiUrl, {
+            const url = new URL(apiUrl)
+
+            for (const [key, value] of Object.entries(params)) {
+                url.searchParams.set(key, String(value))
+            }
+
+            console.log("USING URL:", url.toString())
+            const res = await fetch(url.toString(), {
                 method: "POST",
                 body: data,
             }).catch((e) => null)
@@ -141,6 +160,40 @@ export default function FileUpload({ apiUrl, title }: FileUploadProps) {
                     <Stack>
                         <Title>{title}</Title>
                     </Stack>
+                    {parameters && (
+                        <Stack>
+                            {parameters.map((parameter) => {
+                                switch (parameter.type) {
+                                    case "number":
+                                        return (
+                                            <TextInput
+                                                key={parameter.id}
+                                                label={parameter.name}
+                                                id={parameter.id}
+                                                name={parameter.id}
+                                                onChange={(e) => {
+                                                    const val = parseInt(
+                                                        e.currentTarget.value,
+                                                    )
+
+                                                    setParams((curr) => {
+                                                        const newParams = {
+                                                            ...curr,
+                                                            [parameter.id]: val,
+                                                        }
+                                                        console.log(newParams)
+                                                        return newParams
+                                                    })
+                                                }}
+                                                placeholder={
+                                                    parameter.placeholder
+                                                }
+                                            />
+                                        )
+                                }
+                            })}
+                        </Stack>
+                    )}
                     {inputFile !== null ? (
                         <Flex align="center" w="100%">
                             <Flex gap="md" align="center" className="grow">
