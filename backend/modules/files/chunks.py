@@ -16,7 +16,6 @@ import pathlib
 import sys
 
 import glob
-import puremagic
 import json
 
 files_dir = pathlib.Path("./bin/jsoneler/files")
@@ -40,7 +39,9 @@ class Chunkerizer:
         def parse_html(buf: bytes) -> str:
             soup = BeautifulSoup(buf, features="html.parser")
             return soup.get_text()
-        
+
+
+
         def is_programming_lang(mime_type: str) -> bool:
             return mime_type == "text/x-c++" or mime_type == "text/x-python" or mime_type == "text/x-java"
 
@@ -50,14 +51,8 @@ class Chunkerizer:
         extracted_text = ""
         extracted_image_text = ""
         try:
-
-            try:
-                mime_type = puremagic.from_string(buf, True, filename)
-            except:
-                mime_type = "text/plain"
+            mime_type = magic.from_buffer(buf[0:512], mime = True)
             print(mime_type)
-            #mime_type = magic.from_buffer(buf[0:1024], mime = True)
-
             filetype = mime_type[mime_type.find("/") + 1:]
 
             if mime_type.startswith("image"):
@@ -65,7 +60,7 @@ class Chunkerizer:
                 extracted_text = pytesseract.image_to_string(img)
                 extracted_image_text = extracted_text
             elif mime_type == "application/json":
-                mime_type = "text/plain"
+                mime_type = "text/plain" 
 
             elif mime_type == "application/pdf": 
 
@@ -88,8 +83,14 @@ class Chunkerizer:
                 extracted_text = bytes.decode(buf, "utf-8", errors = "ignore")
             elif mime_type == "text/plain":
                 if file_extenstion == "html":
-                    filetype = "html"
                     extracted_text = parse_html(buf)
+                    filetype = "html"
+                elif file_extenstion == "json":
+                    extracted_text = bytes.decode(buf, "utf-8", errors = "ignore")
+                    filetype = "json"
+                elif file_extenstion == "jsonl":
+                    extracted_text = bytes.decode(buf, "utf-8", errors = "ignore")
+                    filetype = "jsonl"
                 else:
                     extracted_text = bytes.decode(buf, "utf-8", errors = "ignore")
             elif mime_type == "text/html":
@@ -130,12 +131,12 @@ class Chunkerizer:
             
         except Exception as error:
             print(type(error).__name__, "-", error)
-            print(mime_type)
             return None
         
     def text_extraction_test():
-        path_list = ["./backend/tests/sample_files/courses/D7032E/Apples2Apples.java"]
-        # path_list = glob.glob("./backend/tests/**/*.*", recursive = True)
+        #path_list = ["./backend/tests\sample_files\courses\D7032E\evolutionCards.json"]
+        #path_list = ["./backend/tests/sample_files/courses/D7032E/Apples2Apples.java"]
+        path_list = glob.glob("./backend/tests/**/*.*", recursive = True)
         try:
             for path in path_list: 
                 print(f"###### testing {path}")
