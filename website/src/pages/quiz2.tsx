@@ -1,55 +1,122 @@
+//import FileUpload from "@/components/FileUpload"
+//import React from "react"
+import React, { useState } from 'react';
 import FileUpload from "@/components/FileUpload"
-import React from "react"
-import {
-    Button,
-    Container,
-    Group,
-    List,
-    Stack,
-    Text,
-    Title,
-    rem,
-    useMantineTheme,
-} from "@mantine/core"
-import { showNotification } from "@mantine/notifications"
-import { Page } from "@/components/Page"
-import { Dropzone } from "@mantine/dropzone"
-import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react"
 
-interface FileUploadProps {
-    title: string
-    apiUrl: string
+//insperation 👌 https://www.geeksforgeeks.org/how-to-build-a-quiz-app-with-react-and-typescript/
+
+const questions = [
+    {
+        question: 'What is the capital of France?',
+        choices: ['Paris', 'London', 'New York', 'bollar' ],
+        CorrectAnswer: 'Paris',
+    },
+    {
+        question: 'What is the largest planet in our solar system?',
+        choices: ['Mars', 'Jupiter', 'Venus'],
+        CorrectAnswer: 'Jupiter',
+    },
+    {
+        question: 'What is the boiling point of water?',
+        choices: ['100°C', '0°C', '50°C'],
+        CorrectAnswer: '100°C',
+    },
+    {
+        question: 'What is the largest planet in our solar system?',
+        choices: ['Mars', 'Jupiter', 'Venus'],
+        CorrectAnswer: 'Jupiter',
+    },
+    {
+        question: 'What is the boiling point of water?',
+        choices: ['100°C', '0°C', '50°C,'],
+        CorrectAnswer: '100°C',
+    },
+];
+
+
+interface Props {
+    question: string;
+    choices: string[];
+    CorrectAnswer: string;
+    onAnswer: (CorrectAnswer: string) => void;
+}
+ 
+const Question: React.FC<Props> = (
+    { question, choices, CorrectAnswer, onAnswer }) => {
+    return (
+        <div className="d-flex 
+                        justify-content-center 
+                        align-center 
+                        text-center 
+                        flex-column">
+            <h2 className="">{question}</h2>
+            <div className="">
+                {choices.map((choice) => (
+                    <button className="btn btn-success m-2"
+                        onClick={() => onAnswer(choice)}>
+                                        {choice}</button>
+                    
+                ))}
+                {/*<button className="btn btn-success m-2">Reset{}</button>*/}
+            </div>
+        </div>
+    );
+};
+
+
+const Quiz: React.FC = () => {
+    const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [score, setScore] = useState(0);
+ 
+    const handleAnswer = (CorrectAnswer: string) => {
+        if (CorrectAnswer === questions[currentQuestion].CorrectAnswer) {
+            setScore(score + 1);
+        }else{
+            alert(`Wrong 🤢`);
+        }
+ 
+        const nextQuestion = currentQuestion + 1;
+        if (nextQuestion < questions.length) {
+            setCurrentQuestion(nextQuestion);
+        } else {
+            alert(`Quiz finished. You scored ${score}/${questions.length}`);
+        }
+    };
+ 
+    return (
+        <div>
+            <h1 className="text-center">Quiz</h1>
+            {currentQuestion < questions.length ? (
+                <Question
+                    question={questions[currentQuestion].question}
+                    choices={questions[currentQuestion].choices}
+                    CorrectAnswer={questions[currentQuestion].CorrectAnswer}
+                    onAnswer={handleAnswer}
+                />
+            ) : "null"
+            }
+        </div>
+    )
 }
 
-interface QuizProps {}
 
-async function onClick() {
-    //maybe generate/import quiz and make it possible to do the quiz
-    return showNotification({ color: "green", message: "It just works -a wise man" })
-}
 
-export default function Quiz({}: QuizProps) {
+    
+    
+export default function QuizSite() {
     return (
         <>
         <FileUpload
-            title="Generate quiz"
-            apiUrl="http://localhost:3030/api/quiz"
-
+            title=   "Generate quiz"
+            apiUrl=  "http://localhost:3030/api/quiz"
             
         /> 
-        <Page>
-            <Container size="xs">
-                <Container color="#FF0000" size="xs" w="50%" h="400p">
-                
-                </Container>
-                <Stack w="100%">
-                    <Button onClick={onClick}>Generate and do quiz</Button>
-                </Stack>
-                
-            </Container>
-        </Page>
+
+
+        <div className="">
+            <Quiz />
+        </div>
         </>
-        
-        
-    )
+    );
 }
+
