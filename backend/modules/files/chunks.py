@@ -16,6 +16,8 @@ import pathlib
 import sys
 
 import glob
+import puremagic
+import json
 
 files_dir = pathlib.Path("./bin/jsoneler/files")
 
@@ -48,7 +50,13 @@ class Chunkerizer:
         extracted_text = ""
         extracted_image_text = ""
         try:
-            mime_type = magic.from_buffer(buf[0:1024], mime = True)
+
+            try:
+                mime_type = puremagic.from_string(buf, True, filename)
+            except:
+                mime_type = "text/plain"
+            print(mime_type)
+            #mime_type = magic.from_buffer(buf[0:1024], mime = True)
 
             filetype = mime_type[mime_type.find("/") + 1:]
 
@@ -56,6 +64,9 @@ class Chunkerizer:
                 img = Image.open(io.BytesIO(buf))
                 extracted_text = pytesseract.image_to_string(img)
                 extracted_image_text = extracted_text
+            elif mime_type == "application/json":
+                mime_type = "text/plain"
+
             elif mime_type == "application/pdf": 
 
                 io_buf = io.BytesIO(buf)
@@ -124,7 +135,7 @@ class Chunkerizer:
         
     def text_extraction_test():
         path_list = ["./backend/tests/sample_files/courses/D7032E/Apples2Apples.java"]
-        #path_list = glob.glob("./backend/tests/**/*.*", recursive = True)
+        # path_list = glob.glob("./backend/tests/**/*.*", recursive = True)
         try:
             for path in path_list: 
                 print(f"###### testing {path}")
