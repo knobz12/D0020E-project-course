@@ -8,12 +8,12 @@ import FileUpload from "@/components/FileUpload"
 const questions = [
     {
         question: 'What is the capital of France?',
-        choices: ['Paris', 'London', 'New York', 'bollar' ],
+        choices: ['Paris', 'London', 'bollar'],
         CorrectAnswer: 'Paris',
     },
     {
         question: 'What is the largest planet in our solar system?',
-        choices: ['Mars', 'Jupiter', 'Venus'],
+        choices: ['Jupiter','Mars',  'Venus'],
         CorrectAnswer: 'Jupiter',
     },
     {
@@ -23,7 +23,7 @@ const questions = [
     },
     {
         question: 'What is the largest planet in our solar system?',
-        choices: ['Mars', 'Jupiter', 'Venus'],
+        choices: ['Jupiter', 'Mars',  'Venus'],
         CorrectAnswer: 'Jupiter',
     },
     {
@@ -80,6 +80,9 @@ const Quiz: React.FC = () => {
             setCurrentQuestion(nextQuestion);
         } else {
             alert(`Quiz finished. You scored ${score}/${questions.length}`);
+            //reset
+            setScore(0);
+            setCurrentQuestion(0);
         }
     };
  
