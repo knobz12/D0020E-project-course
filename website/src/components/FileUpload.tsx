@@ -8,6 +8,7 @@ import {
     Container,
     Flex,
     Group,
+    NumberInput,
     Stack,
     Text,
     TextInput,
@@ -68,7 +69,9 @@ export default function FileUpload({
     parameters,
 }: FileUploadProps) {
     const [data, setData] = useState<string | null>(null)
-    const [params, setParams] = useState<Record<string, string | number>>({})
+    const [params, setParams] = useState<
+        Record<string, string | number | undefined>
+    >({})
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [inputFile, setFile] = useState<{ file: File; url?: string } | null>(
         null,
@@ -166,20 +169,33 @@ export default function FileUpload({
                                 switch (parameter.type) {
                                     case "number":
                                         return (
-                                            <TextInput
+                                            <NumberInput
                                                 key={parameter.id}
                                                 label={parameter.name}
                                                 id={parameter.id}
                                                 name={parameter.id}
                                                 onChange={(e) => {
-                                                    const val = parseInt(
-                                                        e.currentTarget.value,
-                                                    )
+                                                    if (e === "") {
+                                                        return setParams(
+                                                            (curr) => {
+                                                                const newParams =
+                                                                    {
+                                                                        ...curr,
+                                                                        [parameter.id]:
+                                                                            undefined,
+                                                                    }
+                                                                console.log(
+                                                                    newParams,
+                                                                )
+                                                                return newParams
+                                                            },
+                                                        )
+                                                    }
 
                                                     setParams((curr) => {
                                                         const newParams = {
                                                             ...curr,
-                                                            [parameter.id]: val,
+                                                            [parameter.id]: e,
                                                         }
                                                         console.log(newParams)
                                                         return newParams

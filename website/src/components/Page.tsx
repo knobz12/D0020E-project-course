@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import React from "react"
 import { useSession, signOut } from "next-auth/react"
 import { IconLogout } from "@tabler/icons-react"
+import Link from "next/link"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -18,7 +19,9 @@ export function Page({ children, center = false }: PageProps) {
     return (
         <div className={clsx(inter.className, "min-h-screen")}>
             <Container className="flex justify-between py-4">
-                <Title>AI Studybuddy</Title>
+                <Link href="/" className="no-underline">
+                    <Title>AI Studybuddy</Title>
+                </Link>
                 {status === "authenticated" && (
                     <div>
                         <Menu>

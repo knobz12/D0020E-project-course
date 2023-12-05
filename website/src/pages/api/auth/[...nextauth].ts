@@ -96,21 +96,18 @@ export const authOptions: AuthOptions = {
         //   return params.session;
         // },
     },
+    // adapter: PrismaAdapter(db),
     jwt: {
         async encode({ token, secret, maxAge, salt }) {
             if (!token) {
                 throw new Error("No token!")
             }
 
-            console.log("Encoding token:", token)
             const encoded = jwt.sign(token, secret, { algorithm: "HS256" })
-            console.log("Encoded:", encoded)
             return encoded
         },
         async decode({ token, secret, salt }) {
-            console.log("Verifying token:", token)
             const verify = jwt.verify(token!, secret)
-            console.log("Result:", verify)
             return verify as any
         },
     },

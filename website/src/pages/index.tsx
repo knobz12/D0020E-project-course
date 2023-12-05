@@ -1,6 +1,5 @@
 import React from "react"
 import {
-    Box,
     Card,
     Center,
     Container,
@@ -11,56 +10,12 @@ import {
     Title,
 } from "@mantine/core"
 import { Page } from "@/components/Page"
-import {
-    IconQuestionMark,
-    Icon,
-    IconBook,
-    IconCheck,
-} from "@tabler/icons-react"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
 import { GetServerSideProps } from "next"
 import { authOptions } from "./api/auth/[...nextauth]"
 
-type Prompt = { icon: Icon; text: string; link: string }
-
-const promptGroups: { name: string; prompts: Prompt[] }[] = [
-    {
-        name: "Generative",
-        prompts: [
-            {
-                icon: IconQuestionMark,
-                text: "Quiz",
-                link: "/quiz",
-            },
-            {
-                icon: IconQuestionMark,
-                text: "QuizTest",
-                link: "/quiz2",
-            },
-            {
-                icon: IconBook,
-                text: "Summary",
-                link: "/summary",
-            },
-            {
-                icon: IconCheck,
-                text: "Assignment",
-                link: "/assignment",
-            },
-        ],
-    },
-    {
-        name: "Question",
-        prompts: [
-            {
-                icon: IconBook,
-                text: "Question",
-                link: "/question",
-            },
-        ],
-    },
-]
+const courses: string[] = ["D7032E"]
 
 export default function Home() {
     return (
@@ -68,38 +23,31 @@ export default function Home() {
             <Container w="100%" size="sm">
                 <Center w="100%" h="100%">
                     <Stack w="100%">
-                        <Title>Prompts</Title>
+                        <Title>Courses</Title>
                         <Paper px="xl" py="lg">
                             <Stack spacing="xl">
-                                {promptGroups.map((group) => (
-                                    <Stack key={group.name}>
-                                        <Title>{group.name}</Title>
-                                        <SimpleGrid cols={3}>
-                                            {group.prompts.map((prompt) => {
-                                                const Icon = prompt.icon
-                                                return (
-                                                    <Link
-                                                        key={
-                                                            prompt.text +
-                                                            prompt.link
-                                                        }
-                                                        href={prompt.link}
-                                                    >
-                                                        <Card>
-                                                            <Icon size={48} />
-                                                            <Text
-                                                                size="lg"
-                                                                fw={600}
-                                                            >
-                                                                {prompt.text}
-                                                            </Text>
-                                                        </Card>
-                                                    </Link>
-                                                )
-                                            })}
-                                        </SimpleGrid>
-                                    </Stack>
-                                ))}
+                                <Stack>
+                                    <SimpleGrid cols={3}>
+                                        {courses.map((course) => {
+                                            // const Icon = prompt.icon
+                                            return (
+                                                <Link
+                                                    key={course}
+                                                    href={`/course/${course.toUpperCase()}`}
+                                                >
+                                                    <Card>
+                                                        <Text
+                                                            size="lg"
+                                                            fw={600}
+                                                        >
+                                                            {course}
+                                                        </Text>
+                                                    </Card>
+                                                </Link>
+                                            )
+                                        })}
+                                    </SimpleGrid>
+                                </Stack>
                             </Stack>
                         </Paper>
                     </Stack>
