@@ -52,7 +52,7 @@ class Chunkerizer:
         extracted_image_text = ""
         try:
             mime_type = magic.from_buffer(buf[0:512], mime = True)
-            print(mime_type)
+            #print(mime_type)
             filetype = mime_type[mime_type.find("/") + 1:]
 
             if mime_type.startswith("image"):
@@ -79,6 +79,7 @@ class Chunkerizer:
                     io_buf = io.BytesIO(img_obj.data)
                     img = Image.open(io_buf)
                     extracted_image_text += pytesseract.image_to_string(img)
+
             elif is_programming_lang(mime_type):
                 extracted_text = bytes.decode(buf, "utf-8", errors = "ignore")
             elif mime_type == "text/plain":
@@ -135,8 +136,8 @@ class Chunkerizer:
         
     def text_extraction_test():
         #path_list = ["./backend/tests\sample_files\courses\D7032E\evolutionCards.json"]
-        #path_list = ["./backend/tests/sample_files/courses/D7032E/Apples2Apples.java"]
-        path_list = glob.glob("./backend/tests/**/*.*", recursive = True)
+        path_list = ["./backend/tests/sample_files/Test_pdfs/image75.pdf"]
+        #path_list = glob.glob("./backend/tests/**/*.*", recursive = True)
         try:
             for path in path_list: 
                 print(f"###### testing {path}")
