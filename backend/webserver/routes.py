@@ -97,6 +97,10 @@ def quiz():
         return make_response("Missing file", 406)
     
     file = request.files["file"]
+
+    if file.content_length == 0:
+        return make_response("Cannot send empty file! 😡", 406)
+
     result = upsert_file(file)
 
     if result == None:
@@ -119,6 +123,9 @@ def summary():
         return make_response("Missing file", 406)
     
     file = request.files["file"]
+
+    if file.content_length == 0:
+        return make_response("Cannot send empty file! 😡", 406)
 
     result = upsert_file(file)
     if result == None:
