@@ -18,9 +18,9 @@ const questions = [
         CorrectAnswer: 'Jupiter',
     },
     {
-        question: 'What is the boiling point of water?',
-        choices: ['100°C', '0°C', '50°C'],
-        CorrectAnswer: '100°C',
+        question: "What is the boiling point of water?",
+        choices: ["100°C", "0°C", "50°C"],
+        CorrectAnswer: "100°C",
     },
     {
         question: 'What is the largest planet in our solar system?',
@@ -28,42 +28,49 @@ const questions = [
         CorrectAnswer: 'Jupiter',
     },
     {
-        question: 'What is the boiling point of water?',
-        choices: ['100°C', '0°C', '50°C,'],
-        CorrectAnswer: '100°C',
+        question: "What is the boiling point of water?",
+        choices: ["100°C", "0°C", "50°C,"],
+        CorrectAnswer: "100°C",
     },
-];
-
+]
 
 interface Props {
-    question: string;
-    choices: string[];
-    CorrectAnswer: string;
-    onAnswer: (CorrectAnswer: string) => void;
+    question: string
+    choices: string[]
+    CorrectAnswer: string
+    onAnswer: (CorrectAnswer: string) => void
 }
- 
-const Question: React.FC<Props> = (
-    { question, choices, CorrectAnswer, onAnswer }) => {
+
+const Question: React.FC<Props> = ({
+    question,
+    choices,
+    CorrectAnswer,
+    onAnswer,
+}) => {
     return (
-        <div className="d-flex 
+        <div
+            className="d-flex 
                         justify-content-center 
                         align-center 
                         text-center 
-                        flex-column">
+                        flex-column"
+        >
             <h2 className="">{question}</h2>
             <div className="">
                 {choices.map((choice) => (
-                    <button className="btn btn-success m-2"
-                        onClick={() => onAnswer(choice)}>
-                                        {choice}</button>
-                    
+                    <button
+                        key={choice}
+                        className="btn btn-success m-2"
+                        onClick={() => onAnswer(choice)}
+                    >
+                        {choice}
+                    </button>
                 ))}
                 {/*<button className="btn btn-success m-2">Reset{}</button>*/}
             </div>
         </div>
-    );
-};
-
+    )
+}
 
 function Quiz(){
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -76,8 +83,6 @@ function Quiz(){
             TempScore = score + 1;
             setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
             console.log(TempScore);
-
-            
                 
         }else{
             alert(`Wrong 🤢`);
@@ -92,8 +97,8 @@ function Quiz(){
             setScore(0); //reset quiz
             setCurrentQuestion(0);
         }
-    };
- 
+    }
+
     return (
         <div>
             <h1 className="text-center">Quiz</h1>
@@ -104,16 +109,13 @@ function Quiz(){
                     CorrectAnswer={questions[currentQuestion].CorrectAnswer}
                     onAnswer={handleAnswer}
                 />
-            ) : "null"
-            }
+            ) : (
+                "null"
+            )}
         </div>
     )
 }
 
-
-
-    
-    
 export default function QuizSite() {
     return (
         <>
@@ -124,11 +126,19 @@ export default function QuizSite() {
             
         />  */}
 
-
-        <div className="">
-            <Quiz />
-        </div>
+            <div className="">
+                <Quiz />
+            </div>
         </>
-    );
+    )
 }
 
+/* export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+    const session = await getServerSession(req, res, authOptions)
+
+    return {
+        props: {
+            session,
+        },
+    }
+} */

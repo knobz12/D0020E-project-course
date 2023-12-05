@@ -18,6 +18,9 @@ import {
     IconCheck,
 } from "@tabler/icons-react"
 import Link from "next/link"
+import { getServerSession } from "next-auth"
+import { GetServerSideProps } from "next"
+import { authOptions } from "./api/auth/[...nextauth]"
 
 type Prompt = { icon: Icon; text: string; link: string }
 
@@ -104,4 +107,14 @@ export default function Home() {
             </Container>
         </Page>
     )
+}
+
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+    const session = await getServerSession(req, res, authOptions)
+
+    return {
+        props: {
+            session,
+        },
+    }
 }

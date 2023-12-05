@@ -102,7 +102,12 @@ def quiz():
     if result == None:
         return make_response("Bad file format", 406)
     
-    questions = int(request.args.get("questions"))
+    query = request.args.get("questions")
+    questions = 3
+
+    if query != None:
+        questions = int(query)
+
     print(f"Creating {questions} questions")
     (file_hash, _) = result
 
