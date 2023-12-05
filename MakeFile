@@ -78,4 +78,6 @@ dist: clean
 	ls -l dist
 
 install: clean
+    wget ...
+    touch $@
 	python setup.py install
