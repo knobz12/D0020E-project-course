@@ -98,7 +98,7 @@ cd D0020E-project-course
         ```
         pip uninstall llama-cpp-python -y
     CMAKE_ARGS="-DLLAMA_METAL=on" pip install -U llama-cpp-python --no-cache-dir
-    pip install 'llama-cpp-python[server]
+        pip install -U llama-cpp-python --no-cache-dir
         ```
 - #### For users
 	- On Windows
@@ -113,6 +113,7 @@ cd D0020E-project-course
 	```
 	make install
 	```
+
 ### Prepare Data & Run
 
 Run using the sample data:
