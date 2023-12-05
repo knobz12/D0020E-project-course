@@ -1,23 +1,21 @@
 //import FileUpload from "@/components/FileUpload"
 //import React from "react"
-import React, { useState } from "react"
+import React, { useState, useEffect, useRef } from 'react';
 import FileUpload from "@/components/FileUpload"
-import { GetServerSideProps } from "next"
-import { getServerSession } from "next-auth"
-import { authOptions } from "./api/auth/[...nextauth]"
+import { sleep } from 'openai/core.mjs';
 
 //insperation 👌 https://www.geeksforgeeks.org/how-to-build-a-quiz-app-with-react-and-typescript/
 
 const questions = [
     {
-        question: "What is the capital of France?",
-        choices: ["Paris", "London", "New York", "bollar"],
-        CorrectAnswer: "Paris",
+        question: 'What is the capital of France?',
+        choices: ['Paris', 'London', 'bollar'],
+        CorrectAnswer: 'Paris',
     },
     {
-        question: "What is the largest planet in our solar system?",
-        choices: ["Mars", "Jupiter", "Venus"],
-        CorrectAnswer: "Jupiter",
+        question: 'What is the largest planet in our solar system?',
+        choices: ['Jupiter','Mars',  'Venus'],
+        CorrectAnswer: 'Jupiter',
     },
     {
         question: "What is the boiling point of water?",
@@ -25,9 +23,9 @@ const questions = [
         CorrectAnswer: "100°C",
     },
     {
-        question: "What is the largest planet in our solar system?",
-        choices: ["Mars", "Jupiter", "Venus"],
-        CorrectAnswer: "Jupiter",
+        question: 'What is the largest planet in our solar system?',
+        choices: ['Jupiter', 'Mars',  'Venus'],
+        CorrectAnswer: 'Jupiter',
     },
     {
         question: "What is the boiling point of water?",
@@ -74,22 +72,30 @@ const Question: React.FC<Props> = ({
     )
 }
 
-const Quiz: React.FC = () => {
-    const [currentQuestion, setCurrentQuestion] = useState(0)
-    const [score, setScore] = useState(0)
-
+function Quiz(){
+    const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [score, setScore] = useState(0);
+    var TempScore = score;  
+ 
     const handleAnswer = (CorrectAnswer: string) => {
         if (CorrectAnswer === questions[currentQuestion].CorrectAnswer) {
-            setScore(score + 1)
-        } else {
-            alert(`Wrong 🤢`)
+            console.log(TempScore);
+            TempScore = score + 1;
+            setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
+            console.log(TempScore);
+                
+        }else{
+            alert(`Wrong 🤢`);
         }
-
-        const nextQuestion = currentQuestion + 1
+ 
+        const nextQuestion = currentQuestion + 1;
         if (nextQuestion < questions.length) {
-            setCurrentQuestion(nextQuestion)
+            setCurrentQuestion(nextQuestion);
         } else {
-            alert(`Quiz finished. You scored ${score}/${questions.length}`)
+
+            alert(`Quiz finished. You scored ${TempScore}/${questions.length}`);
+            setScore(0); //reset quiz
+            setCurrentQuestion(0);
         }
     }
 
@@ -113,10 +119,12 @@ const Quiz: React.FC = () => {
 export default function QuizSite() {
     return (
         <>
-            <FileUpload
-                title="Generate quiz"
-                apiUrl="http://localhost:3030/api/quiz"
-            />
+
+        {/* <FileUpload
+            title=   "Generate quiz"
+            apiUrl=  "http://localhost:3030/api/quiz"
+            
+        />  */}
 
             <div className="">
                 <Quiz />
@@ -125,7 +133,7 @@ export default function QuizSite() {
     )
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+/* export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     const session = await getServerSession(req, res, authOptions)
 
     return {
@@ -133,4 +141,4 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
             session,
         },
     }
-}
+} */
