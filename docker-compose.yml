@@ -7,6 +7,19 @@ services:
       - chroma_vol:/chroma
     ports:
       - 8000:8000
+  database:
+    container_name: database
+    image: postgres:alpine
+    ports:
+      - 5432:5432
+    restart: on-failure:5
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=db
+    volumes:
+      - "database_data:/var/lib/postgresql/data"
 
 volumes:
   chroma_vol:
+  database_data:
