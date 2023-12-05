@@ -10,7 +10,7 @@ export const authOptions: AuthOptions = {
         sessionToken: {
             name: `${cookiePrefix}.session-token`,
             options: {
-                domain: ".github-oauth.serveo.net",
+                domain: process.env.COOKIE_DOMAIN,
                 httpOnly: true,
                 sameSite: "lax",
                 path: "/",
@@ -20,7 +20,7 @@ export const authOptions: AuthOptions = {
         callbackUrl: {
             name: `${cookiePrefix}.callback-url`,
             options: {
-                domain: ".github-oauth.serveo.net",
+                domain: process.env.COOKIE_DOMAIN,
                 sameSite: "lax",
                 path: "/",
                 secure: true,
@@ -29,7 +29,7 @@ export const authOptions: AuthOptions = {
         csrfToken: {
             name: `${cookiePrefix}.csrf-token`,
             options: {
-                domain: ".github-oauth.serveo.net",
+                domain: process.env.COOKIE_DOMAIN,
                 httpOnly: true,
                 sameSite: "lax",
                 path: "/",
@@ -39,7 +39,7 @@ export const authOptions: AuthOptions = {
         pkceCodeVerifier: {
             name: `${cookiePrefix}.pkce.code_verifier`,
             options: {
-                domain: ".github-oauth.serveo.net",
+                domain: process.env.COOKIE_DOMAIN,
                 httpOnly: true,
                 sameSite: "lax",
                 path: "/",
@@ -50,7 +50,7 @@ export const authOptions: AuthOptions = {
         state: {
             name: `${cookiePrefix}.state`,
             options: {
-                domain: ".github-oauth.serveo.net",
+                domain: process.env.COOKIE_DOMAIN,
                 httpOnly: true,
                 sameSite: "lax",
                 path: "/",
@@ -61,7 +61,7 @@ export const authOptions: AuthOptions = {
         nonce: {
             name: `${cookiePrefix}.nonce`,
             options: {
-                domain: ".github-oauth.serveo.net",
+                domain: process.env.COOKIE_DOMAIN,
                 httpOnly: true,
                 sameSite: "lax",
                 path: "/",
