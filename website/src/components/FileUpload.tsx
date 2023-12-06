@@ -102,6 +102,7 @@ export default function FileUpload({
             const res = await fetch(url.toString(), {
                 method: "POST",
                 body: data,
+                credentials: "include",
             }).catch((e) => null)
 
             if (res === null) {

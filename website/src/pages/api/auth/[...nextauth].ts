@@ -1,9 +1,17 @@
 import NextAuth, { AuthOptions } from "next-auth"
 import GithubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
+import { PrismaAdapter } from "@auth/prisma-adapter"
+// import Adapters from "next-auth/adapters"
 import jwt from "jsonwebtoken"
+import { db } from "@/lib/database"
 
 const cookiePrefix = "aisb"
+// const adapter =
+// console.log("Adapter:", adapter.getAdapter())
+// db.account.findUnique({
+//     where: { pro },
+// })
 
 export const authOptions: AuthOptions = {
     cookies: {
@@ -12,7 +20,7 @@ export const authOptions: AuthOptions = {
             options: {
                 domain: process.env.COOKIE_DOMAIN,
                 httpOnly: true,
-                sameSite: "lax",
+                sameSite: "none",
                 path: "/",
                 secure: true,
             },
@@ -21,7 +29,7 @@ export const authOptions: AuthOptions = {
             name: `${cookiePrefix}.callback-url`,
             options: {
                 domain: process.env.COOKIE_DOMAIN,
-                sameSite: "lax",
+                sameSite: "none",
                 path: "/",
                 secure: true,
             },
@@ -31,7 +39,7 @@ export const authOptions: AuthOptions = {
             options: {
                 domain: process.env.COOKIE_DOMAIN,
                 httpOnly: true,
-                sameSite: "lax",
+                sameSite: "none",
                 path: "/",
                 secure: true,
             },
@@ -41,7 +49,7 @@ export const authOptions: AuthOptions = {
             options: {
                 domain: process.env.COOKIE_DOMAIN,
                 httpOnly: true,
-                sameSite: "lax",
+                sameSite: "none",
                 path: "/",
                 secure: true,
                 maxAge: 900,
@@ -52,7 +60,7 @@ export const authOptions: AuthOptions = {
             options: {
                 domain: process.env.COOKIE_DOMAIN,
                 httpOnly: true,
-                sameSite: "lax",
+                sameSite: "none",
                 path: "/",
                 secure: true,
                 maxAge: 900,
@@ -63,13 +71,12 @@ export const authOptions: AuthOptions = {
             options: {
                 domain: process.env.COOKIE_DOMAIN,
                 httpOnly: true,
-                sameSite: "lax",
+                sameSite: "none",
                 path: "/",
                 secure: true,
             },
         },
     },
-    // Configure one or more authentication providers
     providers: [
         GithubProvider({
             clientId: process.env.GITHUB_ID!,
@@ -82,28 +89,46 @@ export const authOptions: AuthOptions = {
         // ...add more providers here
     ],
     callbacks: {
-        signIn(params) {
-            // if (params.account.)
-            console.log("signin params:", params)
+        async signIn(params) {
+            const user = params.user.email
+                ? await db.user.findUnique({
+                      where: { email: params.user.email },
+                      select: { id: true },
+                  })
+                : null
+
+            if (!user || !user.id) {
+                await db.user.create({
+                    data: {
+                        email: params.user.email,
+                        name: params.user.name,
+                    },
+                })
+            }
+
             return true
         },
-        // jwt(params) {
-        //   console.log("jwt PARAMS:", params);
-        //   return params.token.token;
-        // },
-        // session(params) {
-        //   console.log("session PARAMS:", params);
-        //   return params.session;
-        // },
     },
-    // adapter: PrismaAdapter(db),
     jwt: {
         async encode({ token, secret, maxAge, salt }) {
-            if (!token) {
+            if (!token || !token.email) {
                 throw new Error("No token!")
             }
 
-            const encoded = jwt.sign(token, secret, { algorithm: "HS256" })
+            const user = await db.user
+                .findUnique({
+                    where: { email: token.email },
+                    select: { id: true },
+                })
+                .catch((e) => null)
+
+            const encoded = jwt.sign(
+                { ...token, userId: user?.id ?? null },
+                secret,
+                {
+                    algorithm: "HS256",
+                },
+            )
             return encoded
         },
         async decode({ token, secret, salt }) {

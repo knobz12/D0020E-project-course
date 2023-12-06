@@ -16,6 +16,22 @@ From the website folder, install dependencies by running:
 pnpm install
 ```
 
+## Before running
+
+Start database container by from root running:
+
+```bash
+docker compose up -d database
+# or
+docker compose up -d # to start all services
+```
+
+Create postgres database schema:
+
+```bash
+pnpm prisma db push
+```
+
 ## To run local development server
 
 When running local development server, for next.config.js hide the following:

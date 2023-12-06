@@ -18,60 +18,65 @@ model Course {
 }
 
 model Quiz {
-  id    String @id @db.Uuid
-  title String
-  text  String
+  id   String @id @default(uuid()) @db.Uuid
+  text String
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
 
   @@map("quiz")
 }
 
-// model Account {
-//   id                 String    @id @default(uuid()) @db.Uuid
-//   providerType       String
-//   providerId         String
-//   providerAccountId  String
-//   refreshToken       String?
-//   accessToken        String?
-//   accessTokenExpires DateTime?
-//   createdAt          DateTime  @default(now())
-//   updatedAt          DateTime  @updatedAt
+model Account {
+  id                String  @id @default(uuid()) @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
-//   userId String @db.Uuid
-//   user   User   @relation(fields: [userId], references: [id])
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-//   @@unique([providerId, providerAccountId])
-// }
+  @@unique([provider, providerAccountId])
+  @@map("account")
+}
 
-// model Session {
-//   id           String   @id @default(cuid())
-//   userId       String
-//   expires      DateTime
-//   sessionToken String   @unique
-//   accessToken  String   @unique
-//   createdAt    DateTime @default(now())
-//   updatedAt    DateTime @updatedAt
-//   user         User     @relation(fields: [userId], references: [id])
-// }
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  sessionToken String   @unique
+  expires      DateTime
 
-// model User {
-//   id            String    @id @default(cuid())
-//   name          String?
-//   email         String?   @unique
-//   emailVerified DateTime?
-//   image         String?
-//   createdAt     DateTime  @default(now())
-//   updatedAt     DateTime  @updatedAt
-//   accounts      Account[]
-//   sessions      Session[]
-// }
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-// model VerificationRequest {
-//   id         String   @id @default(cuid())
-//   identifier String
-//   token      String   @unique
-//   expires    DateTime
-//   createdAt  DateTime @default(now())
-//   updatedAt  DateTime @updatedAt
+  @@map("session")
+}
 
-//   @@unique([identifier, token])
-// }
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+
+  quizes Quiz[]
+
+  @@map("user")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_token")
+}
