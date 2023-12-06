@@ -164,7 +164,7 @@ def create_quiz_from_questions_stream(guid, questions: list[str], answer_count: 
     """
 
 @guidance()
-def newQuestionJSONGenerator(lm, context: str, answer_count: int, qsts: list[str]):
+def newQuestionJSONGenerator(lm, context: str, answer_count: int, question_count: int):
 
     def gen_answer(idx: int) -> str:
         answer: str = f"""\
@@ -174,30 +174,54 @@ def newQuestionJSONGenerator(lm, context: str, answer_count: int, qsts: list[str
         }}"""
         return answer
 
-    qst_str = "\n".join(qsts)
+    def gen_question(idx: int):
+        question: str = f"""\
+        {{
+            "question": "{gen(f"question{idx}",stop='"')}",
+            "answers": [\n
+        """
+
+        answers: str = ""
+        for i in range(0, answer_count):
+            if (i != answer_count - 1):
+                answers += gen_answer(idx + i) + ",\n"
+            else:
+                answers += gen_answer(idx + i) + "\n"
+        
+
+        answers = textwrap.indent(answers, 8 * ' ')
+        question += answers + "    ]\n}"
+        print(question)
+        return question
+
+    questions: str = ""
+    for i in range(0, question_count):
+        if (i != question_count - 1):
+            questions += gen_question(i) + ",\n"
+        else:
+            questions += gen_question(i) + "\n"
+
+        
+    questions = textwrap.indent(questions, 8 * ' ')
+
+
+
+
     res = f"""\
     The following is a quiz question in JSON format.
-    Generate answers based on the provided context. Only ONE of the answers can be true, and the others shall be false.
+    Generate answers based on the provided context. Only ONE of the answers is. true, and the others shall be false.
     The incorrect answers must be different from each other but still related to the topic.
-    The new question MUST NOT be similar to one of the already existing questions provided below.
-
-    Existing questions: {qst_str}
+    The questions MUST be different to one another.
 
     Context: {context}
-
     {{
-        "question": "{gen("question",stop='"')}",
-        "answers": ["""
+        "questions": [\n{questions} 
+        ]
+    }}
+    """
 
-    # answers: str = ""
-    for i in range(0, answer_count):
-        if (i != answer_count - 1):
-            res += gen_answer(i) + ",\n"
-        else:
-            res += gen_answer(i) + "\n"
 
-        res += f"""]
-    }}"""
+    print(res)
     lm += res 
     
     return lm
@@ -211,20 +235,22 @@ def create_quiz(id: str, questions: int) -> Generator[str, str, None]:
     print(docs)
     qsts_list: list[str] = []
 
+
+    string: str = ""
+
     for (i, doc) in enumerate(docs["metadatas"]):
         qsts_cunt = calculate_questions_per_doc(len(docs["metadatas"]), questions, i)
-        print(f"Creating {qsts_cunt} for doc {i}")
+        print(f"Questions for {i}")
+        result = glmm + newQuestionJSONGenerator(doc["text"], 4, qsts_cunt)
 
         for i in range(0, qsts_cunt):
-            print(f"Question {i}")
-            result = glmm + newQuestionJSONGenerator(doc["text"], 4, qsts_list)
-            question: str = result["question"]
+            question: str = result[f"question{i}"]
             qsts_list.append(question)
             print(question, end="\n\n")
-            print(str(result))
+            #print(str(result))
             answers: list[tuple[str, bool]] = []
-            for i in range(0,4):
-                answer = (result[f"answer{i}"], True if result[f"isAnswer{i}"] == "true" else False)
+            for j in range(0,4):
+                answer = (result[f"answer{i + j}"], True if result[f"isAnswer{i + j}"] == "true" else False)
                 answers.append(answer)
 
             res= [question]
@@ -232,10 +258,12 @@ def create_quiz(id: str, questions: int) -> Generator[str, str, None]:
                 symbol = "✅" if answer[1] == True else "💀"
                 res.append(f"{symbol} {answer[0]}: {answer[1]}")
             complete = "\n".join(res)
-            yield complete + "\n\n"
+            string += complete + "\n\n"
+            print(string)
+    return string
 
 def quiz_test():
-    print(create_quiz("b53998910b5a91c141f890fa76fbcb7f")) 
+    print(create_quiz("b53998910b5a91c141f890fa76fbcb7f", 3)) 
 
     # doc_amnt = 6
     # qsts = 11
