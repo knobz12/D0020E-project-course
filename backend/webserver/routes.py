@@ -126,6 +126,7 @@ def summary():
         return make_response("Missing file", 406)
     
     file = request.files["file"]
+    file_size = file.seek(0, os.SEEK_END)
     print("File size:",file_size)
 
     if file_size <= 0:
