@@ -19,6 +19,8 @@
         "@mantine/next": "^6",
         "@mantine/notifications": "^6.0.21",
         "@mantine/nprogress": "^6.0.21",
+        "@next-auth/prisma-adapter": "0.4.4-canary.81",
+        "@prisma/client": "^5.6.0",
         "@tabler/icons-react": "^2.40.0",
         "ai": "^2.2.23",
         "clsx": "^2.0.0",
@@ -42,6 +44,7 @@
         "postcss-simple-vars": "^7.0.1",
         "prettier": "^3.1.0",
         "prettier-plugin-tailwindcss": "^0.5.7",
+        "prisma": "^5.6.0",
         "tailwindcss": "^3.3.5",
         "typescript": "^5.2.2"
     }
