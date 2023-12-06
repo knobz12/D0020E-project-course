@@ -191,7 +191,7 @@ def newQuestionJSONGenerator(lm, context: str, answer_count: int, question_count
 
         answers = textwrap.indent(answers, 8 * ' ')
         question += answers + "    ]\n}"
-        print(question)
+        #print(question)
         return question
 
     questions: str = ""
@@ -246,7 +246,7 @@ def create_quiz(id: str, questions: int) -> Generator[str, str, None]:
         for i in range(0, qsts_cunt):
             question: str = result[f"question{i}"]
             qsts_list.append(question)
-            print(question, end="\n\n")
+            #print(question, end="\n\n")
             #print(str(result))
             answers: list[tuple[str, bool]] = []
             for j in range(0,4):
