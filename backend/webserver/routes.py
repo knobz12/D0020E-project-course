@@ -99,6 +99,7 @@ def quiz():
     
     file = request.files["file"]
     file_size = file.seek(0, os.SEEK_END)
+    file.seek(0)
     print("File size:",file_size)
 
     if file_size <= 0:
@@ -127,6 +128,7 @@ def summary():
     
     file = request.files["file"]
     file_size = file.seek(0, os.SEEK_END)
+    file.seek(0)
     print("File size:",file_size)
 
     if file_size <= 0:
