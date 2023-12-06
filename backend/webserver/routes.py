@@ -3,6 +3,7 @@ from modules.ai.summarizer import summarize_doc_stream
 from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
 from webserver.app import app
+import os
 
 from modules.ai.utils.llm import create_llm_guidance
 from modules.files.hash_and_json.HashFunction import TextToHash
