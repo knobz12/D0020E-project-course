@@ -79,7 +79,8 @@ class Chunkerizer:
                     io_buf = io.BytesIO(img_obj.data)
                     img = Image.open(io_buf)
                     extracted_image_text += pytesseract.image_to_string(img)
-
+            elif mime_type == "application/x-empty":
+                pass
             elif is_programming_lang(mime_type):
                 extracted_text = bytes.decode(buf, "utf-8", errors = "ignore")
             elif mime_type == "text/plain":
@@ -136,7 +137,7 @@ class Chunkerizer:
         
     def text_extraction_test():
         #path_list = ["./backend/tests\sample_files\courses\D7032E\evolutionCards.json"]
-        path_list = ["./backend/tests/sample_files/Test_pdfs/image75.pdf"]
+        path_list = ["./backend/tests/sample_files/Test_txt/t.txt"]
         #path_list = glob.glob("./backend/tests/**/*.*", recursive = True)
         try:
             for path in path_list: 
