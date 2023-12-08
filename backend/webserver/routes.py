@@ -3,6 +3,7 @@ from modules.ai.summarizer import summarize_doc_stream
 from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
 from webserver.app import app
+import os
 
 from modules.ai.utils.llm import create_llm_guidance
 from modules.files.hash_and_json.HashFunction import TextToHash
@@ -91,12 +92,35 @@ def upsert_file(file: FileStorage) -> tuple[str, GetResult] | None:
     upload_chunks(file_hash,chunks)
     return (file_hash, collection.get(where={"id":file_hash}))
 
+import jwt
+def get_user_id() -> str | None:
+    token = request.cookies.get("aisb.session-token")
+    token = token.replace("'","\"")
+
+    if token == None:
+        return None
+
+    token = jwt.decode(token, "123",algorithms=["HS256"])
+    print("Token str:",token)
+    if not "userId" in token:
+        return None
+
+    user_id = token["userId"]
+    return user_id
+
 @app.route("/api/quiz", methods=["POST"])
 def quiz():
     if 'file' not in request.files:
         return make_response("Missing file", 406)
     
     file = request.files["file"]
+    file_size = file.seek(0, os.SEEK_END)
+    file.seek(0)
+    print("File size:",file_size)
+
+    if file_size <= 0:
+        return make_response("Cannot send empty file! 😡", 406)
+
     result = upsert_file(file)
 
     if result == None:
@@ -111,7 +135,25 @@ def quiz():
     print(f"Creating {questions} questions")
     (file_hash, _) = result
 
-    return app.response_class(create_quiz(file_hash, questions), mimetype='text/plain')
+    import psycopg2
+
+    quiz = ""
+    for chunk in create_quiz(file_hash, questions):
+        quiz += chunk
+
+    print(quiz)
+    print("Inserting quiz")
+    from uuid import uuid4
+    user_id = get_user_id()
+    if user_id:
+        print("Found user:", user_id)
+        print("Saving quiz")
+        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+        cur = conn.cursor()
+        cur.execute("INSERT INTO quiz (id, text, user_id) VALUES (%s, %s, %s);", (str(uuid4()), quiz, user_id))
+        conn.commit()
+    
+    return make_response(quiz, 200)
 
 @app.route("/api/summary", methods=["POST"])
 def summary():
@@ -119,6 +161,13 @@ def summary():
         return make_response("Missing file", 406)
     
     file = request.files["file"]
+    file_size = file.seek(0, os.SEEK_END)
+    file.seek(0)
+    print("File size:",file_size)
+
+    if file_size <= 0:
+        return make_response("Cannot send empty file! 😡", 406)
+
 
     result = upsert_file(file)
     if result == None:

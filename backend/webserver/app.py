@@ -11,7 +11,7 @@ path = os.path.abspath("website/out")
 print(path)
 app = Flask(__name__, static_folder=path,template_folder=path)
 app.secret_key = 'knobz'
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
 
 import webserver.routes
 

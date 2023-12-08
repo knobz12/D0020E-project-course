@@ -2,6 +2,7 @@ import "../../public/globals.css"
 import React from "react"
 import Head from "next/head"
 import { MantineProvider } from "@mantine/core"
+import { ModalsProvider } from "@mantine/modals"
 import { Notifications } from "@mantine/notifications"
 import { SessionProvider } from "next-auth/react"
 import type { AppProps } from "next/app"
@@ -85,8 +86,10 @@ export default function LlamaApp({
                         },
                     }}
                 >
-                    <Notifications />
-                    <Component {...pageProps} />
+                    <ModalsProvider>
+                        <Notifications />
+                        <Component {...pageProps} />
+                    </ModalsProvider>
                 </MantineProvider>
             </SessionProvider>
         </>

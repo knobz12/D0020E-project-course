@@ -22,4 +22,7 @@ def get_args() -> Args:
     if not exists:
         raise FileNotFoundError("Model does not exist at path: "+ model_path)
 
+
+    print(f"--model-path = {args.model_path}")
+    print(f"--gpu-layers = {args.gpu_layers}")
     return Args(model_path=model_path,gpu_layers=gpu_layers)
