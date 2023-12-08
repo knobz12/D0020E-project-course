@@ -55,152 +55,53 @@ def determineQuestionBias(lm, question: str):
 
 
 @guidance()
-def questionJSONGenerator(lm, question: str, answer_count: int):
-
-    def gen_answer() -> str:
-        answer: str = f"""\
-        {{
-            "answer": "{gen("answer", stop='"')}",
-            "isAnswer": "{select(options=['true', 'false'], name='isAnswer')}"
-        }}"""
-        return answer
-
-    answers: str = ""
-    for i in range(0, answer_count):
-        if (i != answer_count - 1):
-            answers += gen_answer() + ",\n"
-        else:
-            answers += gen_answer() + "\n"
-
-
-    res = f"""\
-    The following is a quiz question in JSON format.
-    Generate answers. Only ONE of the answers can be true, and the others shall be false.
-    The incorrect answers must be different from each other but still related to the topic.
-
-    {{
-        "question": "{question}",
-        "answers": [
-            {answers}
-        ]
-    }}"""
-
-    lm += res 
-    
-    return lm
-
-def create_quiz_from_questions(guid, questions: list[str], answer_count: int) -> str:
-    json_output: str = """\
-    {
-        "questions": [\n"""
-
-    for (idx, question) in enumerate(questions):
-        print(f"Generating quiz {idx}")
-        quizJson = str(guid + questionJSONGenerator(question, answer_count))
-        res = str(guid + determineQuestionBias(question))
-        factual = res.__contains__("Answer: factual")
-        f = "factual" if factual == True else "opinion"
-        print(f"Question {idx + 1}: {f}")
-
-        pattern = regex.compile(r'{(?:[^{}]|(?R))*}')
-        jsonn = pattern.findall(quizJson)[0]
-        val = json.loads(jsonn)
-        res = str(json.dumps(val, indent=4))
-        res = textwrap.indent(res, 12 * ' ')
-
-        if (idx != len(questions) - 1):
-            json_output += res + ",\n"
-        else:
-            json_output += res + "\n"
-    json_output += """\
-        ]
-    }
-    """
-    return json_output
-
-
-def create_quiz_from_questions_stream(guid, questions: list[str], answer_count: int) -> str:
-    yield """\
-    {
-        "questions": [\n"""
-
-    for (idx, question) in enumerate(questions):
-        print(f"Generating quiz {idx}")
-        quizJson = str(guid + questionJSONGenerator(question, answer_count))
-
-        res = str(guid + determineQuestionBias(question))
-        factual = res.__contains__("Answer: factual")
-        f = "factual" if factual == True else "opinion"
-        print(f"Question {idx + 1}: {f}")
-
-        pattern = regex.compile(r'{(?:[^{}]|(?R))*}')
-        jsonn = pattern.findall(quizJson)[0]
-        val = json.loads(jsonn)
-        res = str(json.dumps(val, indent=4))
-        res = textwrap.indent(res, 12 * ' ')
-
-        if (idx != len(questions) - 1):
-            yield res + ",\n"
-        else:
-            yield res + "\n"
-
-
-
-    yield """\
-        ]
-    }
-    """
-
-@guidance()
 def newQuestionJSONGenerator(lm, context: str, answer_count: int, question_count: int):
 
-    def gen_answer(idx: int) -> str:
-        answer: str = f"""\
-        {{
-            "answer": "{gen(f"answer{idx}", stop='"')}",
-            "isAnswer": "{select(options=['true', 'false'], name=f'isAnswer{idx}')}"
-        }}"""
+    def gen_answer(idx: int,questionIndex:int) -> str:
+        answerKey = f"answer{questionIndex}-{idx}"
+        isAnswerKey = f"isAnswer{questionIndex}-{idx}"
+        print(answerKey, isAnswerKey)
+        import random
+        seed = random.randint(0, 1337)
+        answer: str = f"""\"{gen(name=answerKey, stop='"',llm_kwargs={"seed": seed})}\": {select(["True", "False"],name=isAnswerKey)}"""
         return answer
 
     def gen_question(idx: int):
+        # question: str = f"""{{ "question":"{gen(f"question{idx}",stop='"',)}", "answers":["""
         question: str = f"""\
-        {{
-            "question": "{gen(f"question{idx}",stop='"')}",
-            "answers": [\n
-        """
+Question: "{gen(f"question{idx}",stop='"')}"
+Answers:
+"""
 
-        answers: str = ""
+        # answers: str = ""
         for i in range(0, answer_count):
-            if (i != answer_count - 1):
-                answers += gen_answer(idx + i) + ",\n"
-            else:
-                answers += gen_answer(idx + i) + "\n"
+            question += gen_answer(i, idx) + "\n"
         
 
-        answers = textwrap.indent(answers, 8 * ' ')
-        question += answers + "    ]\n}"
+        #print(question)
         return question
 
     questions: str = ""
     for i in range(0, question_count):
-        if (i != question_count - 1):
-            questions += gen_question(i) + ",\n"
-        else:
-            questions += gen_question(i) + "\n"
+        questions += gen_question(i) + "\n\n"
 
-    questions = textwrap.indent(questions, 8 * ' ')
+        
+    print("Questions:\n", questions)
+
+
+
 
     res = f"""\
-    The following is a quiz question in JSON format.
-    Generate answers based on the provided context. Only ONE of the answers is. true, and the others shall be false.
-    The incorrect answers must be different from each other but still related to the topic.
-    The questions MUST be different to one another.
+The following is a quiz question in JSON format.
+Generate answers based on the provided context. Only ONE of the answers is. true, and the others shall be false.
+The incorrect answers must be different from each other but still related to the topic.
+The questions MUST be different to one another.
 
-    Context: {context}
-    {{
-        "questions": [\n{questions} 
-        ]
-    }}
+Context: {context}
+
+Questions:
+
+{questions}
     """
 
 
@@ -217,22 +118,34 @@ def create_quiz(id: str, questions: int) -> Generator[str, str, None]:
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
     print(docs)
     qsts_list: list[str] = []
+
     string: str = ""
 
     for (i, doc) in enumerate(docs["metadatas"]):
         qsts_cunt = calculate_questions_per_doc(len(docs["metadatas"]), questions, i)
         print(f"Questions for {i}")
         result = glmm + newQuestionJSONGenerator(doc["text"], 4, qsts_cunt)
+        print(str(result))
 
         for i in range(0, qsts_cunt):
             question: str = result[f"question{i}"]
+            print(question)
             qsts_list.append(question)
-            #print(question, end="\n\n")
-            #print(str(result))
             answers: list[tuple[str, bool]] = []
+            print("Answers:",answers)
+
             for j in range(0,4):
-                answer = (result[f"answer{i + j}"], True if result[f"isAnswer{i + j}"] == "true" else False)
+                answer = (result[f"answer{i}-{j}"], True if result[f"isAnswer{i}-{j}"] == "True" else False)
                 answers.append(answer)
+
+            all_false = True
+            for (_, answer) in answers:
+                if answer == True:
+                    all_false = False
+                    break
+
+            if all_false:
+                continue
 
             res= [question]
             for answer in answers:
@@ -240,7 +153,7 @@ def create_quiz(id: str, questions: int) -> Generator[str, str, None]:
                 res.append(f"{symbol} {answer[0]}: {answer[1]}")
             complete = "\n".join(res)
             string += complete + "\n\n"
-            print(string)
+    print(string)
     return string
 
 def quiz_test():

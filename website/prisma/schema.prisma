@@ -11,24 +11,104 @@ datasource db {
 }
 
 model Course {
-  id   String @id @db.VarChar(64)
+  id   String @id @default(uuid()) @db.Uuid
   name String
 
-  @@map("course")
+  quizPrompts    QuizPrompt[]
+  summaryPrompts SummaryPrompt[]
+  /// ... more prompts
+
+  @@map("courses")
 }
 
-model Quiz {
-  id   String @id @default(uuid()) @db.Uuid
-  text String
+model QuizPrompt {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title   String
+  content Json
 
   userId String @map("user_id") @db.Uuid
+  /// The user who made this prompt
   user   User   @relation(fields: [userId], references: [id])
 
-  @@map("quiz")
+  courseId String @map("course_id") @db.Uuid
+  /// The course this prompt belongs to
+  course   Course @relation(fields: [courseId], references: [id])
+
+  reactions QuizPromptReaction[]
+
+  @@map("quiz_prompts")
 }
 
+model QuizPromptReaction {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String @map("user_id") @db.Uuid
+  /// The user who made this prompt
+  user   User   @relation(fields: [userId], references: [id])
+
+  quizPromptId String     @db.Uuid
+  /// The quiz prompt this reaction is for
+  quizPrompt   QuizPrompt @relation(fields: [quizPromptId], references: [id])
+
+  /// Whether the reaction is positive or not.
+  positive Boolean
+
+  @@unique([quizPromptId, userId])
+}
+
+model SummaryPrompt {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title   String
+  content String
+
+  userId String @map("user_id") @db.Uuid
+  /// The user who made this prompt
+  user   User   @relation(fields: [userId], references: [id])
+
+  courseId String @map("course_id") @db.Uuid
+  /// The course this prompt belongs to
+  course   Course @relation(fields: [courseId], references: [id])
+
+  reactions SummaryPromptReaction[]
+
+  @@map("summary_prompts")
+}
+
+model SummaryPromptReaction {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String @map("user_id") @db.Uuid
+  /// The user who made this prompt
+  user   User   @relation(fields: [userId], references: [id])
+
+  summaryPromptId String        @db.Uuid
+  /// The summary prompt this reaction is for
+  summaryPrompt   SummaryPrompt @relation(fields: [summaryPromptId], references: [id])
+
+  positive Boolean
+
+  @@unique([summaryPromptId, userId])
+}
+
+/// Explanation prompt
+/// Flashcard prompt
+/// Assignment prompt
+
 model Account {
-  id                String  @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   type              String
   provider          String
   providerAccountId String
@@ -44,22 +124,28 @@ model Account {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  @@map("account")
+  @@map("accounts")
 }
 
 model Session {
-  id           String   @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   sessionToken String   @unique
   expires      DateTime
 
   userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("session")
+  @@map("sessions")
 }
 
 model User {
-  id            String    @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   name          String?
   email         String?   @unique
   emailVerified DateTime?
@@ -67,9 +153,13 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  quizes Quiz[]
+  quizes    QuizPrompt[]
+  summaries SummaryPrompt[]
 
-  @@map("user")
+  quizReactions    QuizPromptReaction[]
+  summaryReactions SummaryPromptReaction[]
+
+  @@map("users")
 }
 
 model VerificationToken {
@@ -78,5 +168,5 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-  @@map("verification_token")
+  @@map("verification_tokens")
 }

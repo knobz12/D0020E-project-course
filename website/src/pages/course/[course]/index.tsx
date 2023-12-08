@@ -74,7 +74,7 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
 ]
 
 export default function Home({
-    quizes,
+    prompts,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
 
@@ -126,29 +126,25 @@ export default function Home({
                         <Stack>
                             <Title>Prompts</Title>
                             <Stack>
-                                {quizes.map((quiz, idx) => {
+                                {prompts.map((prompt, idx) => {
                                     return (
                                         <Paper
                                             onClick={() => {
                                                 modals.open({
-                                                    title: `Title ${idx + 1}`,
-                                                    children: (
-                                                        <Text>{quiz.text}</Text>
-                                                    ),
+                                                    title: prompt.title,
                                                 })
                                             }}
-                                            key={quiz.id}
+                                            key={prompt.id}
                                             className="overflow-hidden max-h-48"
                                             radius="lg"
                                             p="lg"
                                         >
                                             <Flex align="center" gap="md">
-                                                <Title>Title {idx + 1}</Title>
-                                                <Badge size="lg">QUIZ</Badge>
+                                                <Title>{prompt.title}</Title>
+                                                <Badge size="lg">
+                                                    {prompt.type}
+                                                </Badge>
                                             </Flex>
-                                            <pre className="w-full h-full overflow-ellipsis">
-                                                {quiz.text}
-                                            </pre>
                                         </Paper>
                                     )
                                 })}
@@ -165,21 +161,132 @@ export const getServerSideProps = (async ({ req, res, params }) => {
     const course = params?.course
     console.log("Params:", params)
 
-    if (course !== "D7032E") {
+    if (typeof course !== "string") {
         return { notFound: true }
     }
 
-    const [session, quizes] = await Promise.all([
+    async function getQuizes() {
+        const quizes = await db.quizPrompt.findMany({
+            orderBy: { createdAt: "desc" },
+            take: 25,
+            where: { course: { name: "D7032E" } },
+            select: {
+                id: true,
+                title: true,
+                createdAt: true,
+            },
+        })
+
+        const formatted = await Promise.all(
+            quizes.map(
+                (quiz) =>
+                    new Promise<
+                        Omit<typeof quiz, "createdAt"> & {
+                            createdAt: string
+                            score: number
+                            type: "QUIZ" | "SUMMARY"
+                        }
+                    >(async (res) => {
+                        const [positiveReactions, negativeReactions] =
+                            await Promise.all([
+                                db.quizPromptReaction.count({
+                                    where: {
+                                        quizPromptId: quiz.id,
+                                        positive: true,
+                                    },
+                                }),
+                                db.quizPromptReaction.count({
+                                    where: {
+                                        quizPromptId: quiz.id,
+                                        positive: false,
+                                    },
+                                }),
+                            ])
+
+                        const score = positiveReactions - negativeReactions
+
+                        res({
+                            ...quiz,
+                            createdAt: quiz.createdAt.toISOString(),
+                            type: "QUIZ",
+                            score,
+                        })
+                    }),
+            ),
+        )
+
+        return formatted
+    }
+
+    async function getSummaries() {
+        const summaries = await db.summaryPrompt.findMany({
+            orderBy: { createdAt: "desc" },
+            take: 25,
+            where: { course: { name: "D7032E" } },
+            select: {
+                id: true,
+                title: true,
+                createdAt: true,
+            },
+        })
+
+        const formatted = await Promise.all(
+            summaries.map(
+                (summary) =>
+                    new Promise<
+                        Omit<typeof summary, "createdAt"> & {
+                            createdAt: string
+                            score: number
+                            type: "QUIZ" | "SUMMARY"
+                        }
+                    >(async (res) => {
+                        const [positiveReactions, negativeReactions] =
+                            await Promise.all([
+                                db.summaryPromptReaction.count({
+                                    where: {
+                                        summaryPromptId: summary.id,
+                                        positive: true,
+                                    },
+                                }),
+                                db.summaryPromptReaction.count({
+                                    where: {
+                                        summaryPromptId: summary.id,
+                                        positive: false,
+                                    },
+                                }),
+                            ])
+
+                        const score = positiveReactions - negativeReactions
+
+                        res({
+                            ...summary,
+                            createdAt: summary.createdAt.toISOString(),
+                            type: "SUMMARY",
+                            score,
+                        })
+                    }),
+            ),
+        )
+
+        return formatted
+    }
+
+    const [session, quizes, summaries] = await Promise.all([
         getServerSession(req, res, authOptions),
-        db.quiz.findMany({
-            orderBy: { id: "desc" },
-        }),
+        getQuizes(),
+        getSummaries(),
     ])
+
+    // Combine into one list ordered by created at date
+    const prompts = [...quizes, ...summaries].sort((a, b) =>
+        new Date(a.createdAt).valueOf() < new Date(b.createdAt).valueOf()
+            ? 1
+            : -1,
+    )
 
     return {
         props: {
-            session,
-            quizes,
+            prompts,
         },
     }
 }) satisfies GetServerSideProps

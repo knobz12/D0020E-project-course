@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import FileUpload from "@/components/FileUpload"
 import { sleep } from 'openai/core.mjs';
 
+
 import {
     Card,
     Center,
@@ -13,6 +14,7 @@ import {
     Stack,
     Text,
     Title,
+    Checkbox,
 } from "@mantine/core"
 import { Page } from "@/components/Page"
 import Link from "next/link"
@@ -24,14 +26,11 @@ import { authOptions } from "../../api/auth/[...nextauth]"
 //insperation 👌 https://www.geeksforgeeks.org/how-to-build-a-quiz-app-with-react-and-typescript/
 
 
-
-
-
 const questions = [
     {
-        question: "What is the boiling point of water? answer  1 or 2",
+        question: "What is the boiling point of water?",
         choices: ["100°C", "1°C", "2°C"],
-        CorrectAnswer: ["1°C","2°C"],
+        CorrectAnswer: ["100°C","1°C"],
     },
     {
         question: 'What is the capital of France?',
@@ -67,6 +66,7 @@ interface Props {
     onAnswer: (CorrectAnswer: string) => void
 }
 
+
 const Question: React.FC<Props> = ({
     question,
     choices,
@@ -83,6 +83,18 @@ const Question: React.FC<Props> = ({
         >
             <h2 className="">{question}</h2>
             <div className="">
+                
+                <button>
+                    {"submit"}
+                </button>
+
+                {choices.map((choice) => (
+                    <Checkbox
+                    
+                    label={choice}/>
+                    
+                ))}
+
                 {choices.map((choice) => (
                     <button
                         key={choice}
