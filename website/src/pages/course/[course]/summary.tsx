@@ -10,7 +10,7 @@ export default function Summary({}: SummaryProps) {
     return (
         <FileUpload
             title="Generate summary"
-            apiUrl="http://localhost:3030/api/quiz"
+            apiUrl="http://localhost:3030/api/summary"
         />
     )
 }
