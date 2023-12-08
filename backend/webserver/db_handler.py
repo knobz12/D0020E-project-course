@@ -16,6 +16,5 @@ class db_handler():
     hash_password = hash_object.hexdigest()
     print(hash_password)
 
-
 #res = cur.execute("SELECT name FROM sqlite_master")
 #res.fetchone()

@@ -16,6 +16,7 @@ from werkzeug.datastructures import FileStorage
 from chromadb import GetResult
 from modules.files.correct_chunks import TextSplit
 import psycopg2
+import jwt
 
 
 cache = Cache(app,config={"CACHE_TYPE":"SimpleCache"})
@@ -26,9 +27,11 @@ def static_serve(path: str):
     res.headers.set("cache-control","max-age: 60")
     return res
 
+
 @app.route("/")
 def home_page():
     return app.send_static_file("index.html")
+
 
 @app.after_request
 def add_cache_header(response: Response):
@@ -39,9 +42,11 @@ def add_cache_header(response: Response):
 
     return response
 
+
 @app.route("/quiz")
 def quiz_page():
     return app.send_static_file("quiz.html")
+
 
 def upload_chunks(file_hash: str, chunks: list[str]):
     collection = create_collection()
@@ -96,7 +101,7 @@ def upsert_file(file: FileStorage) -> tuple[str, GetResult] | None:
     upload_chunks(file_hash,chunks)
     return (file_hash, collection.get(where={"id":file_hash}))
 
-import jwt
+
 def get_user_id() -> str | None:
     token = request.cookies.get("aisb.session-token")
     token = token.replace("'","\"")
@@ -111,6 +116,7 @@ def get_user_id() -> str | None:
 
     user_id = token["userId"]
     return user_id
+
 
 @app.route("/api/quiz", methods=["POST"])
 def quiz():
@@ -159,6 +165,7 @@ def quiz():
     
     return make_response(quiz, 200)
 
+
 @app.route("/api/summary", methods=["POST"])
 def summary():
     if 'file' not in request.files:
@@ -180,6 +187,7 @@ def summary():
     (file_hash, _) = result
 
     return app.response_class(summarize_doc_stream(file_hash), mimetype='text/plain')
+
 
 @app.route("/api/explanation", methods=["POST"])
 def explanation():
