@@ -1,12 +1,12 @@
 from flask import Flask
 import flask_login
 from flask_cors import CORS
-
+import os
 
 class User(flask_login.UserMixin):
     pass
 
-import os
+
 path = os.path.abspath("website/out")
 print(path)
 app = Flask(__name__, static_folder=path,template_folder=path)
