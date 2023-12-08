@@ -24,9 +24,10 @@ def create_llm_guidance() -> LlamaCpp:
         f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
         temperature=0,
         top_k=40,
-        top_p=1,
-        repeat_penalty=1/0.85,
+        top_p=0.1,
+        repeat_penalty=1.176,
         verbose=False,
+        seed=-1
     )
 
     guid = llm
