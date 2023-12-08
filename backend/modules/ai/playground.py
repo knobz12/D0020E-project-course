@@ -76,7 +76,7 @@ Answer:"""
         # "What happens when the dimensions increase when using k-NN?",
         # "Are there any extra tasks in lab3?",
         # "Summarize lab 6.",
-        "What is SOLID principles?"
+        # "What is SOLID principles?"
     ]
 
     # llm("Finish the sentence: I compare thee [...]")
