@@ -14,6 +14,7 @@ from guidance import select, gen
 
 import textwrap
 import regex
+from typing import Generator
 
 def calculate_questions_per_doc(total_docs: int, total_questions: int, doc_index: int):
     """
@@ -88,14 +89,6 @@ def questionJSONGenerator(lm, question: str, answer_count: int):
     
     return lm
 
-
-
-@guidance()
-def question_generator(lm, ):
-    pass
-
-
-
 def create_quiz_from_questions(guid, questions: list[str], answer_count: int) -> str:
     json_output: str = """\
     {
@@ -119,15 +112,10 @@ def create_quiz_from_questions(guid, questions: list[str], answer_count: int) ->
             json_output += res + ",\n"
         else:
             json_output += res + "\n"
-
-
-
     json_output += """\
         ]
     }
     """
-
-
     return json_output
 
 
@@ -219,7 +207,7 @@ Questions:
     
     return lm
 
-from typing import Generator
+
 def create_quiz(id: str, questions: int) -> Generator[str, str, None]:
     glmm = create_llm_guidance()
     vectorstore = create_vectorstore()
@@ -267,42 +255,6 @@ def create_quiz(id: str, questions: int) -> Generator[str, str, None]:
 
 def quiz_test():
     print(create_quiz("b53998910b5a91c141f890fa76fbcb7f", 3)) 
-
-    # doc_amnt = 6
-    # qsts = 11
-    # for i in range(0, doc_amnt):
-    #     print(f"Idx: {i}, qsts: {calculate_questions_per_doc(doc_amnt, qsts, i)}")
-
-    # questions: list[str] = [
-    #     # Opinion based
-    #     "What is your favorite book of all time, and why?",
-    #     "Do you believe that social media has a positive or negative impact on society?",
-    #     "In your opinion, what is the most important quality in a leader?",
-    #     "Should governments prioritize environmental conservation over economic development, or vice versa?",
-    #     "Is it better to pursue a college education or start working right after high school?",
-
-    #     # Fact question
-    #     "What is the capital city of France?",
-    #     "How many planets are there in our solar system?",
-    #     "When did World War II end?",
-    #     "What is the chemical symbol for gold?",
-    #     "How many continents are there in the world?",
-
-    #     # "Who is the best tech CEO of all time?",
-    #     # "What is the closest planet to the sun?",
-    #     # "What are the eight planets?",
-    #     # "Which country is known as the 'Land of the Rising Sun'?",
-    #     # "What is the chemical symbol for gold?",
-    #     # "Who wrote the play 'Romeo and Juliet'?",
-    #     # "In which year did Christopher Columbus first reach the Americas?",
-    #     # "What does the acronym 'CPU' stand for?",
-    #     # "Who is known as the 'King of Pop'?",
-    #     # "In which sport would you perform a slam dunk?",
-    #     # "Who painted the Mona Lisa?",
-    #     # "What is the capital city of Australia?",
-    #     # "Which film won the Academy Award for Best Picture in 2020?",
-    # ]
-
 
 if __name__ == "__main__":
     quiz_test()

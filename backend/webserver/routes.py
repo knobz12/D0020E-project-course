@@ -12,6 +12,12 @@ from modules.ai.utils.vectorstore import create_collection
 from flask import Response, request, make_response, send_from_directory
 from flask_caching import Cache
 
+from werkzeug.datastructures import FileStorage
+from chromadb import GetResult
+from modules.files.correct_chunks import TextSplit
+import psycopg2
+
+
 cache = Cache(app,config={"CACHE_TYPE":"SimpleCache"})
 
 @app.route("/static/<path:path>")
@@ -66,9 +72,7 @@ def upload_chunks(file_hash: str, chunks: list[str]):
     collection.upsert(ids, metadatas=metadatas,documents=documents)
 
 
-from werkzeug.datastructures import FileStorage
-from chromadb import GetResult
-from modules.files.correct_chunks import TextSplit
+
 def upsert_file(file: FileStorage) -> tuple[str, GetResult] | None:
     file_bytes: bytes = file.read()
     res = Chunkerizer.text_and_image_text_from_file_bytes(file_bytes, file.filename)
@@ -135,7 +139,7 @@ def quiz():
     print(f"Creating {questions} questions")
     (file_hash, _) = result
 
-    import psycopg2
+    
 
     quiz = ""
     for chunk in create_quiz(file_hash, questions):
