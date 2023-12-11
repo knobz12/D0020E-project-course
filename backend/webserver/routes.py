@@ -177,8 +177,7 @@ def quiz():
 
     conn.close()
 
-    return make_response(quiz, 200)
-    # return app.response_class(produce(), mimetype='text/plain')
+    return app.response_class(quiz, mimetype='application/json',status=200)
 
 
 @app.route("/api/summary", methods=["POST"])
