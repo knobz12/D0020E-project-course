@@ -20,6 +20,7 @@ import { showNotification } from "@mantine/notifications"
 import { Page } from "@/components/Page"
 import { Dropzone } from "@mantine/dropzone"
 import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react"
+import { useRouter } from "next/router"
 
 function encode(input: Uint8Array) {
     var keyStr =
@@ -68,6 +69,8 @@ export default function FileUpload({
     title,
     parameters,
 }: FileUploadProps) {
+    const router = useRouter()
+    console.log("Router:", router)
     const [data, setData] = useState<string | null>(null)
     const [params, setParams] = useState<
         Record<string, string | number | undefined>
@@ -97,6 +100,16 @@ export default function FileUpload({
             for (const [key, value] of Object.entries(params)) {
                 url.searchParams.set(key, String(value))
             }
+
+            const course = router.query.course
+            if (typeof course !== "string") {
+                return showNotification({
+                    color: "red",
+                    message: "Couldn't find course",
+                })
+            }
+
+            url.searchParams.set("course", course)
 
             console.log("USING URL:", url.toString())
             const res = await fetch(url.toString(), {

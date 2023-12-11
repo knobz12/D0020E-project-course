@@ -136,6 +136,11 @@ def quiz():
     if result == None:
         return make_response("Bad file format", 406)
     
+    course_query = request.args.get("course")
+    if course_query == None:
+        return make_response("Missing required course parameter", 400)
+
+    course = course_query
     query = request.args.get("questions")
     questions = 3
 
@@ -145,7 +150,13 @@ def quiz():
     print(f"Creating {questions} questions")
     (file_hash, _) = result
 
-    
+    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM courses WHERE name=%s",(course,))
+    courses = cur.fetchall()
+    print("COURSES:",courses)
+    course_id = courses[0][0]
+    print("Course id:",course_id)
 
     quiz = ""
     for chunk in create_quiz(file_hash, questions):
@@ -154,16 +165,22 @@ def quiz():
     print(quiz)
     print("Inserting quiz")
     from uuid import uuid4
+    import json
+    import datetime
     user_id = get_user_id()
     if user_id:
         print("Found user:", user_id)
         print("Saving quiz")
-        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
         cur = conn.cursor()
-        cur.execute("INSERT INTO quiz (id, text, user_id) VALUES (%s, %s, %s);", (str(uuid4()), quiz, user_id))
+        updated_at = datetime.datetime.now().isoformat()
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO quiz_prompts (id, updated_at, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, f"Quiz {updated_at}", json.dumps({"data":quiz}), user_id, course_id))
         conn.commit()
-    
+
+    conn.close()
+
     return make_response(quiz, 200)
+    # return app.response_class(produce(), mimetype='text/plain')
 
 
 @app.route("/api/summary", methods=["POST"])
