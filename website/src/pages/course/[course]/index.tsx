@@ -70,12 +70,16 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
     },
 ]
 
-export default function Home({
-    prompts,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Home({} // prompts,
+: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
+    const prompts = trpc.prompts.getPrompts.useQuery({
+        course: router.query.course as string,
+    })
     const { mutate: react } = trpc.prompts.react.useMutation({
-        onSuccess: router.reload,
+        onSuccess() {
+            prompts.refetch()
+        },
     })
 
     return (
@@ -126,7 +130,7 @@ export default function Home({
                         <Stack>
                             <Title>Prompts</Title>
                             <Stack>
-                                {prompts.map((prompt, idx) => {
+                                {prompts.data?.map((prompt, idx) => {
                                     return (
                                         <Paper
                                             key={prompt.id}
@@ -137,9 +141,21 @@ export default function Home({
                                             <Flex gap="md">
                                                 <Stack
                                                     align="center"
-                                                    spacing="xs"
+                                                    spacing="sm"
                                                 >
                                                     <ActionIcon
+                                                        variant={
+                                                            prompt.reaction ===
+                                                            true
+                                                                ? "light"
+                                                                : undefined
+                                                        }
+                                                        color={
+                                                            prompt.reaction ===
+                                                            true
+                                                                ? "green"
+                                                                : undefined
+                                                        }
                                                         onClick={() =>
                                                             react({
                                                                 positive: true,
@@ -149,12 +165,32 @@ export default function Home({
                                                             })
                                                         }
                                                     >
-                                                        <IconArrowUp />
+                                                        <IconArrowUp
+                                                            size={48}
+                                                            stroke={
+                                                                prompt.reaction ===
+                                                                true
+                                                                    ? 3
+                                                                    : 2
+                                                            }
+                                                        />
                                                     </ActionIcon>
-                                                    <Text size="xl">
+                                                    <Text size="xl" fw={500}>
                                                         {prompt.score}
                                                     </Text>
                                                     <ActionIcon
+                                                        variant={
+                                                            prompt.reaction ===
+                                                            false
+                                                                ? "light"
+                                                                : undefined
+                                                        }
+                                                        color={
+                                                            prompt.reaction ===
+                                                            false
+                                                                ? "red"
+                                                                : undefined
+                                                        }
                                                         onClick={() =>
                                                             react({
                                                                 positive: false,
@@ -164,7 +200,15 @@ export default function Home({
                                                             })
                                                         }
                                                     >
-                                                        <IconArrowDown />
+                                                        <IconArrowDown
+                                                            size={48}
+                                                            stroke={
+                                                                prompt.reaction ===
+                                                                false
+                                                                    ? 3
+                                                                    : 2
+                                                            }
+                                                        />
                                                     </ActionIcon>
                                                 </Stack>
                                                 <Divider orientation="vertical" />

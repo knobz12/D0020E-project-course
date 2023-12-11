@@ -23,6 +23,7 @@ export const trpc = createTRPCNext<AppRouter>({
                     // You can pass any HTTP headers you wish here
                     async headers() {
                         return {
+                            cookie: opts.ctx?.req?.headers.cookie,
                             // authorization: getAuthCookie(),
                         }
                     },
@@ -33,5 +34,5 @@ export const trpc = createTRPCNext<AppRouter>({
     /**
      * @link https://trpc.io/docs/ssr
      **/
-    ssr: false,
+    ssr: true,
 })

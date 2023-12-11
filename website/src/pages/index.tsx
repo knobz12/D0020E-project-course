@@ -14,13 +14,11 @@ import Link from "next/link"
 import { getServerSession } from "next-auth"
 import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { authOptions } from "./api/auth/[...nextauth]"
-import { db } from "@/lib/database"
+import { trpc } from "@/lib/trpc"
 
-// const courses: string[] = ["D7032E"]
-
-export default function Home({
-    courses,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Home({} // courses,
+: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const courses = trpc.courses.getCourses.useQuery()
     return (
         <Page center>
             <Container w="100%" size="sm">
@@ -31,7 +29,7 @@ export default function Home({
                             <Stack spacing="xl">
                                 <Stack>
                                     <SimpleGrid cols={3}>
-                                        {courses.map(({ id, name }) => {
+                                        {courses.data?.map(({ id, name }) => {
                                             // const Icon = prompt.icon
                                             return (
                                                 <Link
@@ -61,15 +59,13 @@ export default function Home({
 }
 
 export const getServerSideProps = (async ({ req, res }) => {
-    const [session, courses] = await Promise.all([
+    const [session] = await Promise.all([
         getServerSession(req, res, authOptions),
-        db.course.findMany({ select: { id: true, name: true } }),
     ])
 
     return {
         props: {
             session,
-            courses,
         },
     }
 }) satisfies GetServerSideProps
