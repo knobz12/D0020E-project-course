@@ -18,15 +18,15 @@ llm = LlamaCPP(
     # You can pass in the URL to a GGML model to download it automatically
     model_path="/home/knobz/Documents/D0020E/D0020E-project-course/backend/models/default_.Q5_K_M.gguf",
     # optionally, you can set the path to a pre-downloaded model instead of model_url
-    temperature=0.1,
-    max_new_tokens=256,
+    temperature=0,
+    max_new_tokens=6000,
     # llama2 has a context window of 4096 tokens, but we set it lower to allow for some wiggle room
-    context_window=3900,
+    context_window=10000,
     # kwargs to pass to __call__()
     generate_kwargs={},
     # kwargs to pass to __init__()
     # set to at least 1 to use GPU
-    model_kwargs={"n_gpu_layers": 20},
+    model_kwargs={"n_gpu_layers": 25},
     # transform inputs into Llama2 format
     messages_to_prompt=messages_to_prompt,
     completion_to_prompt=completion_to_prompt,
@@ -45,5 +45,5 @@ set_global_service_context(service_context)
 documents = SimpleDirectoryReader("/home/knobz/Documents/D0020E/D0020E-project-course/backend/tests/sample_files/Test_pdfs").load_data()
 index = VectorStoreIndex.from_documents(documents)
 query_engine = index.as_query_engine(streaming=True, similarity_top_k=3)
-response_stream = query_engine.query("Make 5 questions about Architectural Design Patterns")
+response_stream = query_engine.query("Your job is to make quizzes. Make 20 questions about Architectural Design Patterns. Each question should have only 4 answer choices each and each new question can't have answers from previous questions, only new answers. EVERY QUESTION HAS TO HAVE UNIQUE ANSWERS ONLY!!! Only one answer for each question should be correct. Mark which answers are correct and which answers are false. Give the output in json format.")
 response_stream.print_response_stream()
