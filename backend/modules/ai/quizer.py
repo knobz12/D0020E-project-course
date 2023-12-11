@@ -14,7 +14,7 @@ from guidance import select, gen
 
 import textwrap
 import regex
-from typing import Generator
+from typing import Any, Generator
 
 def calculate_questions_per_doc(total_docs: int, total_questions: int, doc_index: int):
     """
@@ -111,15 +111,18 @@ Questions:
     return lm
 
 
-def create_quiz(id: str, questions: int) -> Generator[str, str, None]:
+
+
+
+def create_quiz(id: str, questions: int) -> str:
     glmm = create_llm_guidance()
     vectorstore = create_vectorstore()
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
     print(docs)
-    qsts_list: list[str] = []
 
-    string: str = ""
+
+    obj: dict[str, list[dict[str, Any]]] =  {}
 
     for (i, doc) in enumerate(docs["metadatas"]):
         qsts_cunt = calculate_questions_per_doc(len(docs["metadatas"]), questions, i)
@@ -127,34 +130,21 @@ def create_quiz(id: str, questions: int) -> Generator[str, str, None]:
         result = glmm + newQuestionJSONGenerator(doc["text"], 4, qsts_cunt)
         print(str(result))
 
+        obj["questions"] = []
+
         for i in range(0, qsts_cunt):
             question: str = result[f"question{i}"]
-            print(question)
-            qsts_list.append(question)
-            answers: list[tuple[str, bool]] = []
-            print("Answers:",answers)
+            obj["questions"].append({"question" : questions, "answers": []})
 
             for j in range(0,4):
-                answer = (result[f"answer{i}-{j}"], True if result[f"isAnswer{i}-{j}"] == "True" else False)
-                answers.append(answer)
+                answer: str = result[f"answer{i}-{j}"]
+                correct: str = result[f"isAnswer{i}-{j}"]
+                obj["questions"][i]["answers"].append({"text": answer, "correct" : correct})
+    
+    result: str = json.dumps(obj)
+    return result
 
-            all_false = True
-            for (_, answer) in answers:
-                if answer == True:
-                    all_false = False
-                    break
 
-            if all_false:
-                continue
-
-            res= [question]
-            for answer in answers:
-                symbol = "✅" if answer[1] == True else "💀"
-                res.append(f"{symbol} {answer[0]}: {answer[1]}")
-            complete = "\n".join(res)
-            string += complete + "\n\n"
-    print(string)
-    return string
 
 def quiz_test():
     print(create_quiz("b53998910b5a91c141f890fa76fbcb7f", 3)) 

@@ -158,9 +158,7 @@ def quiz():
     course_id = courses[0][0]
     print("Course id:",course_id)
 
-    quiz = ""
-    for chunk in create_quiz(file_hash, questions):
-        quiz += chunk
+    quiz = create_quiz(file_hash, questions)
 
     print(quiz)
     print("Inserting quiz")
