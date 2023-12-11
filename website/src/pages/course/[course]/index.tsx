@@ -1,37 +1,34 @@
 import React from "react"
 import {
+    ActionIcon,
     Badge,
-    Box,
     Card,
     Center,
     Container,
+    Divider,
     Flex,
-    List,
     Paper,
     SimpleGrid,
     Stack,
     Text,
-    Textarea,
     Title,
 } from "@mantine/core"
 import { Page } from "@/components/Page"
-import { modals } from "@mantine/modals"
 import {
     IconQuestionMark,
     Icon,
     IconBook,
     IconCheck,
+    IconArrowUp,
+    IconArrowDown,
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
-import {
-    GetServerSideProps,
-    GetStaticPaths,
-    InferGetServerSidePropsType,
-} from "next"
+import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { authOptions } from "../../api/auth/[...nextauth]"
 import { useRouter } from "next/router"
 import { db } from "@/lib/database"
+import { trpc } from "@/lib/trpc"
 
 type Prompt = { icon: Icon; text: string; link: string }
 
@@ -77,6 +74,9 @@ export default function Home({
     prompts,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
+    const { mutate: react } = trpc.prompts.react.useMutation({
+        onSuccess: router.reload,
+    })
 
     return (
         <Page center>
@@ -129,21 +129,53 @@ export default function Home({
                                 {prompts.map((prompt, idx) => {
                                     return (
                                         <Paper
-                                            onClick={() => {
-                                                modals.open({
-                                                    title: prompt.title,
-                                                })
-                                            }}
                                             key={prompt.id}
                                             className="overflow-hidden max-h-48"
                                             radius="lg"
                                             p="lg"
                                         >
-                                            <Flex align="center" gap="md">
-                                                <Title>{prompt.title}</Title>
-                                                <Badge size="lg">
-                                                    {prompt.type}
-                                                </Badge>
+                                            <Flex gap="md">
+                                                <Stack
+                                                    align="center"
+                                                    spacing="xs"
+                                                >
+                                                    <ActionIcon
+                                                        onClick={() =>
+                                                            react({
+                                                                positive: true,
+                                                                promptId:
+                                                                    prompt.id,
+                                                                type: prompt.type,
+                                                            })
+                                                        }
+                                                    >
+                                                        <IconArrowUp />
+                                                    </ActionIcon>
+                                                    <Text size="xl">
+                                                        {prompt.score}
+                                                    </Text>
+                                                    <ActionIcon
+                                                        onClick={() =>
+                                                            react({
+                                                                positive: false,
+                                                                promptId:
+                                                                    prompt.id,
+                                                                type: prompt.type,
+                                                            })
+                                                        }
+                                                    >
+                                                        <IconArrowDown />
+                                                    </ActionIcon>
+                                                </Stack>
+                                                <Divider orientation="vertical" />
+                                                <Flex align="center" gap="md">
+                                                    <Title>
+                                                        {prompt.title}
+                                                    </Title>
+                                                    <Badge size="lg">
+                                                        {prompt.type}
+                                                    </Badge>
+                                                </Flex>
                                             </Flex>
                                         </Paper>
                                     )
@@ -169,7 +201,7 @@ export const getServerSideProps = (async ({ req, res, params }) => {
         const quizes = await db.quizPrompt.findMany({
             orderBy: { createdAt: "desc" },
             take: 25,
-            where: { course: { name: "D7032E" } },
+            where: { course: { name: course as string } },
             select: {
                 id: true,
                 title: true,
@@ -222,7 +254,7 @@ export const getServerSideProps = (async ({ req, res, params }) => {
         const summaries = await db.summaryPrompt.findMany({
             orderBy: { createdAt: "desc" },
             take: 25,
-            where: { course: { name: "D7032E" } },
+            where: { course: { name: course as string } },
             select: {
                 id: true,
                 title: true,

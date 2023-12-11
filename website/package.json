@@ -22,6 +22,11 @@
         "@mantine/nprogress": "^6.0.21",
         "@prisma/client": "^5.6.0",
         "@tabler/icons-react": "^2.40.0",
+        "@tanstack/react-query": "^4.0.0",
+        "@trpc/client": "^10.44.1",
+        "@trpc/next": "^10.44.1",
+        "@trpc/react-query": "^10.44.1",
+        "@trpc/server": "^10.44.1",
         "ai": "^2.2.23",
         "clsx": "^2.0.0",
         "jsonwebtoken": "^9.0.2",
@@ -29,7 +34,8 @@
         "next-auth": "^4.24.5",
         "openai": "^4.18.0",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0"
+        "react-dom": "^18.2.0",
+        "zod": "^3.22.4"
     },
     "devDependencies": {
         "@types/jsonwebtoken": "^9.0.5",

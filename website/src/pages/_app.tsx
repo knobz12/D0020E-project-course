@@ -7,8 +7,9 @@ import { Notifications } from "@mantine/notifications"
 import { SessionProvider } from "next-auth/react"
 import type { AppProps } from "next/app"
 import type { Session } from "next-auth"
+import { trpc } from "@/lib/trpc"
 
-export default function LlamaApp({
+function LlamaApp({
     Component,
     pageProps,
 }: AppProps & { pageProps: AppProps["pageProps"] & { session: Session } }) {
@@ -95,3 +96,5 @@ export default function LlamaApp({
         </>
     )
 }
+
+export default trpc.withTRPC(LlamaApp)
