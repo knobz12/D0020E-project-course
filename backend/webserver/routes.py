@@ -17,6 +17,7 @@ from chromadb import GetResult
 from modules.files.correct_chunks import TextSplit
 import psycopg2
 import jwt
+from jose import jwe
 
 
 cache = Cache(app,config={"CACHE_TYPE":"SimpleCache"})
@@ -110,6 +111,9 @@ def get_user_id() -> str | None:
         return None
 
     token = jwt.decode(token, "123",algorithms=["HS256"])
+
+    #encrypted_token = jwe.encrypt('Secret message', 'Token secret', algorithm='dir', encryption='A128GCM')
+    #decrypted_token = jwe.decrypt(token 'asecret128bitkey')
     print("Token str:",token)
     if not "userId" in token:
         return None
