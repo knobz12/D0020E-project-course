@@ -26,7 +26,7 @@ def create_llm_guidance() -> LlamaCpp:
         top_k=40,
         top_p=0.1,
         repeat_penalty=1.176,
-        verbose=False,
+        verbose=True,
         seed=-1
     )
 
