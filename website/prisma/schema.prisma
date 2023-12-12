@@ -34,11 +34,11 @@ model QuizPrompt {
 
   userId String @map("user_id") @db.Uuid
   /// The user who made this prompt
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   courseId String @map("course_id") @db.Uuid
   /// The course this prompt belongs to
-  course   Course @relation(fields: [courseId], references: [id])
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   reactions QuizPromptReaction[]
 
@@ -52,11 +52,11 @@ model QuizPromptReaction {
 
   userId String @map("user_id") @db.Uuid
   /// The user who made this prompt
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   quizPromptId String     @db.Uuid
   /// The quiz prompt this reaction is for
-  quizPrompt   QuizPrompt @relation(fields: [quizPromptId], references: [id])
+  quizPrompt   QuizPrompt @relation(fields: [quizPromptId], references: [id], onDelete: Cascade)
 
   /// Whether the reaction is positive or not.
   positive Boolean
@@ -75,11 +75,11 @@ model SummaryPrompt {
 
   userId String @map("user_id") @db.Uuid
   /// The user who made this prompt
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   courseId String @map("course_id") @db.Uuid
   /// The course this prompt belongs to
-  course   Course @relation(fields: [courseId], references: [id])
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   reactions SummaryPromptReaction[]
 
@@ -93,11 +93,11 @@ model SummaryPromptReaction {
 
   userId String @map("user_id") @db.Uuid
   /// The user who made this prompt
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   summaryPromptId String        @db.Uuid
   /// The summary prompt this reaction is for
-  summaryPrompt   SummaryPrompt @relation(fields: [summaryPromptId], references: [id])
+  summaryPrompt   SummaryPrompt @relation(fields: [summaryPromptId], references: [id], onDelete: Cascade)
 
   positive Boolean
 
