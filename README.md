@@ -84,22 +84,19 @@ cd D0020E-project-course
       - ### Install llama.cpp with right arguments for your operating system
         - On Windows:
         ```
-        pip uninstall llama-cpp-python -y
         $env:CMAKE_ARGS="-DLLAMA_CUBLAS=on -DCMAKE_CUDA_ARCHITECTURES=all-major"
-        pip install -U llama-cpp-python --no-cache-dir
+        pip install -U llama-cpp-python --force-reinstall --no-cache-dir
         ```
         - On Linux:
         ```
-        pip uninstall llama-cpp-python -y
         CMAKE_ARGS="-DLLAMA_CUBLAS=1 -DCMAKE_CUDA_ARCHITECTURES=all-major"
-        pip install -U llama-cpp-python --no-cache-dir
+        pip install -U llama-cpp-python --force-reinstall --no-cache-dir
         ```
         - On Mac:
         ```
-        pip uninstall llama-cpp-python -y
-    CMAKE_ARGS="-DLLAMA_METAL=on" pip install -U llama-cpp-python --no-cache-dir
-        pip install -U llama-cpp-python --no-cache-dir
+        CMAKE_ARGS="-DLLAMA_METAL=on" pip install -U llama-cpp-python --force-reinstall --no-cache-dir
         ```
+
 - #### For users
 	- On Windows
 	```
