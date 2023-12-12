@@ -4,6 +4,34 @@ import { db } from "@/lib/database"
 import { TRPCError } from "@trpc/server"
 
 export const promptRouter = router({
+    deleteSummaryPromptById: userProcedure
+        .input(z.object({ id: z.string().uuid() }))
+        .mutation(async function ({ input, ctx }) {
+            const quiz = await db.summaryPrompt.findUnique({
+                where: { id: input.id },
+                select: {
+                    userId: true,
+                },
+            })
+
+            if (!quiz) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Couldn't find the summary you wanted to delete.",
+                })
+            }
+
+            if (ctx.user.id !== quiz.userId) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "You can only delete summaries you have made.",
+                })
+            }
+
+            await db.summaryPrompt.delete({
+                where: { id: input.id },
+            })
+        }),
     deleteQuizPromptById: userProcedure
         .input(z.object({ id: z.string().uuid() }))
         .mutation(async function ({ input, ctx }) {

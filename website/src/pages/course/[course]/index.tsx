@@ -85,8 +85,14 @@ export default function Home({} // prompts,
             prompts.refetch()
         },
     })
-    const { mutate: deletePrompt } =
+    const { mutate: deleteQuizPrompt } =
         trpc.prompts.deleteQuizPromptById.useMutation({
+            onSuccess() {
+                prompts.refetch()
+            },
+        })
+    const { mutate: deleteSummary } =
+        trpc.prompts.deleteSummaryPromptById.useMutation({
             onSuccess() {
                 prompts.refetch()
             },
@@ -221,63 +227,78 @@ export default function Home({} // prompts,
                                                         />
                                                     </ActionIcon>
                                                 </Stack>
+
                                                 <Divider orientation="vertical" />
-                                                <Flex align="center" gap="md">
-                                                    <Link
-                                                        href={`/course/${
-                                                            router.query.course
-                                                        }/${
-                                                            prompt.type ===
-                                                            "QUIZ"
-                                                                ? "quiz"
-                                                                : "summary"
-                                                        }/${prompt.id}`}
+
+                                                <Flex w="100%">
+                                                    <Stack
+                                                        align="start"
+                                                        style={{ flex: 1 }}
                                                     >
-                                                        <Title>
-                                                            {prompt.title}
-                                                        </Title>
-                                                    </Link>
-                                                    <Badge size="lg">
-                                                        {prompt.type}
-                                                    </Badge>
-                                                </Flex>
-                                                {prompt.userId ===
-                                                    session.data?.user
-                                                        ?.userId && (
-                                                    <ActionIcon
-                                                        color="red"
-                                                        onClick={() =>
-                                                            modals.openConfirmModal(
-                                                                {
-                                                                    title: "Delete prompt",
-                                                                    children:
-                                                                        "Are you sure you want to delete this prompt?",
-                                                                    color: "red",
-                                                                    centered:
-                                                                        true,
-                                                                    labels: {
-                                                                        confirm:
-                                                                            "Delete",
-                                                                        cancel: "Cancel",
-                                                                    },
-                                                                    confirmProps:
-                                                                        {
-                                                                            color: "red",
+                                                        <Link
+                                                            href={`/course/${
+                                                                router.query
+                                                                    .course
+                                                            }/${
+                                                                prompt.type ===
+                                                                "QUIZ"
+                                                                    ? "quiz"
+                                                                    : "summary"
+                                                            }/${prompt.id}`}
+                                                        >
+                                                            <Title>
+                                                                {prompt.title}
+                                                            </Title>
+                                                        </Link>
+                                                        <Badge size="lg">
+                                                            {prompt.type}
+                                                        </Badge>
+                                                    </Stack>
+                                                    {prompt.userId ===
+                                                        session.data?.user
+                                                            ?.userId && (
+                                                        <ActionIcon
+                                                            color="red"
+                                                            onClick={() =>
+                                                                modals.openConfirmModal(
+                                                                    {
+                                                                        title: "Delete prompt",
+                                                                        children:
+                                                                            "Are you sure you want to delete this prompt?",
+                                                                        color: "red",
+                                                                        centered:
+                                                                            true,
+                                                                        labels: {
+                                                                            confirm:
+                                                                                "Delete",
+                                                                            cancel: "Cancel",
                                                                         },
-                                                                    onConfirm:
-                                                                        () =>
-                                                                            deletePrompt(
-                                                                                {
-                                                                                    id: prompt.id,
-                                                                                },
-                                                                            ),
-                                                                },
-                                                            )
-                                                        }
-                                                    >
-                                                        <IconTrash />
-                                                    </ActionIcon>
-                                                )}
+                                                                        confirmProps:
+                                                                            {
+                                                                                color: "red",
+                                                                            },
+                                                                        onConfirm:
+                                                                            () =>
+                                                                                prompt.type ===
+                                                                                "QUIZ"
+                                                                                    ? deleteQuizPrompt(
+                                                                                          {
+                                                                                              id: prompt.id,
+                                                                                          },
+                                                                                      )
+                                                                                    : deleteSummary(
+                                                                                          {
+                                                                                              id: prompt.id,
+                                                                                          },
+                                                                                      ),
+                                                                    },
+                                                                )
+                                                            }
+                                                        >
+                                                            <IconTrash />
+                                                        </ActionIcon>
+                                                    )}
+                                                </Flex>
                                             </Flex>
                                         </Paper>
                                     )
