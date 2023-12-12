@@ -120,7 +120,7 @@ def quiz():
         print("Found user:", user_id)
         print("Saving quiz")
         cur = conn.cursor()
-        updated_at = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
         cur.execute("INSERT INTO quiz_prompts (id, updated_at, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, f"Quiz {updated_at}", json.dumps(quiz), user_id, course_id))
         conn.commit()
