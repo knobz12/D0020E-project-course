@@ -89,24 +89,44 @@ export const authOptions: AuthOptions = {
         // ...add more providers here
     ],
     callbacks: {
-        async signIn(params) {
-            const user = params.user.email
-                ? await db.user.findUnique({
-                      where: { email: params.user.email },
-                      select: { id: true },
-                  })
-                : null
+        session(params) {
+            // console.log("SESSSSION:", params)
 
-            if (!user || !user.id) {
-                await db.user.create({
-                    data: {
-                        email: params.user.email,
-                        name: params.user.name,
+            if (params.token.userId) {
+                return {
+                    ...params.session,
+                    user: {
+                        ...params.session.user,
+                        userId: params.token.userId,
                     },
-                })
+                }
             }
 
-            return true
+            return params.session
+        },
+        async signIn(params) {
+            try {
+                const user = params.user.email
+                    ? await db.user.findUnique({
+                          where: { email: params.user.email },
+                          select: { id: true },
+                      })
+                    : null
+
+                if (!user || !user.id) {
+                    await db.user.create({
+                        data: {
+                            email: params.user.email,
+                            name: params.user.name,
+                        },
+                    })
+                }
+
+                return true
+            } catch (e) {
+                console.error(e)
+                return false
+            }
         },
     },
     jwt: {
