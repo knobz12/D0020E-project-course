@@ -134,7 +134,7 @@ def create_quiz(id: str, questions: int) -> str:
 
         for i in range(0, qsts_cunt):
             question: str = result[f"question{i}"]
-            obj["questions"].append({"question" : questions, "answers": []})
+            obj["questions"].append({"question" : question, "answers": []})
 
             for j in range(0,4):
                 answer: str = result[f"answer{i}-{j}"]
@@ -147,6 +147,7 @@ def create_quiz(id: str, questions: int) -> str:
 
 
 def quiz_test():
+    
     print(create_quiz("b53998910b5a91c141f890fa76fbcb7f", 3)) 
 
 if __name__ == "__main__":

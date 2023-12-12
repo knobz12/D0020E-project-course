@@ -27,15 +27,26 @@ class NotSupportedFiletype(Exception):
 # TODO(Johan) kanske göra så text_and_image_text_from_file_bytes inte returnerar filetype
 class Chunkerizer:
     
-    def make_chunk(text: str, chunk_size: int) -> list[str]:
-        return textwrap.wrap(text, chunk_size)
+    def make_chunk(text: str = "This is a cool text", chunksize: int = 512) -> list[str]:
+        output_text = []
+        split_text = text.split()
+        length = len(split_text)
 
-    def text_and_image_text_from_file(filepath: str) -> tuple[str, str, str] | None:
+        if length < chunksize:
+            output_text = [" ".join(split_text)]
+        else:
+            for i in range(1,length//chunksize + 1):
+                output_text.append(" ".join(split_text[(i-1)*chunksize:i*chunksize]))
+            output_text.append(" ".join(split_text[i*chunksize:]))
+
+        return output_text
+
+    def text_and_image_text_from_file(filepath: str, image_txt_from_complex_types: bool) -> tuple[str, str, str] | None:
         filename = os.path.basename(filepath)
         with open(filepath, "rb") as f:
-            return Chunkerizer.text_and_image_text_from_file_bytes(f.read(), filename)
+            return Chunkerizer.text_and_image_text_from_file_bytes(f.read(), image_txt_from_complex_types, filename)
 
-    def text_and_image_text_from_file_bytes(buf: bytes, filename: str = "") -> tuple[str, str, str] | None:        
+    def text_and_image_text_from_file_bytes(buf: bytes, image_txt_from_complex_types: bool, filename: str = "") -> tuple[str, str, str] | None:        
         def parse_html(buf: bytes) -> str:
             soup = BeautifulSoup(buf, features="html.parser")
             return soup.get_text()
@@ -68,17 +79,20 @@ class Chunkerizer:
                 pdf = PyPDF2.PdfReader(io_buf)
                 
                 image_list = []
+
                 for page in pdf.pages:
                     extracted_text += page.extract_text()
-                    for img in page.images:
-                        if img not in image_list:
-                            image_list.append(img)
+                    if image_txt_from_complex_types:
+                        for img in page.images:
+                            if img not in image_list:
+                                image_list.append(img)
 
-
-                for img_obj in image_list:
-                    io_buf = io.BytesIO(img_obj.data)
-                    img = Image.open(io_buf)
-                    extracted_image_text += pytesseract.image_to_string(img)
+                if image_txt_from_complex_types:
+                    for img_obj in image_list:
+                        io_buf = io.BytesIO(img_obj.data)
+                        img = Image.open(io_buf)
+                        extracted_image_text += pytesseract.image_to_string(img)
+                
             elif mime_type == "application/x-empty":
                 pass
             elif is_programming_lang(mime_type):
@@ -114,7 +128,7 @@ class Chunkerizer:
                     for shape in slide.shapes:
                         if hasattr(shape, "text"):
                             extracted_text = extracted_text + " " + shape.text
-                        elif(hasattr(shape, "image")):
+                        elif(image_txt_from_complex_types and hasattr(shape, "image")):
                             io_buf = io.BytesIO(shape.image.blob)
                             img = Image.open(io_buf)
                             if img.format == "WMF" or img.format == "EMF":
@@ -137,12 +151,12 @@ class Chunkerizer:
         
     def text_extraction_test():
         #path_list = ["./backend/tests\sample_files\courses\D7032E\evolutionCards.json"]
-        path_list = ["./backend/tests/sample_files/Test_txt/t.txt"]
-        #path_list = glob.glob("./backend/tests/**/*.*", recursive = True)
+        #path_list = ["./backend/tests/sample_files/Test_txt/t.txt"]
+        path_list = glob.glob("./backend/tests/**/*.*", recursive = True)
         try:
             for path in path_list: 
                 print(f"###### testing {path}")
-                Chunkerizer.text_and_image_text_from_file(path)
+                Chunkerizer.text_and_image_text_from_file(path, True)
         except Exception as error:
             pass
         
@@ -198,7 +212,7 @@ def create_jsonls():
             filepath = pathlib.Path(code_dir, file).resolve()
             print(filepath)
 
-            result = Chunkerizer.text_and_image_text_from_file(str(filepath))
+            result = Chunkerizer.text_and_image_text_from_file(str(filepath), False)
 
             if result == None:
                 continue
@@ -225,8 +239,3 @@ if __name__ == "__main__":
         f.write(result_text)
     
     f.close()
-
-    # x = Chunkerizer.text_and_image_text_from_file("./tests/sample_files/Test_ppts/D0020E_Sustainability.pptx")
-    # x = Chunkerizer.text_and_image_text_from_file("tests\sample_files\Test_htmls\Architectural Design Patterns.html")
-    # if x is not None:
-    #     print(x[0],x[1])
