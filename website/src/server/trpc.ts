@@ -1,9 +1,10 @@
 import { createContext } from "@/pages/api/trpc/[trpc]"
 import { TRPCError, initTRPC } from "@trpc/server"
+import superjson from "superjson"
 
 type Context = Awaited<ReturnType<typeof createContext>>
 
-const t = initTRPC.context<Context>().create()
+const t = initTRPC.context<Context>().create({ transformer: superjson })
 
 export const router = t.router
 
