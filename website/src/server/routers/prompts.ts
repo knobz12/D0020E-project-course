@@ -60,6 +60,20 @@ export const promptRouter = router({
                 where: { id: input.id },
             })
         }),
+    getSummaryPromptById: userProcedure
+        .input(z.object({ id: z.string().uuid() }))
+        .query(async function ({ input }) {
+            const summary = await db.summaryPrompt.findUnique({
+                where: { id: input.id },
+                select: {
+                    id: true,
+                    title: true,
+                    userId: true,
+                    content: true,
+                },
+            })
+            return summary
+        }),
     getQuizPromptById: userProcedure
         .input(z.object({ id: z.string().uuid() }))
         .query(async function ({ input }) {
