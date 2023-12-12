@@ -98,8 +98,9 @@ const Question: React.FC<Props> = ({
                 >
                     {"submit"}
                 </button>
-                {choices.map((choice) => (
+                {choices.map((choice, idx) => (
                     <Checkbox 
+                        key={choice + idx}
                     id={choice}
                     size={100}
                     radius={10}
