@@ -81,7 +81,7 @@ def upload_chunks(file_hash: str, chunks: list[str]):
 
 def upsert_file(file: FileStorage) -> tuple[str, GetResult] | None:
     file_bytes: bytes = file.read()
-    res = Chunkerizer.text_and_image_text_from_file_bytes(file_bytes, file.filename)
+    res = Chunkerizer.text_and_image_text_from_file_bytes(file_bytes, False, file.filename)
 
     if res == None:
         print("Chunky returned None")
