@@ -13,10 +13,11 @@ import PyPDF2
 
 import os
 import pathlib
-import sys
 
 import glob
-import json
+import hashlib
+
+from modules.ai.utils.vectorstore import *
 
 files_dir = pathlib.Path("./bin/jsoneler/files")
 
@@ -27,6 +28,55 @@ class NotSupportedFiletype(Exception):
 # TODO(Johan) kanske göra så text_and_image_text_from_file_bytes inte returnerar filetype
 class Chunkerizer:
     
+
+    def upload_chunks_from_file(filepath: str, course_name: str) -> str:
+        filename = os.path.basename(filepath)
+        with open(filepath, "rb") as f:
+            return Chunkerizer.upload_chunks_from_file_bytes(f.read(), filename, course_name)
+
+    def upload_chunks_from_file_bytes(buf: bytes, filename: str, course_name: str) -> str:
+
+        result = Chunkerizer.text_and_image_text_from_file_bytes(buf, False, filename)
+        if result == None:
+            return None
+        (type, text, image_text) = result
+
+        hash = hashlib.md5()
+        hash.update(f"{input}".encode('UTF-8'))
+        file_hash = hash.hexdigest()
+
+        chunks = Chunkerizer.make_chunk(text, 512)
+
+        collection = create_collection()
+
+        ids: list[str] = []
+        metadatas: list[dict] = []
+        documents: list[str] = []
+
+        for (i, data) in enumerate(chunks):
+            print(f"Creating chunk {i}")
+            doc_id = file_hash + str(i)
+            ids.append(doc_id)
+            doc = {
+                "id":file_hash,
+                "chunk-id": str(i),
+                "course": course_name,
+                "text":data,
+            }
+            metadatas.append(doc)
+            documents.append(data)
+
+        print(len(ids))
+        for i in range(0,len(ids)):
+            print(ids[i])
+            print(metadatas[i])
+            print()
+
+        print(f"Uploading {len(ids)} doc chunks")
+        collection.upsert(ids, metadatas=metadatas,documents=documents)
+
+
+        return file_hash
     def make_chunk(text: str = "This is a cool text", chunksize: int = 512) -> list[str]:
         output_text = []
         split_text = text.split()

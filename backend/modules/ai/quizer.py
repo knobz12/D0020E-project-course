@@ -7,13 +7,13 @@ Creating quizes based on document(s)
 
 import json
 from modules.ai.utils.llm import create_llm_guidance
-from modules.ai.utils.vectorstore import create_vectorstore
+from modules.ai.utils.vectorstore import *
 
 import guidance
 from guidance import select, gen
 
-import textwrap
-import regex
+from modules.files.chunks import *
+
 from typing import Any, Generator
 
 def calculate_questions_per_doc(total_docs: int, total_questions: int, doc_index: int):
@@ -114,6 +114,9 @@ Questions:
 
 
 
+
+
+
 def create_quiz(id: str, questions: int) -> str:
     glmm = create_llm_guidance()
     vectorstore = create_vectorstore()
@@ -147,8 +150,8 @@ def create_quiz(id: str, questions: int) -> str:
 
 
 def quiz_test():
-    
-    print(create_quiz("b53998910b5a91c141f890fa76fbcb7f", 3)) 
+    file_hash = Chunkerizer.upload_chunks_from_file("backend/tests/sample_files/Test_htmls/Architectural Design Patterns.html", "D0072E")
+    print(create_quiz(file_hash, 3)) 
 
 if __name__ == "__main__":
     quiz_test()

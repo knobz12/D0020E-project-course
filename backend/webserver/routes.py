@@ -50,59 +50,6 @@ def quiz_page():
     return app.send_static_file("quiz.html")
 
 
-def upload_chunks(file_hash: str, chunks: list[str]):
-    collection = create_collection()
-    ids: list[str] = []
-    metadatas: list[dict] = []
-    documents: list[str] = []
-
-    for (i, data) in enumerate(chunks):
-        print(f"Creating chunk {i}")
-        doc_id = file_hash + str(i)
-        ids.append(doc_id)
-        doc = {
-            "id":file_hash,
-            "chunk-id": str(i),
-            "course": "D7032E",
-            "text":data,
-        }
-        metadatas.append(doc)
-        documents.append(data)
-
-    print(len(ids))
-    for i in range(0,len(ids)):
-        print(ids[i])
-        print(metadatas[i])
-        print()
-
-    print(f"Uploading {len(ids)} doc chunks")
-    collection.upsert(ids, metadatas=metadatas,documents=documents)
-
-
-
-def upsert_file(file: FileStorage) -> tuple[str, GetResult] | None:
-    file_bytes: bytes = file.read()
-    res = Chunkerizer.text_and_image_text_from_file_bytes(file_bytes, False, file.filename)
-
-    if res == None:
-        print("Chunky returned None")
-        return None
-    (_, text, __) = res
-
-    hasher = TextToHash() 
-    (file_hash, _) = hasher.ConvertToHash(text)
-    collection = create_collection()
-    docs = collection.get(where={"id":file_hash})
-
-    if len(docs['ids']) > 0:
-        return (file_hash, docs)
-
-    chunks = Chunkerizer.make_chunk(text,512)
-    print("chunks length",len(chunks))
-    upload_chunks(file_hash,chunks)
-    return (file_hash, collection.get(where={"id":file_hash}))
-
-
 def get_user_id() -> str | None:
     token = request.cookies.get("aisb.session-token")
     token = token.replace("'","\"")
@@ -143,16 +90,16 @@ def quiz():
     if file_size <= 0:
         return make_response("Cannot send empty file! 😡", 406)
 
-    result = upsert_file(file)
-
-    if result == None:
-        return make_response("Bad file format", 406)
-    
     course_query = request.args.get("course")
     if course_query == None:
         return make_response("Missing required course parameter", 400)
 
     course = course_query
+
+    file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.name, course)
+    if file_hash == None:
+        return make_response("Bad file format", 406)
+    
     query = request.args.get("questions")
     questions = 3
 
@@ -160,7 +107,7 @@ def quiz():
         questions = int(query)
 
     print(f"Creating {questions} questions")
-    (file_hash, _) = result
+
 
     conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
     course_id = get_course_id_from_name(course)
@@ -203,11 +150,10 @@ def summary():
     course = course_query
 
 
-    result = upsert_file(file)
-    if result == None:
+    file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.name, course)
+    if file_hash == None:
         return make_response("Bad file format", 406)
 
-    (file_hash, _) = result
     course_id = get_course_id_from_name(course)
     user_id = get_user_id()
 
