@@ -14,7 +14,6 @@ from flask_caching import Cache
 
 from werkzeug.datastructures import FileStorage
 from chromadb import GetResult
-from modules.files.correct_chunks import TextSplit
 import psycopg2
 import jwt
 
@@ -95,8 +94,7 @@ def upsert_file(file: FileStorage) -> tuple[str, GetResult] | None:
     if len(docs['ids']) > 0:
         return (file_hash, docs)
 
-    # chunks = Chunkerizer.make_chunk(text,512)
-    chunks = TextSplit(text, 512)
+    chunks = Chunkerizer.make_chunk(text,512)
     print("chunks length",len(chunks))
     upload_chunks(file_hash,chunks)
     return (file_hash, collection.get(where={"id":file_hash}))
