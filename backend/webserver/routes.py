@@ -17,7 +17,6 @@ from chromadb import GetResult
 from modules.files.correct_chunks import TextSplit
 import psycopg2
 import jwt
-from jose import jwe
 
 
 cache = Cache(app,config={"CACHE_TYPE":"SimpleCache"})
