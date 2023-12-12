@@ -27,8 +27,19 @@ class NotSupportedFiletype(Exception):
 # TODO(Johan) kanske göra så text_and_image_text_from_file_bytes inte returnerar filetype
 class Chunkerizer:
     
-    def make_chunk(text: str, chunk_size: int) -> list[str]:
-        return textwrap.wrap(text, chunk_size)
+    def make_chunk(text: str = "This is a cool text", chunksize: int = 512) -> list[str]:
+        output_text = []
+        split_text = text.split()
+        length = len(split_text)
+
+        if length < chunksize:
+            output_text = [" ".join(split_text)]
+        else:
+            for i in range(1,length//chunksize + 1):
+                output_text.append(" ".join(split_text[(i-1)*chunksize:i*chunksize]))
+            output_text.append(" ".join(split_text[i*chunksize:]))
+
+        return output_text
 
     def text_and_image_text_from_file(filepath: str, image_txt_from_complex_types: bool) -> tuple[str, str, str] | None:
         filename = os.path.basename(filepath)
