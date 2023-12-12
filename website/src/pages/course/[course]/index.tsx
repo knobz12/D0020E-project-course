@@ -21,6 +21,7 @@ import {
     IconCheck,
     IconArrowUp,
     IconArrowDown,
+    IconTrash,
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
@@ -29,6 +30,8 @@ import { authOptions } from "../../api/auth/[...nextauth]"
 import { useRouter } from "next/router"
 import { db } from "@/lib/database"
 import { trpc } from "@/lib/trpc"
+import { useSession } from "next-auth/react"
+import { modals } from "@mantine/modals"
 
 type Prompt = { icon: Icon; text: string; link: string }
 
@@ -73,6 +76,7 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
 export default function Home({} // prompts,
 : InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
+    const session = useSession()
     const prompts = trpc.prompts.getPrompts.useQuery({
         course: router.query.course as string,
     })
@@ -81,6 +85,12 @@ export default function Home({} // prompts,
             prompts.refetch()
         },
     })
+    const { mutate: deletePrompt } =
+        trpc.prompts.deleteQuizPromptById.useMutation({
+            onSuccess() {
+                prompts.refetch()
+            },
+        })
 
     return (
         <Page center>
@@ -213,13 +223,61 @@ export default function Home({} // prompts,
                                                 </Stack>
                                                 <Divider orientation="vertical" />
                                                 <Flex align="center" gap="md">
-                                                    <Title>
-                                                        {prompt.title}
-                                                    </Title>
+                                                    <Link
+                                                        href={`/course/${
+                                                            router.query.course
+                                                        }/${
+                                                            prompt.type ===
+                                                            "QUIZ"
+                                                                ? "quiz"
+                                                                : "summary"
+                                                        }/${prompt.id}`}
+                                                    >
+                                                        <Title>
+                                                            {prompt.title}
+                                                        </Title>
+                                                    </Link>
                                                     <Badge size="lg">
                                                         {prompt.type}
                                                     </Badge>
                                                 </Flex>
+                                                {prompt.userId ===
+                                                    session.data?.user
+                                                        ?.userId && (
+                                                    <ActionIcon
+                                                        color="red"
+                                                        onClick={() =>
+                                                            modals.openConfirmModal(
+                                                                {
+                                                                    title: "Delete prompt",
+                                                                    children:
+                                                                        "Are you sure you want to delete this prompt?",
+                                                                    color: "red",
+                                                                    centered:
+                                                                        true,
+                                                                    labels: {
+                                                                        confirm:
+                                                                            "Delete",
+                                                                        cancel: "Cancel",
+                                                                    },
+                                                                    confirmProps:
+                                                                        {
+                                                                            color: "red",
+                                                                        },
+                                                                    onConfirm:
+                                                                        () =>
+                                                                            deletePrompt(
+                                                                                {
+                                                                                    id: prompt.id,
+                                                                                },
+                                                                            ),
+                                                                },
+                                                            )
+                                                        }
+                                                    >
+                                                        <IconTrash />
+                                                    </ActionIcon>
+                                                )}
                                             </Flex>
                                         </Paper>
                                     )
@@ -362,6 +420,7 @@ export const getServerSideProps = (async ({ req, res, params }) => {
 
     return {
         props: {
+            session,
             prompts,
         },
     }

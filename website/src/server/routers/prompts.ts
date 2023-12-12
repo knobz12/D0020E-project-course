@@ -1,13 +1,57 @@
 import { z } from "zod"
 import { publicProcedure, router, userProcedure } from "../trpc"
 import { db } from "@/lib/database"
+import { TRPCError } from "@trpc/server"
 
 export const promptRouter = router({
+    deleteQuizPromptById: userProcedure
+        .input(z.object({ id: z.string().uuid() }))
+        .mutation(async function ({ input, ctx }) {
+            const quiz = await db.quizPrompt.findUnique({
+                where: { id: input.id },
+                select: {
+                    userId: true,
+                },
+            })
+
+            if (!quiz) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Couldn't find the quiz you wanted to delete.",
+                })
+            }
+
+            if (ctx.user.id !== quiz.userId) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "You can only delete quizes you have made.",
+                })
+            }
+
+            await db.quizPrompt.delete({
+                where: { id: input.id },
+            })
+        }),
+    getQuizPromptById: userProcedure
+        .input(z.object({ id: z.string().uuid() }))
+        .query(async function ({ input }) {
+            const quiz = await db.quizPrompt.findUnique({
+                where: { id: input.id },
+                select: {
+                    id: true,
+                    title: true,
+                    userId: true,
+                    content: true,
+                },
+            })
+            return quiz
+        }),
     getPrompts: userProcedure
         .input(z.object({ course: z.string() }))
         .query(async function ({ input, ctx }) {
             interface PromptType {
                 id: string
+                userId: string
                 title: string
                 createdAt: string
                 type: "QUIZ" | "SUMMARY"
@@ -21,6 +65,7 @@ export const promptRouter = router({
                     where: { course: { name: input.course } },
                     select: {
                         id: true,
+                        userId: true,
                         title: true,
                         createdAt: true,
                         reactions: {
@@ -55,6 +100,7 @@ export const promptRouter = router({
 
                                 res({
                                     id: quiz.id,
+                                    userId: quiz.userId,
                                     title: quiz.title,
                                     reaction:
                                         quiz.reactions.length === 0
@@ -78,6 +124,7 @@ export const promptRouter = router({
                     where: { course: { name: input.course } },
                     select: {
                         id: true,
+                        userId: true,
                         title: true,
                         createdAt: true,
                         reactions: {
@@ -112,6 +159,7 @@ export const promptRouter = router({
 
                                 res({
                                     id: summary.id,
+                                    userId: summary.userId,
                                     title: summary.title,
                                     reaction:
                                         summary.reactions.length === 0
