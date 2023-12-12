@@ -139,7 +139,7 @@ def create_quiz(id: str, questions: int) -> str:
             for j in range(0,4):
                 answer: str = result[f"answer{i}-{j}"]
                 correct: str = result[f"isAnswer{i}-{j}"]
-                obj["questions"][i]["answers"].append({"text": answer, "correct" : correct})
+                obj["questions"][i]["answers"].append({"text": answer, "correct" : False if correct == "False" else True})
     
     result: str = json.dumps(obj)
     return result

@@ -173,7 +173,7 @@ def quiz():
         cur = conn.cursor()
         updated_at = datetime.datetime.now().isoformat()
         print("Updated at:", updated_at)
-        cur.execute("INSERT INTO quiz_prompts (id, updated_at, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, f"Quiz {updated_at}", json.dumps({"data":quiz}), user_id, course_id))
+        cur.execute("INSERT INTO quiz_prompts (id, updated_at, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, f"Quiz {updated_at}", json.dumps(quiz), user_id, course_id))
         conn.commit()
 
     conn.close()
