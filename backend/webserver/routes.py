@@ -4,6 +4,9 @@ from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
 from webserver.app import app
 import os
+from uuid import uuid4
+import json
+import datetime
 
 from modules.ai.utils.llm import create_llm_guidance
 from modules.files.hash_and_json.HashFunction import TextToHash
@@ -118,6 +121,14 @@ def get_user_id() -> str | None:
     user_id = token["userId"]
     return user_id
 
+def get_course_id_from_name(name: str) -> str:
+    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM courses WHERE name=%s",(name,))
+    courses = cur.fetchall()
+    course_id = courses[0][0]
+    conn.close()
+    return course_id
 
 @app.route("/api/quiz", methods=["POST"])
 def quiz():
@@ -152,26 +163,17 @@ def quiz():
     (file_hash, _) = result
 
     conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
-    cur = conn.cursor()
-    cur.execute("SELECT id FROM courses WHERE name=%s",(course,))
-    courses = cur.fetchall()
-    print("COURSES:",courses)
-    course_id = courses[0][0]
-    print("Course id:",course_id)
-
+    course_id = get_course_id_from_name(course)
     quiz = create_quiz(file_hash, questions)
 
     print(quiz)
     print("Inserting quiz")
-    from uuid import uuid4
-    import json
-    import datetime
     user_id = get_user_id()
     if user_id:
         print("Found user:", user_id)
         print("Saving quiz")
         cur = conn.cursor()
-        updated_at = datetime.datetime.now().isoformat()
+        updated_at = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
         cur.execute("INSERT INTO quiz_prompts (id, updated_at, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, f"Quiz {updated_at}", json.dumps(quiz), user_id, course_id))
         conn.commit()
@@ -194,14 +196,41 @@ def summary():
     if file_size <= 0:
         return make_response("Cannot send empty file! 😡", 406)
 
+    course_query = request.args.get("course")
+    if course_query == None:
+        return make_response("Missing required course parameter", 400)
+
+    course = course_query
+
 
     result = upsert_file(file)
     if result == None:
         return make_response("Bad file format", 406)
 
     (file_hash, _) = result
+    course_id = get_course_id_from_name(course)
+    user_id = get_user_id()
 
-    return app.response_class(summarize_doc_stream(file_hash), mimetype='text/plain')
+    def stream():
+        summary = ""
+        for chunk in summarize_doc_stream(file_hash):
+            yield chunk
+            summary += chunk
+
+        if user_id == None:
+            return
+
+        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+        cur = conn.cursor()
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO summary_prompts (id, updated_at, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, f"Summary {updated_at}", summary, user_id, course_id))
+        conn.commit()
+        conn.close()
+
+        
+
+    return app.response_class(stream(), mimetype='text/plain')
 
 
 @app.route("/api/explanation", methods=["POST"])

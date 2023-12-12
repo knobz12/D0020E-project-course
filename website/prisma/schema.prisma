@@ -68,7 +68,7 @@ model QuizPromptReaction {
 model SummaryPrompt {
   id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   title   String
   content String
