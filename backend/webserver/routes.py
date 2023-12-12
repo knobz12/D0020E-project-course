@@ -96,7 +96,7 @@ def quiz():
 
     course = course_query
 
-    file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.name, course)
+    file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
     if file_hash == None:
         return make_response("Bad file format", 406)
     
@@ -150,7 +150,7 @@ def summary():
     course = course_query
 
 
-    file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.name, course)
+    file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
     if file_hash == None:
         return make_response("Bad file format", 406)
 
