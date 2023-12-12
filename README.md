@@ -102,10 +102,12 @@ cd D0020E-project-course
 	```
 	make install
 	```
+  
 	- On Linux
-	- ```
+	```
 	make install
 	```
+
 	- On Mac
 	```
 	make install
