@@ -254,7 +254,7 @@ export const promptRouter = router({
 
                 // Delete if reacting with same as already existing
                 if (existing?.positive === positive) {
-                    await db.quizPromptReaction.delete({
+                    await db.summaryPromptReaction.delete({
                         where: {
                             id: existing.id,
                         },
