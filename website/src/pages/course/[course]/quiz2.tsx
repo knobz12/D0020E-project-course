@@ -15,7 +15,10 @@ import {
     Text,
     Title,
     Checkbox,
+    CheckboxProps,
 } from "@mantine/core"
+import { IconBiohazard, IconRadioactive } from '@tabler/icons-react';
+
 import { Page } from "@/components/Page"
 import Link from "next/link"
 
@@ -64,7 +67,11 @@ interface Props {
     choices: string[]
     CorrectAnswer: string[]
     onAnswer: (CorrectAnswer: string) => void
+    onSubmit: (CorrectAnswer: string) => void
 }
+
+var tempChoices:string [];
+
 
 
 const Question: React.FC<Props> = ({
@@ -72,6 +79,7 @@ const Question: React.FC<Props> = ({
     choices,
     CorrectAnswer,
     onAnswer,
+    onSubmit,
 }) => {
     return (
         <div
@@ -83,16 +91,20 @@ const Question: React.FC<Props> = ({
         >
             <h2 className="">{question}</h2>
             <div className="">
-                
-                <button>
+
+                <button
+                //onClick={() => onSubmit("0°C")}
+                onClick={() => alert("test")}
+                >
                     {"submit"}
                 </button>
-
                 {choices.map((choice) => (
-                    <Checkbox
-                    
-                    label={choice}/>
-                    
+                    <Checkbox 
+                    id={choice}
+                    size={100}
+                    radius={10}
+                    label={choice}
+                    />
                 ))}
 
                 {choices.map((choice) => (
@@ -127,11 +139,33 @@ function CheckCorrectAnswer(answer:string, CorrectAnswer:string[]){
 function Quiz(){
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [score, setScore] = useState(0);
-    var TempScore = score;  
+    var TempScore = score;
     
     const handleAnswer = (CorrectAnswer: string) => {
         if (CheckCorrectAnswer(CorrectAnswer, questions[currentQuestion].CorrectAnswer)===1){
         //if (CorrectAnswer === questions[currentQuestion].CorrectAnswer[0]) {
+            console.log(TempScore);
+            TempScore = score + 1;
+            setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
+            console.log(TempScore);
+                
+        }else{
+            alert(`Wrong 🤢`);
+        }
+ 
+        const nextQuestion = currentQuestion + 1;
+        if (nextQuestion < questions.length) {
+            setCurrentQuestion(nextQuestion);
+        } else {
+
+            alert(`Quiz finished. You scored ${TempScore}/${questions.length}`);
+            setScore(0);            //reset quiz
+            setCurrentQuestion(0);  //reset quiz
+        }
+    }
+
+    const handleSubmit = (CorrectAnswer: string) => {
+        if (CheckCorrectAnswer(CorrectAnswer, questions[currentQuestion].CorrectAnswer)===1){
             console.log(TempScore);
             TempScore = score + 1;
             setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
@@ -161,6 +195,7 @@ function Quiz(){
                     choices={questions[currentQuestion].choices}
                     CorrectAnswer={questions[currentQuestion].CorrectAnswer}
                     onAnswer={handleAnswer}
+                    onSubmit={handleSubmit}
                 />
             ) : (
                 "null"
