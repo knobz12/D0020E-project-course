@@ -73,6 +73,30 @@ interface Props {
 var tempChoices:string [];
 
 
+function Demo(choice:string) {
+    const [checked, setChecked] = useState(false);
+    return (
+        <>
+        <button
+        //onClick={() => onSubmit("0°C")}
+        onClick={() => alert("test")}
+        >
+            {"submit"}
+        </button>
+        <Checkbox 
+            key={choice}
+            id={choice}
+            size={100}
+            radius={10}
+            label={choice}
+            checked={checked} 
+            onChange={(event) => setChecked(event.currentTarget.checked)}
+        />
+        
+        </>
+    );
+  }
+
 
 const Question: React.FC<Props> = ({
     question,
@@ -92,7 +116,7 @@ const Question: React.FC<Props> = ({
             <h2 className="">{question}</h2>
             <div className="">
 
-                <button
+                {/* <button
                 //onClick={() => onSubmit("0°C")}
                 onClick={() => alert("test")}
                 >
@@ -105,9 +129,10 @@ const Question: React.FC<Props> = ({
                     size={100}
                     radius={10}
                     label={choice}
+                    checked={checked} 
+                    onChange={(event) => setChecked(event.currentTarget.checked)}
                     />
-                ))}
-
+                ))} */}
                 {choices.map((choice) => (
                     <button
                         key={choice}
