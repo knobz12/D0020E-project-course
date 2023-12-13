@@ -70,7 +70,6 @@ export default function FileUpload({
     parameters,
 }: FileUploadProps) {
     const router = useRouter()
-    console.log("Router:", router)
     const [data, setData] = useState<string | null>(null)
     const [params, setParams] = useState<
         Record<string, string | number | undefined>
@@ -119,6 +118,7 @@ export default function FileUpload({
             }).catch((e) => null)
 
             if (res === null) {
+                console.error(res)
                 return showNotification({
                     color: "red",
                     message: "Failed to make request",
@@ -126,6 +126,7 @@ export default function FileUpload({
             }
 
             if (res.status !== 200) {
+                console.error(res)
                 return showNotification({
                     color: "red",
                     message: await res.text(),
@@ -159,6 +160,7 @@ export default function FileUpload({
             }
         } catch (e) {
             if (e instanceof Error) {
+                console.error(e)
                 showNotification({
                     color: "red",
                     title: "Something went wrong",

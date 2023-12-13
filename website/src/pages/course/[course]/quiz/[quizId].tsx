@@ -1,38 +1,22 @@
 import { Page } from "@/components/Page"
 import { db } from "@/lib/database"
-import { trpc } from "@/lib/trpc"
+import { RouterOutput, trpc } from "@/lib/trpc"
 import { Container, List, Stack, Text, Title } from "@mantine/core"
 import type { Prisma } from "@prisma/client"
 import { GetServerSideProps } from "next"
 import { useRouter } from "next/router"
 
 interface QuizContentProps {
-    content: Prisma.JsonValue
+    content: (RouterOutput["prompts"]["getPromptById"] & {
+        type: "QUIZ"
+    })["content"]
 }
 
 function QuizContent({ content }: QuizContentProps) {
-    console.log(`cont (${typeof content}):`, content)
-    // if (!content || typeof content !== "object" || !("data" in content)) {
-    //     return
-    // }
-
-    // const json = (content)
-    // json["data"]
-    const data = JSON.parse(content as string)
-    const questions = data["questions"]
-    if (!Array.isArray(questions)) {
-        return
-    }
-    const qsts = questions as {
-        question: number
-        answers: { text: string; correct: "False" | "True" }[]
-    }[]
-    console.log(questions)
-    // const data = content["data"]
-
+    console.log("Content:", content)
     return (
         <Stack>
-            {qsts.map((qst, idx) => (
+            {content.questions.map((qst, idx) => (
                 <Stack key={idx + qst.question}>
                     <Text>{qst.question}</Text>
                     <List>
@@ -55,7 +39,7 @@ function QuizContent({ content }: QuizContentProps) {
 
 export default function QuizPage() {
     const router = useRouter()
-    const quiz = trpc.prompts.getQuizPromptById.useQuery({
+    const quiz = trpc.prompts.getPromptById.useQuery({
         id: router.query.quizId! as string,
     })
     console.log(quiz.data)
@@ -65,7 +49,9 @@ export default function QuizPage() {
             <Container>
                 <Title>{quiz.data?.title}</Title>
                 {/* <pre>{JSON.stringify(quiz.data, undefined, 4)}</pre> */}
-                {quiz.data && <QuizContent content={quiz.data.content} />}
+                {quiz.data?.type === "QUIZ" && (
+                    <QuizContent content={quiz.data.content} />
+                )}
             </Container>
         </Page>
     )
@@ -93,8 +79,8 @@ export const getServerSideProps = (async ({ req, res, params }) => {
             }
         }
 
-        const quiz = await db.quizPrompt.findUnique({
-            where: { id: quizId, course: { id: dbCourse.id } },
+        const quiz = await db.prompt.findUnique({
+            where: { id: quizId, course: { id: dbCourse.id }, type: "QUIZ" },
             select: {
                 id: true,
                 title: true,

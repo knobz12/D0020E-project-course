@@ -15,16 +15,18 @@ model Course {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  name String @unique
-
-  quizPrompts    QuizPrompt[]
-  summaryPrompts SummaryPrompt[]
-  /// ... more prompts
+  name    String   @unique
+  prompts Prompt[]
 
   @@map("courses")
 }
 
-model QuizPrompt {
+enum PromptType {
+  SUMMARY
+  QUIZ
+}
+
+model Prompt {
   id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -32,6 +34,9 @@ model QuizPrompt {
   title   String
   content Json   @db.JsonB
 
+  /// What type this prompt is. Determines the structure of the content data.
+  type PromptType
+
   userId String @map("user_id") @db.Uuid
   /// The user who made this prompt
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -40,12 +45,15 @@ model QuizPrompt {
   /// The course this prompt belongs to
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
-  reactions QuizPromptReaction[]
+  reactions PromptReaction[]
 
-  @@map("quiz_prompts")
+  @@index([type])
+  @@index([courseId])
+  @@index([type, courseId])
+  @@map("prompts")
 }
 
-model QuizPromptReaction {
+model PromptReaction {
   id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -54,60 +62,17 @@ model QuizPromptReaction {
   /// The user who made this prompt
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  quizPromptId String     @db.Uuid
+  promptId String @map("prompt_id") @db.Uuid
   /// The quiz prompt this reaction is for
-  quizPrompt   QuizPrompt @relation(fields: [quizPromptId], references: [id], onDelete: Cascade)
+  prompt   Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
 
   /// Whether the reaction is positive or not.
   positive Boolean
 
-  @@unique([quizPromptId, userId])
-  @@map("quiz_prompts_reaction")
+  @@unique([promptId, userId])
+  @@index([promptId, positive])
+  @@map("prompt_reactions")
 }
-
-model SummaryPrompt {
-  id        String   @id @default(uuid()) @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  title   String
-  content String
-
-  userId String @map("user_id") @db.Uuid
-  /// The user who made this prompt
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  courseId String @map("course_id") @db.Uuid
-  /// The course this prompt belongs to
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  reactions SummaryPromptReaction[]
-
-  @@map("summary_prompts")
-}
-
-model SummaryPromptReaction {
-  id        String   @id @default(uuid()) @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  userId String @map("user_id") @db.Uuid
-  /// The user who made this prompt
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  summaryPromptId String        @db.Uuid
-  /// The summary prompt this reaction is for
-  summaryPrompt   SummaryPrompt @relation(fields: [summaryPromptId], references: [id], onDelete: Cascade)
-
-  positive Boolean
-
-  @@unique([summaryPromptId, userId])
-  @@map("summary_prompts_reaction")
-}
-
-/// Explanation prompt
-/// Flashcard prompt
-/// Assignment prompt
 
 model Account {
   id        String   @id @default(uuid()) @db.Uuid
@@ -158,11 +123,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  quizes    QuizPrompt[]
-  summaries SummaryPrompt[]
-
-  quizReactions    QuizPromptReaction[]
-  summaryReactions SummaryPromptReaction[]
+  prompts         Prompt[]
+  promptReactions PromptReaction[]
 
   @@map("users")
 }

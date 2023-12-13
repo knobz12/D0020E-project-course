@@ -116,13 +116,14 @@ def quiz():
     print(quiz)
     print("Inserting quiz")
     user_id = get_user_id()
+    quiz_id = str(uuid4())
     if user_id:
         print("Found user:", user_id)
         print("Saving quiz")
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
-        cur.execute("INSERT INTO quiz_prompts (id, updated_at, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, f"Quiz {updated_at}", json.dumps(quiz), user_id, course_id))
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (quiz_id, updated_at, "QUIZ", f"Quiz {updated_at}", quiz, user_id, course_id))
         conn.commit()
 
     conn.close()
@@ -170,7 +171,7 @@ def summary():
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
-        cur.execute("INSERT INTO summary_prompts (id, updated_at, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, f"Summary {updated_at}", summary, user_id, course_id))
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "SUMMARY", f"Summary {updated_at}", json.dumps({"text":summary}), user_id, course_id))
         conn.commit()
         conn.close()
 

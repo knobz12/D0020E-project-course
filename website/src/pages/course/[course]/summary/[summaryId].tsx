@@ -8,7 +8,7 @@ import { useRouter } from "next/router"
 
 export default function SummaryPage() {
     const router = useRouter()
-    const summary = trpc.prompts.getSummaryPromptById.useQuery({
+    const summary = trpc.prompts.getPromptById.useQuery({
         id: router.query.summaryId! as string,
     })
     console.log(summary.data)
@@ -17,8 +17,9 @@ export default function SummaryPage() {
         <Page>
             <Container>
                 <Title>{summary.data?.title}</Title>
-                {/* <pre>{JSON.stringify(quiz.data, undefined, 4)}</pre> */}
-                <Text>{summary.data?.content}</Text>
+                {summary.data?.type === "SUMMARY" && (
+                    <Text>{summary.data.content.text}</Text>
+                )}
             </Container>
         </Page>
     )
@@ -46,8 +47,12 @@ export const getServerSideProps = (async ({ req, res, params }) => {
             }
         }
 
-        const summary = await db.summaryPrompt.findUnique({
-            where: { id: summaryId, course: { id: dbCourse.id } },
+        const summary = await db.prompt.findUnique({
+            where: {
+                id: summaryId,
+                course: { id: dbCourse.id },
+                type: "SUMMARY",
+            },
             select: {
                 id: true,
                 title: true,
