@@ -73,29 +73,23 @@ interface Props {
 var tempChoices:string [];
 
 
-function Demo(choice:string) {
-    const [checked, setChecked] = useState(false);
+
+
+function checkboxTest(choice:string) {
+    
+    const ref = useRef(null);
     return (
-        <>
-        <button
-        //onClick={() => onSubmit("0°C")}
-        onClick={() => alert("test")}
-        >
-            {"submit"}
-        </button>
         <Checkbox 
-            key={choice}
-            id={choice}
+            key={"choice"}
+            id={"choice"}
             size={100}
             radius={10}
             label={choice}
-            checked={checked} 
-            onChange={(event) => setChecked(event.currentTarget.checked)}
+            ref={ref}
         />
-        
-        </>
     );
   }
+
 
 
 const Question: React.FC<Props> = ({
@@ -105,6 +99,11 @@ const Question: React.FC<Props> = ({
     onAnswer,
     onSubmit,
 }) => {
+
+    let tempAnswers:string[];
+    const handleCheckboxChange = () => {
+        console.log("yes32");
+    };
     return (
         <div
             className="d-flex 
@@ -115,24 +114,23 @@ const Question: React.FC<Props> = ({
         >
             <h2 className="">{question}</h2>
             <div className="">
-
-                {/* <button
-                //onClick={() => onSubmit("0°C")}
-                onClick={() => alert("test")}
-                >
-                    {"submit"}
-                </button>
-                {choices.map((choice, idx) => (
+                {choices.map((choice) => (
                     <Checkbox 
-                        key={choice + idx}
-                    id={choice}
+                    key={choice}
+                    id={"banan"}
                     size={100}
                     radius={10}
                     label={choice}
-                    checked={checked} 
-                    onChange={(event) => setChecked(event.currentTarget.checked)}
+                    onChange={handleCheckboxChange}
                     />
-                ))} */}
+                ))}
+
+                 <button
+                onClick={() =>   onAnswer("rrr")} // This needs to check the checkboxes and return chosen answers      
+                >
+                    {"submit"}
+                </button>
+
                 {choices.map((choice) => (
                     <button
                         key={choice}
@@ -147,11 +145,12 @@ const Question: React.FC<Props> = ({
         </div>
     )
 }
+
 function CheckCorrectAnswer(answer:string, CorrectAnswer:string[]){
     console.log(CorrectAnswer)
     console.log(answer)
     for(let i = 0; i < CorrectAnswer.length; i++){
-        console.log("dm"+i)
+        console.log(i)
         console.log(CorrectAnswer[i]+" and "+ answer)
         if(CorrectAnswer[i] === answer){
             console.log("correct")
@@ -233,13 +232,6 @@ function Quiz(){
 
 
 export default function QuizSite() {
-    var test = <FileUpload 
-    title=   "Generate quiz"
-    apiUrl=  "http://localhost:3030/api/quiz"
-    />
-
-    
-
   
     return (
         <>
