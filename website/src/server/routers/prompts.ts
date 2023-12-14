@@ -80,6 +80,65 @@ async function formatPrompt(
 }
 
 export const promptRouter = router({
+    updateQuizPrompt: userProcedure
+        .input(
+            z.object({
+                promptId: z.string().uuid(),
+                quiz: z.object({
+                    title: z.string().max(128),
+                    content: z.object({
+                        questions: z.array(
+                            z.object({
+                                question: z.string(),
+                                answers: z.array(
+                                    z.object({
+                                        text: z.string(),
+                                        correct: z.boolean(),
+                                    }),
+                                ),
+                            }),
+                        ),
+                    }),
+                }),
+            }),
+        )
+        .mutation(async function ({ ctx, input }): Promise<void> {
+            const prompt = await db.prompt.findUnique({
+                where: { id: input.promptId },
+                select: { userId: true, type: true },
+            })
+
+            if (!prompt) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "The quiz you tried to update doesn't exist.",
+                })
+            }
+
+            if (prompt.type !== "QUIZ") {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "The prompt you tried to edit is not a quiz.",
+                })
+            }
+
+            if (prompt.userId !== ctx.user.id) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "You can't edit quizes you haven't made.",
+                })
+            }
+
+            await db.prompt.update({
+                where: {
+                    id: input.promptId,
+                },
+                data: {
+                    title: input.quiz.title,
+                    content: input.quiz.content,
+                },
+            })
+        }),
     deletePromptById: userProcedure
         .input(z.object({ id: z.string().uuid() }))
         .mutation(async function ({ input, ctx }) {

@@ -4,22 +4,28 @@ import { db } from "@/lib/database"
 import { trpc } from "@/lib/trpc"
 import { Container, Title } from "@mantine/core"
 import { GetServerSideProps } from "next"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/router"
 
 export default function QuizPage() {
+    const { data: session } = useSession()
     const router = useRouter()
     const quiz = trpc.prompts.getPromptById.useQuery({
         id: router.query.quizId! as string,
     })
-    console.log(quiz.data)
+    // console.log(quiz.data)
 
     return (
         <Page>
             <Container>
-                <Title>{quiz.data?.title}</Title>
                 {/* <pre>{JSON.stringify(quiz.data, undefined, 4)}</pre> */}
                 {quiz.data?.type === "QUIZ" && (
-                    <QuizContent content={quiz.data.content} />
+                    <QuizContent
+                        promptId={quiz.data.id}
+                        title={quiz.data.title}
+                        editable={quiz.data.userId === session?.user.userId}
+                        content={quiz.data.content}
+                    />
                 )}
             </Container>
         </Page>

@@ -362,9 +362,11 @@ export default function FileUpload({
                     {/* {data !== null && <Textarea h="96rem" value={data} />} */}
                     {data !== null &&
                         (type === "QUIZ" ? (
-                            <QuizContent content={JSON.parse(data)} />
+                            typeof data === "string" &&
+                            data !== "" && (
+                                <QuizContent content={JSON.parse(data)} />
+                            )
                         ) : (
-                            // <Text dangerouslySetInnerHTML={{ __html: data }} />
                             <Text>
                                 {data.split("\n").map((val, idx) => (
                                     <Text key={val + idx}>{val}</Text>
