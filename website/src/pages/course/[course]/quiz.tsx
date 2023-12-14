@@ -9,6 +9,7 @@ interface QuizProps {}
 export default function Quiz({}: QuizProps) {
     return (
         <FileUpload
+            type="QUIZ"
             title="Generate quiz"
             apiUrl="http://localhost:3030/api/quiz"
             parameters={[

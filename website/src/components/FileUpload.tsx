@@ -21,6 +21,8 @@ import { Page } from "@/components/Page"
 import { Dropzone } from "@mantine/dropzone"
 import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react"
 import { useRouter } from "next/router"
+import type { PromptType } from "@prisma/client"
+import { QuizContent } from "./QuizContent"
 
 function encode(input: Uint8Array) {
     var keyStr =
@@ -56,6 +58,7 @@ function encode(input: Uint8Array) {
 interface FileUploadProps {
     title: string
     apiUrl: string
+    type: PromptType
     parameters?: {
         type: "number"
         id: string
@@ -67,6 +70,7 @@ interface FileUploadProps {
 export default function FileUpload({
     apiUrl,
     title,
+    type,
     parameters,
 }: FileUploadProps) {
     const router = useRouter()
@@ -356,14 +360,17 @@ export default function FileUpload({
                         </Button>
                     </Stack>
                     {/* {data !== null && <Textarea h="96rem" value={data} />} */}
-                    {data !== null && (
-                        // <Text dangerouslySetInnerHTML={{ __html: data }} />
-                        <Text>
-                            {data.split("\n").map((val, idx) => (
-                                <Text key={val + idx}>{val}</Text>
-                            ))}
-                        </Text>
-                    )}
+                    {data !== null &&
+                        (type === "QUIZ" ? (
+                            <QuizContent content={JSON.parse(data)} />
+                        ) : (
+                            // <Text dangerouslySetInnerHTML={{ __html: data }} />
+                            <Text>
+                                {data.split("\n").map((val, idx) => (
+                                    <Text key={val + idx}>{val}</Text>
+                                ))}
+                            </Text>
+                        ))}
                 </Stack>
             </Container>
         </Page>

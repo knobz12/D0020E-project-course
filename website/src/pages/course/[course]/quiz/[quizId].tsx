@@ -6,37 +6,6 @@ import type { Prisma } from "@prisma/client"
 import { GetServerSideProps } from "next"
 import { useRouter } from "next/router"
 
-interface QuizContentProps {
-    content: (RouterOutput["prompts"]["getPromptById"] & {
-        type: "QUIZ"
-    })["content"]
-}
-
-function QuizContent({ content }: QuizContentProps) {
-    console.log("Content:", content)
-    return (
-        <Stack>
-            {content.questions.map((qst, idx) => (
-                <Stack key={idx + qst.question}>
-                    <Text>{qst.question}</Text>
-                    <List>
-                        {qst.answers.map((answer, idx) => (
-                            <List.Item key={idx + answer.text}>
-                                <Text
-                                    color={answer.correct ? "green" : undefined}
-                                >
-                                    {answer.text}
-                                </Text>
-                            </List.Item>
-                        ))}
-                    </List>
-                </Stack>
-            ))}
-        </Stack>
-    )
-    // return <Text>{JSON.stringify(content, undefined, 4)}</Text>
-}
-
 export default function QuizPage() {
     const router = useRouter()
     const quiz = trpc.prompts.getPromptById.useQuery({

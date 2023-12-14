@@ -9,6 +9,7 @@ interface SummaryProps {}
 export default function Summary({}: SummaryProps) {
     return (
         <FileUpload
+            type="SUMMARY"
             title="Generate summary"
             apiUrl="http://localhost:3030/api/summary"
         />
