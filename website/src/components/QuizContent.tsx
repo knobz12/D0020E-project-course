@@ -127,6 +127,7 @@ function QuizEditor({
                     title: "Quiz updated",
                     message: "Your quiz has been updated with the new text.",
                 })
+                onFinish()
             },
         })
     const [data, setData] = useDebouncedState<{
@@ -264,10 +265,16 @@ function QuizEditor({
                         }}
                         color="teal"
                         variant="filled"
+                        loading={isLoading}
                     >
                         Save
                     </Button>
-                    <Button onClick={onCancel} color="red" variant="filled">
+                    <Button
+                        onClick={onCancel}
+                        color="red"
+                        variant="filled"
+                        loading={isLoading}
+                    >
                         Cancel
                     </Button>
                 </Group>
