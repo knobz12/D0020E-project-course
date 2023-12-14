@@ -1,8 +1,8 @@
 import { Page } from "@/components/Page"
+import { QuizContent } from "@/components/QuizContent"
 import { db } from "@/lib/database"
-import { RouterOutput, trpc } from "@/lib/trpc"
-import { Container, List, Stack, Text, Title } from "@mantine/core"
-import type { Prisma } from "@prisma/client"
+import { trpc } from "@/lib/trpc"
+import { Container, Title } from "@mantine/core"
 import { GetServerSideProps } from "next"
 import { useRouter } from "next/router"
 
