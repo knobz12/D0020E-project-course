@@ -75,20 +75,20 @@ function QuizViewer({ title, content, editable, onEdit }: QuizViewerProps) {
         <Stack>
             <Flex>
                 <Title style={{ flex: 1 }}>{title}</Title>
-                {editable && (
-                    <Group>
-                        <Link
-                            href={`/course/${router.query.course}/quiz/${router.query.quizId}/play`}
-                        >
-                            <Button color="blue" variant="filled">
-                                Play
-                            </Button>
-                        </Link>
+                <Group>
+                    <Link
+                        href={`/course/${router.query.course}/quiz/${router.query.quizId}/play`}
+                    >
+                        <Button color="blue" variant="filled">
+                            Play
+                        </Button>
+                    </Link>
+                    {editable && (
                         <Button onClick={onEdit} color="teal" variant="filled">
                             Edit
                         </Button>
-                    </Group>
-                )}
+                    )}
+                </Group>
             </Flex>
             {content.questions.map((qst, idx) => (
                 <Stack key={idx + qst.question}>
