@@ -15,6 +15,8 @@ def chunky():
     Chunkerizer.text_extraction_test()
 
 if __name__ == "__main__":
+    from modules.ai.utils.args import init_args
+    init_args()
     app()
     # playground()
     # quiz()
