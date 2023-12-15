@@ -4,7 +4,6 @@ from chromadb.config import Settings
 from guidance.models._llama_cpp import LlamaCpp
 from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from langchain.vectorstores.chroma import Chroma
-from modules.ai.utils.args import get_args
 
 collection_name = "llama-2-papers"
 
@@ -20,6 +19,7 @@ def create_chroma_client() -> ClientAPI:
         return client
 
     client = chromadb.Client(settings=Settings(allow_reset=True))
+    #client = chromadb.PersistentClient("./chroma_data", settings=Settings(allow_reset=True))
     #client = chromadb.HttpClient(settings=Settings(allow_reset=True))
 
     return client
