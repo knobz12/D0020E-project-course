@@ -13,7 +13,6 @@ export default function QuizPage() {
     const quiz = trpc.prompts.getPromptById.useQuery({
         id: router.query.quizId! as string,
     })
-    // console.log(quiz.data)
 
     return (
         <Page>
