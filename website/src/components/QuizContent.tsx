@@ -14,6 +14,7 @@ import {
 import { useDebouncedState } from "@mantine/hooks"
 import { modals } from "@mantine/modals"
 import { notifications } from "@mantine/notifications"
+import Link from "next/link"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
@@ -69,14 +70,24 @@ interface QuizViewerProps extends QuizContentProps {
 }
 
 function QuizViewer({ title, content, editable, onEdit }: QuizViewerProps) {
+    const router = useRouter()
     return (
         <Stack>
             <Flex>
                 <Title style={{ flex: 1 }}>{title}</Title>
                 {editable && (
-                    <Button onClick={onEdit} color="teal" variant="filled">
-                        Edit
-                    </Button>
+                    <Group>
+                        <Link
+                            href={`/course/${router.query.course}/quiz/${router.query.quizId}/play`}
+                        >
+                            <Button color="blue" variant="filled">
+                                Play
+                            </Button>
+                        </Link>
+                        <Button onClick={onEdit} color="teal" variant="filled">
+                            Edit
+                        </Button>
+                    </Group>
                 )}
             </Flex>
             {content.questions.map((qst, idx) => (
