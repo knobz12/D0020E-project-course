@@ -1,3 +1,4 @@
+import { Page } from "@/components/Page"
 import { RouterOutput, trpc } from "@/lib/trpc"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { Text } from "@mantine/core"
@@ -12,11 +13,11 @@ export default function QuizPlay() {
     })
 
     return (
-        <Text>
+        <Page>
             {quizQuery.data && quizQuery.data.type === "QUIZ" ? (
                 <Player data={quizQuery.data} />
             ) : null}
-        </Text>
+        </Page>
     )
 }
 
