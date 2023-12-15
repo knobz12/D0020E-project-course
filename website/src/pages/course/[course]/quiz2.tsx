@@ -73,8 +73,6 @@ interface Props {
 var tempChoices:string [];
 
 
-
-
 function checkboxTest(choice:string) {
     
     const ref = useRef(null);
@@ -82,15 +80,13 @@ function checkboxTest(choice:string) {
         <Checkbox 
             key={"choice"}
             id={"choice"}
-            size={100}
+            size={50}
             radius={10}
             label={choice}
             ref={ref}
         />
     );
   }
-
-
 
 const Question: React.FC<Props> = ({
     question,
@@ -114,10 +110,16 @@ const Question: React.FC<Props> = ({
         >
             <h2 className="">{question}</h2>
             <div className="">
+                <button
+                onClick={() =>    onAnswer("rrr")} // This needs to check the checkboxes and return chosen answers           probably use    
+                >
+                    {"submit"}
+                </button>
+
                 {choices.map((choice) => (
                     <Checkbox 
                     key={choice}
-                    id={"banan"}
+                    id={choice}
                     size={100}
                     radius={10}
                     label={choice}
@@ -125,11 +127,6 @@ const Question: React.FC<Props> = ({
                     />
                 ))}
 
-                 <button
-                onClick={() =>   onAnswer("rrr")} // This needs to check the checkboxes and return chosen answers      
-                >
-                    {"submit"}
-                </button>
 
                 {choices.map((choice) => (
                     <button
@@ -140,13 +137,12 @@ const Question: React.FC<Props> = ({
                         {choice}
                     </button>
                 ))}
-                {/*<button className="btn btn-success m-2">Reset{}</button>*/}
             </div>
         </div>
     )
 }
 
-function CheckCorrectAnswer(answer:string, CorrectAnswer:string[]){
+function CheckCorrectAnswer(answer:string, CorrectAnswer:string[]){  // checks if the given answer is in the correct answers
     console.log(CorrectAnswer)
     console.log(answer)
     for(let i = 0; i < CorrectAnswer.length; i++){
