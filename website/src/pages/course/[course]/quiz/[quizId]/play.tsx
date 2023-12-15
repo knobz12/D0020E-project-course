@@ -11,13 +11,9 @@ export default function QuizPlay() {
         id: router.query.quizId! as string,
     })
 
-    return (
-        <Text>
-            {quizQuery.data && quizQuery.data.type === "QUIZ" ? (
-                <Player data={quizQuery.data} />
-            ) : null}
-        </Text>
-    )
+    return quizQuery.data && quizQuery.data.type === "QUIZ" ? (
+        <Player data={quizQuery.data} />
+    ) : null
 }
 
 function Player({
