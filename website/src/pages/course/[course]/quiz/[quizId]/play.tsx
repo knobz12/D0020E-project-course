@@ -32,7 +32,7 @@ function Player({
 
     type Content = (RouterOutput["prompts"]["getPromptById"] & { type: "QUIZ" })["content"]
 
-    return <Text>{JSON.stringify(quiz)}{playableQuiz(quiz)}</Text>
+    return <div>{playableQuiz(quiz)}</div>
 }
 
 export const getServerSideProps = (async ({ req, res, params }) => {

@@ -34,39 +34,6 @@ import { RouterOutput, trpc } from "@/lib/trpc"
 type Content = (RouterOutput["prompts"]["getPromptById"] & { type: "QUIZ" })["content"]
 
 
-const questions = [
-    {
-        question: "What is the boiling point of water?",
-        choices: ["100°C", "1°C", "2°C"],
-        CorrectAnswer: ["100°C","1°C"],
-    },
-    {
-        question: 'What is the capital of France?',
-        choices: ['Paris', 'London', 'bollar'],
-        CorrectAnswer: ['Paris'],
-    },
-    {
-        question: 'What is the largest planet in our solar system?',
-        choices: ['Jupiter','Mars',  'Venus'],
-        CorrectAnswer: ['Jupiter'],
-    },
-    {
-        question: "What is the boiling point of water?",
-        choices: ["100°C", "0°C", "50°C"],
-        CorrectAnswer: ["100°C"],
-    },
-    {
-        question: 'What is the largest planet in our solar system?',
-        choices: ['Jupiter', 'Mars',  'Venus'],
-        CorrectAnswer: ['Jupiter'],
-    },
-    {
-        question: "What is the boiling point of water?",
-        choices: ["100°C", "0°C", "50°C,"],
-        CorrectAnswer: ["100°C"],
-    },
-]
-
 
 
 interface Props {
@@ -74,7 +41,7 @@ interface Props {
     choices: string[]
     CorrectAnswer: string[]
     onAnswer: (CorrectAnswer: string) => void
-    onSubmit: (CorrectAnswer: string) => void
+    //onSubmit: (CorrectAnswer: string) => void
 }
 
 var tempChoices:string [];
@@ -100,7 +67,7 @@ const Question: React.FC<Props> = ({
     choices,
     CorrectAnswer,
     onAnswer,
-    onSubmit,
+    //onSubmit,
 }) => {
 
     let tempAnswers:string[];
@@ -225,7 +192,7 @@ export default function Quiz(Quizquestions:Content){
         }
     }
 
-    const handleSubmit = (CorrectAnswer: string) => {
+    /* const handleSubmit = (CorrectAnswer: string) => {
         if (CheckCorrectAnswer(CorrectAnswer, choicesArray[1])===1){  //  choicesArray[1] is correct choices
             console.log(TempScore);
             TempScore = score + 1;
@@ -246,19 +213,21 @@ export default function Quiz(Quizquestions:Content){
             setCurrentQuestion(0);  //reset quiz
         }
     }
+        
+    */ 
 
     return (
         
         <div>
             {Quizquestions.questions[0].answers[0].text}
             <h1 className="text-center">Quiz</h1>
-            {currentQuestion < questions.length ? (
+            {currentQuestion < Quizquestions.questions.length ? (
                 <Question
                     question={Quizquestions.questions[currentQuestion].question}
                     choices={choicesArray[0]}
                     CorrectAnswer={choicesArray[1]}   
                     onAnswer={handleAnswer}
-                    onSubmit={handleSubmit}
+                    //onSubmit={handleSubmit}
                 />
             ) : (
                 "null"
