@@ -28,10 +28,11 @@ import { getServerSession } from "next-auth"
 import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { authOptions } from "../../api/auth/[...nextauth]"
 import { useRouter } from "next/router"
-import { db } from "@/lib/database"
 import { trpc } from "@/lib/trpc"
 import { useSession } from "next-auth/react"
 import { modals } from "@mantine/modals"
+import { CreateTeacherNoteButton } from "@/components/CreateTeacherNoteButton"
+import { TeacherNote } from "@/components/TeacherNote"
 
 type Prompt = { icon: Icon; text: string; link: string }
 
@@ -143,7 +144,7 @@ export default function Home({} // prompts,
                                     return (
                                         <Paper
                                             key={prompt.id}
-                                            className="overflow-hidden max-h-48"
+                                            className="overflow-hidden"
                                             radius="lg"
                                             p="lg"
                                         >
@@ -239,53 +240,80 @@ export default function Home({} // prompts,
                                                                     : "summary"
                                                             }/${prompt.id}`}
                                                         >
-                                                            <Title>
+                                                            <Title
+                                                                lineClamp={3}
+                                                            >
                                                                 {prompt.title}
                                                             </Title>
                                                         </Link>
                                                         <Badge size="lg">
                                                             {prompt.type}
                                                         </Badge>
+                                                        {prompt.teacherNote && (
+                                                            <TeacherNote
+                                                                promptId={
+                                                                    prompt.id
+                                                                }
+                                                                note={
+                                                                    prompt.teacherNote
+                                                                }
+                                                            />
+                                                        )}
                                                     </Stack>
-                                                    {session.data?.user.type ===
-                                                        "TEACHER" ||
-                                                    prompt.userId ===
-                                                        session.data?.user
-                                                            ?.userId ? (
-                                                        <ActionIcon
-                                                            color="red"
-                                                            onClick={() =>
-                                                                modals.openConfirmModal(
-                                                                    {
-                                                                        title: "Delete prompt",
-                                                                        children:
-                                                                            "Are you sure you want to delete this prompt?",
-                                                                        color: "red",
-                                                                        centered:
-                                                                            true,
-                                                                        labels: {
-                                                                            confirm:
-                                                                                "Delete",
-                                                                            cancel: "Cancel",
-                                                                        },
-                                                                        confirmProps:
-                                                                            {
-                                                                                color: "red",
+                                                    <Stack>
+                                                        {session.data?.user
+                                                            .type ===
+                                                            "TEACHER" ||
+                                                        prompt.userId ===
+                                                            session.data?.user
+                                                                ?.userId ? (
+                                                            <ActionIcon
+                                                                color="red"
+                                                                title="Delete prompt"
+                                                                onClick={() =>
+                                                                    modals.openConfirmModal(
+                                                                        {
+                                                                            title: "Delete prompt",
+                                                                            children:
+                                                                                "Are you sure you want to delete this prompt?",
+                                                                            color: "red",
+                                                                            centered:
+                                                                                true,
+                                                                            labels: {
+                                                                                confirm:
+                                                                                    "Delete",
+                                                                                cancel: "Cancel",
                                                                             },
-                                                                        onConfirm:
-                                                                            () =>
-                                                                                deletePrompt(
-                                                                                    {
-                                                                                        id: prompt.id,
-                                                                                    },
-                                                                                ),
-                                                                    },
-                                                                )
-                                                            }
-                                                        >
-                                                            <IconTrash />
-                                                        </ActionIcon>
-                                                    ) : null}
+                                                                            confirmProps:
+                                                                                {
+                                                                                    color: "red",
+                                                                                },
+                                                                            onConfirm:
+                                                                                () =>
+                                                                                    deletePrompt(
+                                                                                        {
+                                                                                            id: prompt.id,
+                                                                                        },
+                                                                                    ),
+                                                                        },
+                                                                    )
+                                                                }
+                                                            >
+                                                                <IconTrash />
+                                                            </ActionIcon>
+                                                        ) : null}
+                                                        {prompt.teacherNote ===
+                                                            undefined &&
+                                                        session.data?.user
+                                                            .type ===
+                                                            "TEACHER" ? (
+                                                            <CreateTeacherNoteButton
+                                                                promptId={
+                                                                    prompt.id
+                                                                }
+                                                            />
+                                                        ) : null}
+                                                    </Stack>
                                                 </Flex>
                                             </Flex>
                                         </Paper>

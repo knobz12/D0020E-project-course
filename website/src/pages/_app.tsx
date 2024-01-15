@@ -8,6 +8,7 @@ import { SessionProvider } from "next-auth/react"
 import type { AppProps } from "next/app"
 import type { Session } from "next-auth"
 import { trpc } from "@/lib/trpc"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
 function LlamaApp({
     Component,
@@ -20,6 +21,9 @@ function LlamaApp({
                 <link rel="icon" href="/lama.png" />
             </Head>
             <SessionProvider session={pageProps.session}>
+                {process.env.NODE_ENV === "development" && (
+                    <ReactQueryDevtools />
+                )}
                 <MantineProvider
                     withGlobalStyles
                     withNormalizeCSS

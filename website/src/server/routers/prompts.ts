@@ -1,8 +1,9 @@
 import { z } from "zod"
-import { publicProcedure, router, userProcedure } from "../trpc"
+import { router, teacherProcedure, userProcedure } from "../trpc"
 import { db } from "@/lib/database"
 import { TRPCError } from "@trpc/server"
-import { Prompt } from "@prisma/client"
+import { Prisma, Prompt } from "@prisma/client"
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 
 type PromptTypeContent = {
     SUMMARY: { text: string }
@@ -14,6 +15,16 @@ type PromptTypeContent = {
     }
 }
 
+type TeacherNote = {
+    text: string
+    title: string
+    user: {
+        id: string
+        name: string | null
+        image: string | null
+    }
+}
+
 type PromptType = {
     id: string
     createdAt: Date
@@ -22,6 +33,7 @@ type PromptType = {
     title: string
     /** The requesting users reaction on this prompt. Null if they haven't reacted else true/false depending on how they reacted to it. */
     reaction: boolean | null
+    teacherNote?: TeacherNote
     score: number
 } & (
     | {
@@ -38,7 +50,7 @@ async function formatPrompt(
     prompt: Prompt,
     userId: string,
 ): Promise<PromptType> {
-    const [positiveReactions, negativeReactions, userReaction] =
+    const [positiveReactions, negativeReactions, userReaction, teacherNote] =
         await Promise.all([
             db.promptReaction.count({
                 where: {
@@ -61,6 +73,16 @@ async function formatPrompt(
                 },
                 select: { id: true, positive: true },
             }),
+            db.teacherNote.findUnique({
+                where: {
+                    promptId: prompt.id,
+                },
+                select: {
+                    title: true,
+                    text: true,
+                    user: { select: { id: true, name: true, image: true } },
+                },
+            }),
         ])
 
     const score = positiveReactions - negativeReactions
@@ -72,9 +94,9 @@ async function formatPrompt(
         userId: prompt.userId,
         title: prompt.title,
         reaction: !userReaction ? null : userReaction.positive,
-        // type: ""
         type: prompt.type as "QUIZ" | "SUMMARY",
         content: prompt.content as any,
+        teacherNote: teacherNote ?? undefined,
         score,
     }
 }
@@ -268,6 +290,79 @@ export const promptRouter = router({
                         userId,
                         positive,
                     },
+                })
+            }
+        }),
+    createTeacherNote: teacherProcedure
+        .input(
+            z.object({
+                promptId: z.string().uuid(),
+                title: z.string().max(128),
+                text: z.string().max(4096),
+            }),
+        )
+        .mutation(async function ({ ctx, input }) {
+            const prompt = await db.prompt.findUnique({
+                where: { id: input.promptId },
+                select: {
+                    id: true,
+                    teacherNote: { select: { promptId: true } },
+                },
+            })
+
+            if (!prompt) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Could not find prompt.",
+                })
+            }
+
+            if (prompt.teacherNote !== null) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Prompt already has a teacher note.",
+                })
+            }
+
+            await db.teacherNote.create({
+                data: {
+                    userId: ctx.user.id,
+                    promptId: input.promptId,
+                    title: input.title,
+                    text: input.text,
+                },
+            })
+        }),
+    deleteTeacherNote: teacherProcedure
+        .input(
+            z.object({
+                promptId: z.string().uuid(),
+            }),
+        )
+        .mutation(async function ({ input }) {
+            try {
+                await db.teacherNote.delete({
+                    where: {
+                        promptId: input.promptId,
+                    },
+                })
+            } catch (e) {
+                if (
+                    e instanceof PrismaClientKnownRequestError &&
+                    // Not found code
+                    e.code === "P2015"
+                ) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message:
+                            "Could not find the note you wanted to delete.",
+                    })
+                }
+
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message:
+                        "Something went wrong on the server when trying to delete note.",
                 })
             }
         }),
