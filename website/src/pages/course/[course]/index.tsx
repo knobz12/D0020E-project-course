@@ -22,6 +22,7 @@ import {
     IconArrowUp,
     IconArrowDown,
     IconTrash,
+    IconBrandMastercard,
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
@@ -48,6 +49,11 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 icon: IconQuestionMark,
                 text: "QuizTest",
                 link: "/quiz2",
+            },
+            {
+                icon: IconBrandMastercard,
+                text: "Flashcards",
+                link: "/flashcards"
             },
             {
                 icon: IconBook,
