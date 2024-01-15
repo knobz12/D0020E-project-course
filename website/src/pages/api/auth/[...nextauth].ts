@@ -1,17 +1,10 @@
 import NextAuth, { AuthOptions } from "next-auth"
 import GithubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-// import Adapters from "next-auth/adapters"
 import jwt from "jsonwebtoken"
 import { db } from "@/lib/database"
 
 const cookiePrefix = "aisb"
-// const adapter =
-// console.log("Adapter:", adapter.getAdapter())
-// db.account.findUnique({
-//     where: { pro },
-// })
 
 export const authOptions: AuthOptions = {
     cookies: {
@@ -82,15 +75,25 @@ export const authOptions: AuthOptions = {
             clientId: process.env.GITHUB_ID!,
             clientSecret: process.env.GITHUB_SECRET!,
         }),
-        GoogleProvider({
-            clientId: process.env.GOOGLE_ID!,
-            clientSecret: process.env.GOOGLE_SECRET!,
-        }),
-        // ...add more providers here
     ],
     callbacks: {
-        session(params) {
+        async session(params) {
             // console.log("SESSSSION:", params)
+
+            const email = params.session.user.email
+
+            if (!email) {
+                throw new Error("Could not find user!")
+            }
+
+            const dbUser = await db.user.findUnique({
+                where: { email },
+                select: { type: true },
+            })
+
+            if (!dbUser) {
+                throw new Error("Could not find user!")
+            }
 
             if (params.token.userId) {
                 return {
@@ -98,6 +101,7 @@ export const authOptions: AuthOptions = {
                     user: {
                         ...params.session.user,
                         userId: params.token.userId,
+                        type: dbUser.type,
                     },
                 }
             }
