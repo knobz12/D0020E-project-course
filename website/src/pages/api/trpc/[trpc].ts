@@ -16,7 +16,7 @@ export const createContext = async ({
 
     const user = await db.user.findUnique({
         where: { email: session.user?.email },
-        select: { id: true, name: true, email: true },
+        select: { id: true, name: true, email: true, type: true },
     })
 
     return { user }

@@ -22,7 +22,10 @@ export default function QuizPage() {
                     <QuizContent
                         promptId={quiz.data.id}
                         title={quiz.data.title}
-                        editable={quiz.data.userId === session?.user.userId}
+                        editable={
+                            session?.user.type === "TEACHER" ||
+                            quiz.data.userId === session?.user.userId
+                        }
                         content={quiz.data.content}
                     />
                 )}

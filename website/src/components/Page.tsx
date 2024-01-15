@@ -1,10 +1,12 @@
 import {
     Avatar,
+    Badge,
     Box,
     Button,
     Container,
     Flex,
     Menu,
+    Stack,
     Text,
     Title,
     UnstyledButton,
@@ -48,13 +50,28 @@ export function Page({ children, center = false }: PageProps) {
                                             <Avatar src={data.user.image} />
                                         )}
                                         {data.user?.name && (
-                                            <Text
-                                                size="xl"
-                                                color="white"
-                                                fw={600}
-                                            >
-                                                {data.user.name}
-                                            </Text>
+                                            <Stack spacing={0}>
+                                                <Text
+                                                    size="xl"
+                                                    color="white"
+                                                    fw={600}
+                                                >
+                                                    {data.user.name}
+                                                </Text>
+                                                <Box>
+                                                    <Badge
+                                                        color={
+                                                            data.user.type ===
+                                                            "STUDENT"
+                                                                ? "blue"
+                                                                : "green"
+                                                        }
+                                                        size="sm"
+                                                    >
+                                                        {data.user.type}
+                                                    </Badge>
+                                                </Box>
+                                            </Stack>
                                         )}
                                     </Flex>
                                 </Button>

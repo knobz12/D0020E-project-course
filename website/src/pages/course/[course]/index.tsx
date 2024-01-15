@@ -247,9 +247,11 @@ export default function Home({} // prompts,
                                                             {prompt.type}
                                                         </Badge>
                                                     </Stack>
-                                                    {prompt.userId ===
+                                                    {session.data?.user.type ===
+                                                        "TEACHER" ||
+                                                    prompt.userId ===
                                                         session.data?.user
-                                                            ?.userId && (
+                                                            ?.userId ? (
                                                         <ActionIcon
                                                             color="red"
                                                             onClick={() =>
@@ -283,7 +285,7 @@ export default function Home({} // prompts,
                                                         >
                                                             <IconTrash />
                                                         </ActionIcon>
-                                                    )}
+                                                    ) : null}
                                                 </Flex>
                                             </Flex>
                                         </Paper>
@@ -306,129 +308,11 @@ export const getServerSideProps = (async ({ req, res, params }) => {
         return { notFound: true }
     }
 
-    // async function getQuizes() {
-    //     const quizes = await db.prompt.findMany({
-    //         orderBy: { createdAt: "desc" },
-    //         take: 25,
-    //         where: { course: { name: course as string } },
-    //         select: {
-    //             id: true,
-    //             title: true,
-    //             createdAt: true,
-    //         },
-    //     })
-
-    //     const formatted = await Promise.all(
-    //         quizes.map(
-    //             (quiz) =>
-    //                 new Promise<
-    //                     Omit<typeof quiz, "createdAt"> & {
-    //                         createdAt: string
-    //                         score: number
-    //                         type: "QUIZ" | "SUMMARY"
-    //                     }
-    //                 >(async (res) => {
-    //                     const [positiveReactions, negativeReactions] =
-    //                         await Promise.all([
-    //                             db.quizPromptReaction.count({
-    //                                 where: {
-    //                                     quizPromptId: quiz.id,
-    //                                     positive: true,
-    //                                 },
-    //                             }),
-    //                             db.quizPromptReaction.count({
-    //                                 where: {
-    //                                     quizPromptId: quiz.id,
-    //                                     positive: false,
-    //                                 },
-    //                             }),
-    //                         ])
-
-    //                     const score = positiveReactions - negativeReactions
-
-    //                     res({
-    //                         ...quiz,
-    //                         createdAt: quiz.createdAt.toISOString(),
-    //                         type: "QUIZ",
-    //                         score,
-    //                     })
-    //                 }),
-    //         ),
-    //     )
-
-    //     return formatted
-    // }
-
-    // async function getSummaries() {
-    //     const summaries = await db.summaryPrompt.findMany({
-    //         orderBy: { createdAt: "desc" },
-    //         take: 25,
-    //         where: { course: { name: course as string } },
-    //         select: {
-    //             id: true,
-    //             title: true,
-    //             createdAt: true,
-    //         },
-    //     })
-
-    //     const formatted = await Promise.all(
-    //         summaries.map(
-    //             (summary) =>
-    //                 new Promise<
-    //                     Omit<typeof summary, "createdAt"> & {
-    //                         createdAt: string
-    //                         score: number
-    //                         type: "QUIZ" | "SUMMARY"
-    //                     }
-    //                 >(async (res) => {
-    //                     const [positiveReactions, negativeReactions] =
-    //                         await Promise.all([
-    //                             db.summaryPromptReaction.count({
-    //                                 where: {
-    //                                     summaryPromptId: summary.id,
-    //                                     positive: true,
-    //                                 },
-    //                             }),
-    //                             db.summaryPromptReaction.count({
-    //                                 where: {
-    //                                     summaryPromptId: summary.id,
-    //                                     positive: false,
-    //                                 },
-    //                             }),
-    //                         ])
-
-    //                     const score = positiveReactions - negativeReactions
-
-    //                     res({
-    //                         ...summary,
-    //                         createdAt: summary.createdAt.toISOString(),
-    //                         type: "SUMMARY",
-    //                         score,
-    //                     })
-    //                 }),
-    //         ),
-    //     )
-
-    //     return formatted
-    // }
     const session = await getServerSession(req, res, authOptions)
-    // const [session, quizes, summaries] = await Promise.all([
-    //     getServerSession(req, res, authOptions),
-    //     getQuizes(),
-    //     getSummaries(),
-    // ])
-
-    // Combine into one list ordered by created at date
-    // const prompts = [...quizes, ...summaries].sort((a, b) =>
-    //     new Date(a.createdAt).valueOf() < new Date(b.createdAt).valueOf()
-    //         ? 1
-    //         : -1,
-    // )
 
     return {
         props: {
             session,
-            // prompts,
         },
     }
 }) satisfies GetServerSideProps
