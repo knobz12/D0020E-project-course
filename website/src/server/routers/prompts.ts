@@ -13,6 +13,12 @@ type PromptTypeContent = {
             answers: { text: string; correct: boolean }[]
         }[]
     }
+    FLASHCARDS: {
+        questions: {
+            question: string
+            answer: string
+        }[]
+    }
 }
 
 type TeacherNote = {
@@ -44,6 +50,10 @@ type PromptType = {
     | {
           type: "QUIZ"
           content: PromptTypeContent["QUIZ"]
+      }
+    | {
+          type: "FLASHCARDS"
+          content: PromptTypeContent["FLASHCARDS"]
       }
 )
 
@@ -95,7 +105,8 @@ async function formatPrompt(
         userId: prompt.userId,
         title: prompt.title,
         reaction: !userReaction ? null : userReaction.positive,
-        type: prompt.type as "QUIZ" | "SUMMARY",
+        // type: ""
+        type: prompt.type as "FLASHCARDS" | "QUIZ" | "SUMMARY",
         content: prompt.content as any,
         teacherNote: teacherNote ?? undefined,
         pinned: prompt.pinned,
@@ -301,7 +312,7 @@ export const promptRouter = router({
     react: userProcedure
         .input(
             z.object({
-                type: z.enum(["QUIZ", "SUMMARY"]),
+                type: z.enum(["FLASHCARDS", "QUIZ", "SUMMARY"]),
                 positive: z.boolean(),
                 promptId: z.string().uuid(),
             }),
