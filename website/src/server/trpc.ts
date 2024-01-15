@@ -28,3 +28,28 @@ const loggedIn = t.middleware(async (opts) => {
 
 // Queries or mutations which require the user to be logged in. Mutations such as reacting to prompts for example.
 export const userProcedure = publicProcedure.use(loggedIn)
+
+const isTeacher = t.middleware(async (opts) => {
+    if (opts.ctx.user === null) {
+        throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You must be logged in to access this route.",
+        })
+    }
+
+    if (opts.ctx.user.type !== "TEACHER") {
+        throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You must be a teacher to access this route.",
+        })
+    }
+
+    return opts.next({
+        ctx: {
+            user: opts.ctx.user,
+        },
+    })
+})
+
+// Queries or mutations which require the user to be logged in and a teacher. Mutations such as adding teacher notes for example.
+export const teacherProcedure = publicProcedure.use(loggedIn).use(isTeacher)

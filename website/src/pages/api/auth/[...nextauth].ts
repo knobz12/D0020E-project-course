@@ -122,6 +122,7 @@ export const authOptions: AuthOptions = {
                         data: {
                             email: params.user.email,
                             name: params.user.name,
+                            image: params.user.image,
                         },
                     })
                 }
