@@ -242,7 +242,11 @@ export default function Home({} // prompts,
                                                                 prompt.type ===
                                                                 "QUIZ"
                                                                     ? "quiz"
-                                                                    : "summary"
+                                                                    : (prompt.type === "FLASHCARDS")
+                                                                     ? "flashcards"
+                                                                     : (prompt.type === "SUMMARY")
+                                                                      ? "summary"
+                                                                        : "unknown"
                                                             }/${prompt.id}`}
                                                         >
                                                             <Title>
