@@ -26,7 +26,7 @@ class LlamaDbFetcher():
                 updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
                 print("Updated at:", updated_at)
                 title = f"{typography[0].upper() + typography[1:].lower()} {updated_at}"
-
+                print(title)
                 if typography == "SUMMARY":
                     content = json.dumps({"text":content})
                 
