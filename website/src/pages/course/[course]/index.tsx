@@ -1,12 +1,8 @@
 import React from "react"
 import {
-    ActionIcon,
-    Badge,
     Card,
     Center,
     Container,
-    Divider,
-    Flex,
     Paper,
     SimpleGrid,
     Stack,
@@ -19,9 +15,6 @@ import {
     Icon,
     IconBook,
     IconCheck,
-    IconArrowUp,
-    IconArrowDown,
-    IconTrash,
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
@@ -29,10 +22,8 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { authOptions } from "../../api/auth/[...nextauth]"
 import { useRouter } from "next/router"
 import { trpc } from "@/lib/trpc"
-import { useSession } from "next-auth/react"
-import { modals } from "@mantine/modals"
-import { CreateTeacherNoteButton } from "@/components/CreateTeacherNoteButton"
-import { TeacherNote } from "@/components/TeacherNote"
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion"
+import { PromptItem } from "@/components/PromptItem"
 
 type Prompt = { icon: Icon; text: string; link: string }
 
@@ -77,19 +68,8 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
 export default function Home({} // prompts,
 : InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
-    const session = useSession()
-    const prompts = trpc.prompts.getPrompts.useQuery({
+    const prompts = trpc.prompts.getNonAndPinnedPrompts.useQuery({
         course: router.query.course as string,
-    })
-    const { mutate: react } = trpc.prompts.react.useMutation({
-        onSuccess() {
-            prompts.refetch()
-        },
-    })
-    const { mutate: deletePrompt } = trpc.prompts.deletePromptById.useMutation({
-        onSuccess() {
-            prompts.refetch()
-        },
     })
 
     return (
@@ -140,185 +120,22 @@ export default function Home({} // prompts,
                         <Stack>
                             <Title>Prompts</Title>
                             <Stack>
-                                {prompts.data?.map((prompt, idx) => {
-                                    return (
-                                        <Paper
-                                            key={prompt.id}
-                                            className="overflow-hidden"
-                                            radius="lg"
-                                            p="lg"
-                                        >
-                                            <Flex gap="md">
-                                                <Stack
-                                                    align="center"
-                                                    spacing="sm"
-                                                >
-                                                    <ActionIcon
-                                                        variant={
-                                                            prompt.reaction ===
-                                                            true
-                                                                ? "light"
-                                                                : undefined
-                                                        }
-                                                        color={
-                                                            prompt.reaction ===
-                                                            true
-                                                                ? "green"
-                                                                : undefined
-                                                        }
-                                                        onClick={() =>
-                                                            react({
-                                                                positive: true,
-                                                                promptId:
-                                                                    prompt.id,
-                                                                type: prompt.type,
-                                                            })
-                                                        }
-                                                    >
-                                                        <IconArrowUp
-                                                            size={48}
-                                                            stroke={
-                                                                prompt.reaction ===
-                                                                true
-                                                                    ? 3
-                                                                    : 2
-                                                            }
-                                                        />
-                                                    </ActionIcon>
-                                                    <Text size="xl" fw={500}>
-                                                        {prompt.score}
-                                                    </Text>
-                                                    <ActionIcon
-                                                        variant={
-                                                            prompt.reaction ===
-                                                            false
-                                                                ? "light"
-                                                                : undefined
-                                                        }
-                                                        color={
-                                                            prompt.reaction ===
-                                                            false
-                                                                ? "red"
-                                                                : undefined
-                                                        }
-                                                        onClick={() =>
-                                                            react({
-                                                                positive: false,
-                                                                promptId:
-                                                                    prompt.id,
-                                                                type: prompt.type,
-                                                            })
-                                                        }
-                                                    >
-                                                        <IconArrowDown
-                                                            size={48}
-                                                            stroke={
-                                                                prompt.reaction ===
-                                                                false
-                                                                    ? 3
-                                                                    : 2
-                                                            }
-                                                        />
-                                                    </ActionIcon>
-                                                </Stack>
-
-                                                <Divider orientation="vertical" />
-
-                                                <Flex w="100%">
-                                                    <Stack
-                                                        align="start"
-                                                        style={{ flex: 1 }}
-                                                    >
-                                                        <Link
-                                                            href={`/course/${
-                                                                router.query
-                                                                    .course
-                                                            }/${
-                                                                prompt.type ===
-                                                                "QUIZ"
-                                                                    ? "quiz"
-                                                                    : "summary"
-                                                            }/${prompt.id}`}
-                                                        >
-                                                            <Title
-                                                                lineClamp={3}
-                                                            >
-                                                                {prompt.title}
-                                                            </Title>
-                                                        </Link>
-                                                        <Badge size="lg">
-                                                            {prompt.type}
-                                                        </Badge>
-                                                        {prompt.teacherNote && (
-                                                            <TeacherNote
-                                                                promptId={
-                                                                    prompt.id
-                                                                }
-                                                                note={
-                                                                    prompt.teacherNote
-                                                                }
-                                                            />
-                                                        )}
-                                                    </Stack>
-                                                    <Stack>
-                                                        {session.data?.user
-                                                            .type ===
-                                                            "TEACHER" ||
-                                                        prompt.userId ===
-                                                            session.data?.user
-                                                                ?.userId ? (
-                                                            <ActionIcon
-                                                                color="red"
-                                                                title="Delete prompt"
-                                                                onClick={() =>
-                                                                    modals.openConfirmModal(
-                                                                        {
-                                                                            title: "Delete prompt",
-                                                                            children:
-                                                                                "Are you sure you want to delete this prompt?",
-                                                                            color: "red",
-                                                                            centered:
-                                                                                true,
-                                                                            labels: {
-                                                                                confirm:
-                                                                                    "Delete",
-                                                                                cancel: "Cancel",
-                                                                            },
-                                                                            confirmProps:
-                                                                                {
-                                                                                    color: "red",
-                                                                                },
-                                                                            onConfirm:
-                                                                                () =>
-                                                                                    deletePrompt(
-                                                                                        {
-                                                                                            id: prompt.id,
-                                                                                        },
-                                                                                    ),
-                                                                        },
-                                                                    )
-                                                                }
-                                                            >
-                                                                <IconTrash />
-                                                            </ActionIcon>
-                                                        ) : null}
-                                                        {prompt.teacherNote ===
-                                                            undefined &&
-                                                        session.data?.user
-                                                            .type ===
-                                                            "TEACHER" ? (
-                                                            <CreateTeacherNoteButton
-                                                                promptId={
-                                                                    prompt.id
-                                                                }
-                                                            />
-                                                        ) : null}
-                                                    </Stack>
-                                                </Flex>
-                                            </Flex>
-                                        </Paper>
-                                    )
-                                })}
+                                <AnimatePresence>
+                                    {prompts.data?.pinned.map((prompt) => {
+                                        return (
+                                            <motion.div layout key={prompt.id}>
+                                                <PromptItem prompt={prompt} />
+                                            </motion.div>
+                                        )
+                                    })}
+                                    {prompts.data?.prompts.map((prompt) => {
+                                        return (
+                                            <motion.div layout key={prompt.id}>
+                                                <PromptItem prompt={prompt} />
+                                            </motion.div>
+                                        )
+                                    })}
+                                </AnimatePresence>
                             </Stack>
                         </Stack>
                     </Stack>

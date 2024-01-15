@@ -70,8 +70,10 @@ export function CreateTeacherNoteButton({
             }
 
             // Cancel any current requests so we don't break the update
-            await utils.prompts.getPrompts.cancel({ course })
-            const data = utils.prompts.getPrompts.getData({ course })
+            await utils.prompts.getNonAndPinnedPrompts.cancel({ course })
+            const data = utils.prompts.getNonAndPinnedPrompts.getData({
+                course,
+            })
 
             if (!data || !user.data) {
                 return
@@ -83,7 +85,7 @@ export function CreateTeacherNoteButton({
                 return
             }
 
-            const updated = data.map((prompt) => {
+            const pinnedUpdated = data.pinned.map((prompt) => {
                 if (prompt.id !== promptId) {
                     return prompt
                 }
@@ -97,7 +99,24 @@ export function CreateTeacherNoteButton({
                     },
                 }
             })
-            utils.prompts.getPrompts.setData({ course }, updated)
+            const promptsUpdated = data.prompts.map((prompt) => {
+                if (prompt.id !== promptId) {
+                    return prompt
+                }
+
+                return {
+                    ...prompt,
+                    teacherNote: {
+                        title: form.values.title,
+                        text: form.values.text,
+                        user: { id: userId, image, name },
+                    },
+                }
+            })
+            utils.prompts.getNonAndPinnedPrompts.setData(
+                { course },
+                { pinned: pinnedUpdated, prompts: promptsUpdated },
+            )
         },
     })
 

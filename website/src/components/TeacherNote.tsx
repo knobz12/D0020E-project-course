@@ -31,14 +31,16 @@ export function TeacherNote({ promptId, note }: TeacherNoteProps) {
             }
 
             // Cancel any current requests so we don't break the update
-            await utils.prompts.getPrompts.cancel({ course })
-            const data = utils.prompts.getPrompts.getData({ course })
+            await utils.prompts.getNonAndPinnedPrompts.cancel({ course })
+            const data = utils.prompts.getNonAndPinnedPrompts.getData({
+                course,
+            })
 
             if (!data) {
                 return
             }
 
-            const updated = data.map((prompt) => {
+            const pinnedUpdated = data.pinned.map((prompt) => {
                 if (prompt.id !== promptId) {
                     return prompt
                 }
@@ -48,7 +50,20 @@ export function TeacherNote({ promptId, note }: TeacherNoteProps) {
                     teacherNote: undefined,
                 }
             })
-            utils.prompts.getPrompts.setData({ course }, updated)
+            const promptsUpdated = data.prompts.map((prompt) => {
+                if (prompt.id !== promptId) {
+                    return prompt
+                }
+
+                return {
+                    ...prompt,
+                    teacherNote: undefined,
+                }
+            })
+            utils.prompts.getNonAndPinnedPrompts.setData(
+                { course },
+                { pinned: pinnedUpdated, prompts: promptsUpdated },
+            )
         },
     })
 

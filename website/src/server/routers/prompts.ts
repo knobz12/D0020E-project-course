@@ -34,6 +34,7 @@ type PromptType = {
     /** The requesting users reaction on this prompt. Null if they haven't reacted else true/false depending on how they reacted to it. */
     reaction: boolean | null
     teacherNote?: TeacherNote
+    pinned: boolean
     score: number
 } & (
     | {
@@ -97,6 +98,7 @@ async function formatPrompt(
         type: prompt.type as "QUIZ" | "SUMMARY",
         content: prompt.content as any,
         teacherNote: teacherNote ?? undefined,
+        pinned: prompt.pinned,
         score,
     }
 }
@@ -222,6 +224,59 @@ export const promptRouter = router({
                 })
             }
             return formatPrompt(summary, ctx.user.id)
+        }),
+    getNonAndPinnedPrompts: userProcedure
+        .input(z.object({ course: z.string() }))
+        .query(async function ({
+            input,
+            ctx,
+        }): Promise<{ pinned: PromptType[]; prompts: PromptType[] }> {
+            const course = await db.course.findUnique({
+                where: { name: input.course },
+                select: { id: true },
+            })
+
+            if (!course) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: `Could not course with name '${input.course}'.`,
+                })
+            }
+
+            const [pinned, nonPinned] = await Promise.all([
+                db.prompt.findMany({
+                    where: { pinned: true, courseId: course.id },
+                    orderBy: { createdAt: "desc" },
+                    // There should only ever be at most 5 pinned prompts.
+                    take: 5,
+                }),
+                db.prompt.findMany({
+                    where: { pinned: false, courseId: course.id },
+                    orderBy: { createdAt: "desc" },
+                    take: 25,
+                }),
+            ])
+
+            const [formattedPinned, formattedNonPinned] = await Promise.all([
+                Promise.all(
+                    pinned.map(
+                        (prompt) =>
+                            new Promise<PromptType>(async (res) => {
+                                res(formatPrompt(prompt, ctx.user.id))
+                            }),
+                    ),
+                ),
+                Promise.all(
+                    nonPinned.map(
+                        (prompt) =>
+                            new Promise<PromptType>(async (res) => {
+                                res(formatPrompt(prompt, ctx.user.id))
+                            }),
+                    ),
+                ),
+            ])
+
+            return { pinned: formattedPinned, prompts: formattedNonPinned }
         }),
     getPrompts: userProcedure
         .input(z.object({ course: z.string() }))
@@ -365,6 +420,46 @@ export const promptRouter = router({
                         "Something went wrong on the server when trying to delete note.",
                 })
             }
+        }),
+    togglePromptPin: teacherProcedure
+        .input(
+            z.object({
+                promptId: z.string().uuid(),
+            }),
+        )
+        .mutation(async function ({ input }) {
+            const prompt = await db.prompt.findUnique({
+                where: { id: input.promptId },
+                select: { id: true, pinned: true, courseId: true },
+            })
+
+            if (!prompt) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "The prompt you wanted to pin wasn't found.",
+                })
+            }
+
+            const count = await db.prompt.count({
+                where: { pinned: true, courseId: prompt.courseId },
+            })
+
+            const newValue = !prompt.pinned
+            console.log(newValue, count)
+
+            if (newValue === true && count >= 5) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message:
+                        "There can only be up to 5 pinned prompts in a course. Unpin a prompt if you still want to prompt this prompt.",
+                })
+            }
+
+            await db.prompt.update({
+                where: { id: input.promptId },
+                data: { pinned: newValue },
+                select: { pinned: true },
+            })
         }),
 })
 
