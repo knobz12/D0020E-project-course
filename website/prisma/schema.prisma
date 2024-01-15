@@ -35,7 +35,9 @@ model Prompt {
   content Json   @db.JsonB
 
   /// What type this prompt is. Determines the structure of the content data.
-  type PromptType
+  type   PromptType
+  /// If this prompt has been pinned to appear at the top of the list.
+  pinned Boolean    @default(false)
 
   userId String @map("user_id") @db.Uuid
   /// The user who made this prompt
@@ -52,6 +54,7 @@ model Prompt {
 
   @@index([type])
   @@index([courseId])
+  @@index([pinned, courseId])
   @@index([type, courseId])
   @@map("prompts")
 }
