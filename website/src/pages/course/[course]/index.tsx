@@ -45,11 +45,6 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 link: "/quiz",
             },
             {
-                icon: IconQuestionMark,
-                text: "QuizTest",
-                link: "/quiz2",
-            },
-            {
                 icon: IconBook,
                 text: "Summary",
                 link: "/summary",

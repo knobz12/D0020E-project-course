@@ -26,7 +26,12 @@ import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../api/auth/[...nextauth]"
 
+import { useRouter } from "next/router"
+import { RouterOutput, trpc } from "@/lib/trpc"
+
 //insperation 👌 https://www.geeksforgeeks.org/how-to-build-a-quiz-app-with-react-and-typescript/
+
+type Content = (RouterOutput["prompts"]["getPromptById"] & { type: "QUIZ" })["content"]
 
 
 const questions = [
@@ -61,6 +66,8 @@ const questions = [
         CorrectAnswer: ["100°C"],
     },
 ]
+
+
 
 interface Props {
     question: string
@@ -157,13 +164,45 @@ function CheckCorrectAnswer(answer:string, CorrectAnswer:string[]){  // checks i
     return 0
 }
 
-function Quiz(){
+function extractChoises(Quizquestions:Content,questionID:number){
+
+    if(questionID >= Quizquestions.questions.length){
+        return [[],[]]
+    }
+
+    var choices:string[] = [];
+    var correctChoices:string[] = [];
+    var num = questionID;
+    
+    let y = 0;
+    for (let i = 0; i<Quizquestions.questions[questionID].answers.length; i++){
+        if(Quizquestions.questions[num].answers[i].correct){  // if correct answer -> add to array
+            correctChoices[y] = Quizquestions.questions[num].answers[i].text 
+            y++
+        }
+
+        choices[i] = Quizquestions.questions[num].answers[i].text
+        
+    }
+    return [choices,correctChoices]
+}
+
+export default function Quiz(Quizquestions:Content){
+
+    
+
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [score, setScore] = useState(0);
     var TempScore = score;
     
+
+
+
+    let choicesArray = extractChoises(Quizquestions,currentQuestion)
+    
+   
     const handleAnswer = (CorrectAnswer: string) => {
-        if (CheckCorrectAnswer(CorrectAnswer, questions[currentQuestion].CorrectAnswer)===1){
+        if (CheckCorrectAnswer(CorrectAnswer, choicesArray[1])===1){  //  choicesArray[1] is correct choices
         //if (CorrectAnswer === questions[currentQuestion].CorrectAnswer[0]) {
             console.log(TempScore);
             TempScore = score + 1;
@@ -175,18 +214,19 @@ function Quiz(){
         }
  
         const nextQuestion = currentQuestion + 1;
-        if (nextQuestion < questions.length) {
+        if (nextQuestion < Quizquestions.questions.length) {
             setCurrentQuestion(nextQuestion);
+            //choicesArray = extractChoises(Quizquestions,currentQuestion,Quizquestions.questions.length)
         } else {
-
-            alert(`Quiz finished. You scored ${TempScore}/${questions.length}`);
+            
+            alert(`Quiz finished. You scored ${TempScore}/${Quizquestions.questions.length}`);
             setScore(0);            //reset quiz
             setCurrentQuestion(0);  //reset quiz
         }
     }
 
     const handleSubmit = (CorrectAnswer: string) => {
-        if (CheckCorrectAnswer(CorrectAnswer, questions[currentQuestion].CorrectAnswer)===1){
+        if (CheckCorrectAnswer(CorrectAnswer, choicesArray[1])===1){  //  choicesArray[1] is correct choices
             console.log(TempScore);
             TempScore = score + 1;
             setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
@@ -208,13 +248,15 @@ function Quiz(){
     }
 
     return (
+        
         <div>
+            {Quizquestions.questions[0].answers[0].text}
             <h1 className="text-center">Quiz</h1>
             {currentQuestion < questions.length ? (
                 <Question
-                    question={questions[currentQuestion].question}
-                    choices={questions[currentQuestion].choices}
-                    CorrectAnswer={questions[currentQuestion].CorrectAnswer}
+                    question={Quizquestions.questions[currentQuestion].question}
+                    choices={choicesArray[0]}
+                    CorrectAnswer={choicesArray[1]}   
                     onAnswer={handleAnswer}
                     onSubmit={handleSubmit}
                 />
@@ -227,7 +269,7 @@ function Quiz(){
 
 
 
-export default function QuizSite() {
+function QuizSite() {
   
     return (
         <>
@@ -241,7 +283,7 @@ export default function QuizSite() {
                                 <Stack>
                                     <SimpleGrid cols={1}>
                                         <div className="">
-                                            <Quiz />
+                                            
                                         </div>
                                     </SimpleGrid>
                                 </Stack>
