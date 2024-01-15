@@ -33,6 +33,7 @@ class LlamaDbFetcher():
                 await cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (prompt_id, updated_at, typography, title, content, user_id, course_id))
                 await aconn.commit()
 
-
-fe = LlamaDbFetcher("user", "pass", "db")
-asyncio.run(fe.InsertPrompt("testbblalblb", "8c84f378-92c1-4df0-9602-c747dd6e2fa3", "e06b1c0e-932d-4a7e-baa5-a441d664126c", "SUMMARY"))
+#Use:
+#Iniate LlamaDbFetcher("user", "pass", "db")
+#Run with asyncio:
+#asyncio.run(fe.InsertPrompt("testbblalblb", "8c84f378-92c1-4df0-9602-c747dd6e2fa3", "e06b1c0e-932d-4a7e-baa5-a441d664126c", "SUMMARY"))
