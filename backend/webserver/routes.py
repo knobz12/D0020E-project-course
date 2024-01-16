@@ -156,7 +156,7 @@ def flashcards():
     if file_hash == None:
         return make_response("Bad file format", 406)
     
-    query = request.args.get("flashcards")
+    query = request.args.get("questions")
     flashcards_count = 3
 
     if query != None:
