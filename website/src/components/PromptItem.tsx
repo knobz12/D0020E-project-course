@@ -7,7 +7,7 @@ import {
     Title,
     Badge,
     Text,
-    Group,
+    Box,
 } from "@mantine/core"
 import { modals } from "@mantine/modals"
 import {
@@ -18,8 +18,7 @@ import {
     IconPinFilled,
 } from "@tabler/icons-react"
 import Link from "next/link"
-import router, { useRouter } from "next/router"
-import react from "react"
+import { useRouter } from "next/router"
 import React from "react"
 import { CreateTeacherNoteButton } from "./CreateTeacherNoteButton"
 import { TeacherNote } from "./TeacherNote"
@@ -77,7 +76,11 @@ export function PromptItem({ prompt }: PromptItemProps) {
                             {prompt.pinned ? <IconPinFilled /> : <IconPin />}
                         </ActionIcon>
                     ) : prompt.pinned ? (
-                        <IconPin />
+                        <Box
+                            sx={(theme) => ({ color: theme.colors.indigo[2] })}
+                        >
+                            <IconPinFilled />
+                        </Box>
                     ) : null}
                     <Stack align="center" spacing="sm">
                         <ActionIcon

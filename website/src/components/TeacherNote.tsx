@@ -3,6 +3,7 @@ import { ActionIcon, Alert, Box, Flex, Space, Stack, Text } from "@mantine/core"
 import { modals } from "@mantine/modals"
 import { showNotification } from "@mantine/notifications"
 import { IconNote, IconTrash } from "@tabler/icons-react"
+import { useSession } from "next-auth/react"
 import Image from "next/image"
 import { useRouter } from "next/router"
 import React from "react"
@@ -14,6 +15,7 @@ interface TeacherNoteProps {
 
 export function TeacherNote({ promptId, note }: TeacherNoteProps) {
     const utils = trpc.useUtils()
+    const session = useSession()
     const router = useRouter()
     const { mutate: deleteNote } = trpc.prompts.deleteTeacherNote.useMutation({
         async onSuccess() {
@@ -75,40 +77,46 @@ export function TeacherNote({ promptId, note }: TeacherNoteProps) {
                         <Text opacity={0.75} fz="xs">
                             Teacher note
                         </Text>
-                        <ActionIcon
-                            onClick={() =>
-                                modals.openConfirmModal({
-                                    title: (
-                                        <Text size="xl" color="white" fw={700}>
-                                            Delete teacher note
-                                        </Text>
-                                    ),
-                                    children: (
-                                        <Text>
-                                            Are you sure you want to delete this
-                                            teacher note? This action cannot be
-                                            undone.
-                                        </Text>
-                                    ),
+                        {session.data?.user.type === "TEACHER" && (
+                            <ActionIcon
+                                onClick={() =>
+                                    modals.openConfirmModal({
+                                        title: (
+                                            <Text
+                                                size="xl"
+                                                color="white"
+                                                fw={700}
+                                            >
+                                                Delete teacher note
+                                            </Text>
+                                        ),
+                                        children: (
+                                            <Text>
+                                                Are you sure you want to delete
+                                                this teacher note? This action
+                                                cannot be undone.
+                                            </Text>
+                                        ),
 
-                                    color: "red",
-                                    centered: true,
-                                    labels: {
-                                        confirm: "Delete",
-                                        cancel: "Cancel",
-                                    },
-                                    confirmProps: {
                                         color: "red",
-                                    },
-                                    onConfirm: () =>
-                                        deleteNote({
-                                            promptId,
-                                        }),
-                                })
-                            }
-                        >
-                            <IconTrash />
-                        </ActionIcon>
+                                        centered: true,
+                                        labels: {
+                                            confirm: "Delete",
+                                            cancel: "Cancel",
+                                        },
+                                        confirmProps: {
+                                            color: "red",
+                                        },
+                                        onConfirm: () =>
+                                            deleteNote({
+                                                promptId,
+                                            }),
+                                    })
+                                }
+                            >
+                                <IconTrash />
+                            </ActionIcon>
+                        )}
                     </Flex>
                     <Text fw={700} fz="lg">
                         {note.title}
