@@ -53,7 +53,7 @@ Answer: "{gen(f"answer{idx}", stop='"')}"
         flashcards += gen_question(i) + "\n"
 
         
-    print("Flashcards:\n", flashcards)
+    # print("Flashcards:\n", flashcards)
 
 
 
@@ -69,7 +69,7 @@ Flashcards:
 {flashcards}
     """
 
-    print(res)
+    # print(res)
     lm += res 
     return lm
 
@@ -78,7 +78,7 @@ def create_flashcards(id: str, questions: int):
     vectorstore = create_vectorstore()
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
-    print(docs)
+    # print(docs)
     
 
     obj = {}
@@ -86,8 +86,8 @@ def create_flashcards(id: str, questions: int):
 
     for (i, doc) in enumerate(docs["metadatas"]):
         qsts_count = calculate_questions_per_doc(len(docs["metadatas"]), questions, i)
-        result = gllm + generate_flashcard(doc["text"], questions)
-        print(result)
+        result = gllm + generate_flashcard(doc["text"], qsts_count)
+        # print(result)
 
         for j in range(0, questions):
             question: str = result[f"question{j}"]
