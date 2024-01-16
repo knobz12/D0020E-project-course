@@ -184,6 +184,76 @@ export const promptRouter = router({
                 },
             })
         }),
+    updateFlashcardsPrompt: userProcedure
+        .input(
+            z.object({
+                promptId: z.string().uuid(),
+                flashcards: z.object({
+                    title: z.string().max(128),
+                    content: z.object({
+                        questions: z.array(
+                            z.object({
+                                question: z.string(),
+                                answer: z.string(),
+                            }),
+                        ),
+                    }),
+                }),
+            }),
+        )
+        .mutation(async function ({ ctx, input }): Promise<void> {
+            const prompt = await db.prompt.findUnique({
+                where: { id: input.promptId },
+                select: { userId: true, type: true },
+            })
+
+            if (!prompt) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "The flashcards you tried to update doesn't exist.",
+                })
+            }
+
+            if (prompt.type !== "FLASHCARDS") {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "The prompt you tried to edit is not a flashcards.",
+                })
+            }
+
+            const isUserOwner = prompt.userId === ctx.user.id
+            console.log(isUserOwner)
+
+            if (ctx.user.type === "STUDENT")
+            {
+                if (!isUserOwner)
+                {
+                    throw new TRPCError({
+                        code: "UNAUTHORIZED",
+                        message: "You can't edit flashcards you haven't made.",
+                    })
+                }
+            }
+            else if (ctx.user.type !== "TEACHER")
+            {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message:
+                        "You must be a teacher to edit prompts you haven't created.",
+                })
+            }
+
+
+            await db.prompt.update({
+                where: {
+                    id: input.promptId,
+                },
+                data: {
+                    title: input.flashcards.title,
+                    content: input.flashcards.content,
+                },
+            })
+        }),
     deletePromptById: userProcedure
         .input(z.object({ id: z.string().uuid() }))
         .mutation(async function ({ input, ctx }) {
