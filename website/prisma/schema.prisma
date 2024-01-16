@@ -36,7 +36,9 @@ model Prompt {
   content Json   @db.JsonB
 
   /// What type this prompt is. Determines the structure of the content data.
-  type PromptType
+  type   PromptType
+  /// If this prompt has been pinned to appear at the top of the list.
+  pinned Boolean    @default(false)
 
   userId String @map("user_id") @db.Uuid
   /// The user who made this prompt
@@ -46,10 +48,14 @@ model Prompt {
   /// The course this prompt belongs to
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
+  /// Teacher note for this prompt.
+  teacherNote TeacherNote?
+
   reactions PromptReaction[]
 
   @@index([type])
   @@index([courseId])
+  @@index([pinned, courseId])
   @@index([type, courseId])
   @@map("prompts")
 }
@@ -133,6 +139,7 @@ model User {
 
   prompts         Prompt[]
   promptReactions PromptReaction[]
+  TeacherNote     TeacherNote[]
 
   @@map("users")
 }
@@ -144,4 +151,23 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model TeacherNote {
+  /// The prompt this teacher note is for. 
+  prompt   Prompt @relation(fields: [promptId], references: [id])
+  /// Used as id since there only can be one note per prompt.
+  promptId String @id @map("prompt_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  /// The user this teacher note was created by.
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("user_id") @db.Uuid
+
+  /// The title of the note.
+  title String
+  /// The text of the note.
+  text  String
 }

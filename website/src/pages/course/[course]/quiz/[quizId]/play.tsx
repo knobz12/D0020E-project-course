@@ -5,6 +5,8 @@ import { Text } from "@mantine/core"
 import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth/next"
 import { useRouter } from "next/router"
+import Quiz from "../../quiz"
+import playableQuiz from "../../playableQuiz"
 
 export default function QuizPlay() {
     const router = useRouter()
@@ -28,7 +30,9 @@ function Player({
 }) {
     const quiz = data.content
 
-    return <Text>{JSON.stringify(quiz)}</Text>
+    type Content = (RouterOutput["prompts"]["getPromptById"] & { type: "QUIZ" })["content"]
+
+    return <div>{playableQuiz(quiz)}</div>
 }
 
 export const getServerSideProps = (async ({ req, res, params }) => {

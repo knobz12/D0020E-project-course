@@ -1,12 +1,8 @@
 import React from "react"
 import {
-    ActionIcon,
-    Badge,
     Card,
     Center,
     Container,
-    Divider,
-    Flex,
     Paper,
     SimpleGrid,
     Stack,
@@ -29,10 +25,9 @@ import { getServerSession } from "next-auth"
 import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { authOptions } from "../../api/auth/[...nextauth]"
 import { useRouter } from "next/router"
-import { db } from "@/lib/database"
 import { trpc } from "@/lib/trpc"
-import { useSession } from "next-auth/react"
-import { modals } from "@mantine/modals"
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion"
+import { PromptItem } from "@/components/PromptItem"
 
 type Prompt = { icon: Icon; text: string; link: string }
 
@@ -82,19 +77,8 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
 export default function Home({} // prompts,
 : InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
-    const session = useSession()
-    const prompts = trpc.prompts.getPrompts.useQuery({
+    const prompts = trpc.prompts.getNonAndPinnedPrompts.useQuery({
         course: router.query.course as string,
-    })
-    const { mutate: react } = trpc.prompts.react.useMutation({
-        onSuccess() {
-            prompts.refetch()
-        },
-    })
-    const { mutate: deletePrompt } = trpc.prompts.deletePromptById.useMutation({
-        onSuccess() {
-            prompts.refetch()
-        },
     })
 
     return (
@@ -145,160 +129,22 @@ export default function Home({} // prompts,
                         <Stack>
                             <Title>Prompts</Title>
                             <Stack>
-                                {prompts.data?.map((prompt, idx) => {
-                                    return (
-                                        <Paper
-                                            key={prompt.id}
-                                            className="overflow-hidden max-h-48"
-                                            radius="lg"
-                                            p="lg"
-                                        >
-                                            <Flex gap="md">
-                                                <Stack
-                                                    align="center"
-                                                    spacing="sm"
-                                                >
-                                                    <ActionIcon
-                                                        variant={
-                                                            prompt.reaction ===
-                                                            true
-                                                                ? "light"
-                                                                : undefined
-                                                        }
-                                                        color={
-                                                            prompt.reaction ===
-                                                            true
-                                                                ? "green"
-                                                                : undefined
-                                                        }
-                                                        onClick={() =>
-                                                            react({
-                                                                positive: true,
-                                                                promptId:
-                                                                    prompt.id,
-                                                                type: prompt.type,
-                                                            })
-                                                        }
-                                                    >
-                                                        <IconArrowUp
-                                                            size={48}
-                                                            stroke={
-                                                                prompt.reaction ===
-                                                                true
-                                                                    ? 3
-                                                                    : 2
-                                                            }
-                                                        />
-                                                    </ActionIcon>
-                                                    <Text size="xl" fw={500}>
-                                                        {prompt.score}
-                                                    </Text>
-                                                    <ActionIcon
-                                                        variant={
-                                                            prompt.reaction ===
-                                                            false
-                                                                ? "light"
-                                                                : undefined
-                                                        }
-                                                        color={
-                                                            prompt.reaction ===
-                                                            false
-                                                                ? "red"
-                                                                : undefined
-                                                        }
-                                                        onClick={() =>
-                                                            react({
-                                                                positive: false,
-                                                                promptId:
-                                                                    prompt.id,
-                                                                type: prompt.type,
-                                                            })
-                                                        }
-                                                    >
-                                                        <IconArrowDown
-                                                            size={48}
-                                                            stroke={
-                                                                prompt.reaction ===
-                                                                false
-                                                                    ? 3
-                                                                    : 2
-                                                            }
-                                                        />
-                                                    </ActionIcon>
-                                                </Stack>
-
-                                                <Divider orientation="vertical" />
-
-                                                <Flex w="100%">
-                                                    <Stack
-                                                        align="start"
-                                                        style={{ flex: 1 }}
-                                                    >
-                                                        <Link
-                                                            href={`/course/${
-                                                                router.query
-                                                                    .course
-                                                            }/${
-                                                                prompt.type ===
-                                                                "QUIZ"
-                                                                    ? "quiz"
-                                                                    : (prompt.type === "FLASHCARDS")
-                                                                     ? "flashcards"
-                                                                     : (prompt.type === "SUMMARY")
-                                                                      ? "summary"
-                                                                        : "unknown"
-                                                            }/${prompt.id}`}
-                                                        >
-                                                            <Title>
-                                                                {prompt.title}
-                                                            </Title>
-                                                        </Link>
-                                                        <Badge size="lg">
-                                                            {prompt.type}
-                                                        </Badge>
-                                                    </Stack>
-                                                    {prompt.userId ===
-                                                        session.data?.user
-                                                            ?.userId && (
-                                                        <ActionIcon
-                                                            color="red"
-                                                            onClick={() =>
-                                                                modals.openConfirmModal(
-                                                                    {
-                                                                        title: "Delete prompt",
-                                                                        children:
-                                                                            "Are you sure you want to delete this prompt?",
-                                                                        color: "red",
-                                                                        centered:
-                                                                            true,
-                                                                        labels: {
-                                                                            confirm:
-                                                                                "Delete",
-                                                                            cancel: "Cancel",
-                                                                        },
-                                                                        confirmProps:
-                                                                            {
-                                                                                color: "red",
-                                                                            },
-                                                                        onConfirm:
-                                                                            () =>
-                                                                                deletePrompt(
-                                                                                    {
-                                                                                        id: prompt.id,
-                                                                                    },
-                                                                                ),
-                                                                    },
-                                                                )
-                                                            }
-                                                        >
-                                                            <IconTrash />
-                                                        </ActionIcon>
-                                                    )}
-                                                </Flex>
-                                            </Flex>
-                                        </Paper>
-                                    )
-                                })}
+                                <AnimatePresence>
+                                    {prompts.data?.pinned.map((prompt) => {
+                                        return (
+                                            <motion.div layout key={prompt.id}>
+                                                <PromptItem prompt={prompt} />
+                                            </motion.div>
+                                        )
+                                    })}
+                                    {prompts.data?.prompts.map((prompt) => {
+                                        return (
+                                            <motion.div layout key={prompt.id}>
+                                                <PromptItem prompt={prompt} />
+                                            </motion.div>
+                                        )
+                                    })}
+                                </AnimatePresence>
                             </Stack>
                         </Stack>
                     </Stack>
@@ -316,129 +162,11 @@ export const getServerSideProps = (async ({ req, res, params }) => {
         return { notFound: true }
     }
 
-    // async function getQuizes() {
-    //     const quizes = await db.prompt.findMany({
-    //         orderBy: { createdAt: "desc" },
-    //         take: 25,
-    //         where: { course: { name: course as string } },
-    //         select: {
-    //             id: true,
-    //             title: true,
-    //             createdAt: true,
-    //         },
-    //     })
-
-    //     const formatted = await Promise.all(
-    //         quizes.map(
-    //             (quiz) =>
-    //                 new Promise<
-    //                     Omit<typeof quiz, "createdAt"> & {
-    //                         createdAt: string
-    //                         score: number
-    //                         type: "QUIZ" | "SUMMARY"
-    //                     }
-    //                 >(async (res) => {
-    //                     const [positiveReactions, negativeReactions] =
-    //                         await Promise.all([
-    //                             db.quizPromptReaction.count({
-    //                                 where: {
-    //                                     quizPromptId: quiz.id,
-    //                                     positive: true,
-    //                                 },
-    //                             }),
-    //                             db.quizPromptReaction.count({
-    //                                 where: {
-    //                                     quizPromptId: quiz.id,
-    //                                     positive: false,
-    //                                 },
-    //                             }),
-    //                         ])
-
-    //                     const score = positiveReactions - negativeReactions
-
-    //                     res({
-    //                         ...quiz,
-    //                         createdAt: quiz.createdAt.toISOString(),
-    //                         type: "QUIZ",
-    //                         score,
-    //                     })
-    //                 }),
-    //         ),
-    //     )
-
-    //     return formatted
-    // }
-
-    // async function getSummaries() {
-    //     const summaries = await db.summaryPrompt.findMany({
-    //         orderBy: { createdAt: "desc" },
-    //         take: 25,
-    //         where: { course: { name: course as string } },
-    //         select: {
-    //             id: true,
-    //             title: true,
-    //             createdAt: true,
-    //         },
-    //     })
-
-    //     const formatted = await Promise.all(
-    //         summaries.map(
-    //             (summary) =>
-    //                 new Promise<
-    //                     Omit<typeof summary, "createdAt"> & {
-    //                         createdAt: string
-    //                         score: number
-    //                         type: "QUIZ" | "SUMMARY"
-    //                     }
-    //                 >(async (res) => {
-    //                     const [positiveReactions, negativeReactions] =
-    //                         await Promise.all([
-    //                             db.summaryPromptReaction.count({
-    //                                 where: {
-    //                                     summaryPromptId: summary.id,
-    //                                     positive: true,
-    //                                 },
-    //                             }),
-    //                             db.summaryPromptReaction.count({
-    //                                 where: {
-    //                                     summaryPromptId: summary.id,
-    //                                     positive: false,
-    //                                 },
-    //                             }),
-    //                         ])
-
-    //                     const score = positiveReactions - negativeReactions
-
-    //                     res({
-    //                         ...summary,
-    //                         createdAt: summary.createdAt.toISOString(),
-    //                         type: "SUMMARY",
-    //                         score,
-    //                     })
-    //                 }),
-    //         ),
-    //     )
-
-    //     return formatted
-    // }
     const session = await getServerSession(req, res, authOptions)
-    // const [session, quizes, summaries] = await Promise.all([
-    //     getServerSession(req, res, authOptions),
-    //     getQuizes(),
-    //     getSummaries(),
-    // ])
-
-    // Combine into one list ordered by created at date
-    // const prompts = [...quizes, ...summaries].sort((a, b) =>
-    //     new Date(a.createdAt).valueOf() < new Date(b.createdAt).valueOf()
-    //         ? 1
-    //         : -1,
-    // )
 
     return {
         props: {
             session,
-            // prompts,
         },
     }
 }) satisfies GetServerSideProps
