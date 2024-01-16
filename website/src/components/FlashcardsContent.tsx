@@ -41,7 +41,7 @@ export function FlashcardsContent({
 
     if (editing) {
         return (
-            <QuizEditor
+            <FlashcardsEditor
                 promptId={promptId}
                 title={title}
                 content={content}
@@ -55,7 +55,7 @@ export function FlashcardsContent({
     }
 
     return (
-        <QuizViewer
+        <FlashcardsViewer
             promptId={promptId}
             title={title}
             content={content}
@@ -65,11 +65,11 @@ export function FlashcardsContent({
     )
 }
 
-interface FlashCardsViewerProps extends FlashcardsContentProps {
+interface FlashcardsViewerProps extends FlashcardsContentProps {
     onEdit: () => void
 }
 
-function QuizViewer({ title, content, editable, onEdit }: FlashCardsViewerProps) {
+function FlashcardsViewer({ title, content, editable, onEdit }: FlashcardsViewerProps) {
     const router = useRouter()
     return (
         <Stack>
@@ -77,7 +77,7 @@ function QuizViewer({ title, content, editable, onEdit }: FlashCardsViewerProps)
                 <Title style={{ flex: 1 }}>{title}</Title>
                 <Group>
                     <Link
-                        href={`/course/${router.query.course}/quiz/${router.query.quizId}/play`}
+                        href={`/course/${router.query.course}/flashcards/${router.query.flashcardsId}/play`}
                     >
                         <Button color="blue" variant="filled">
                             Play
@@ -100,33 +100,33 @@ function QuizViewer({ title, content, editable, onEdit }: FlashCardsViewerProps)
     )
 }
 
-interface QuizEditorProps extends FlashcardsContentProps {
+interface FlashcardsEditorProps extends FlashcardsContentProps {
     onCancel: () => void
     onFinish: () => void
 }
 
-function QuizEditor({
+function FlashcardsEditor({
     promptId,
     title,
     content,
     editable,
     onCancel,
     onFinish,
-}: QuizEditorProps) {
-    const { mutate: mutUpdateQuiz, isLoading } =
-        trpc.prompts.updateQuizPrompt.useMutation({
+}: FlashcardsEditorProps) {
+    const { mutate: mutUpdateFlashcards, isLoading } =
+        trpc.prompts.updateFlashcardsPrompt.useMutation({
             onError(data, variables, context) {
                 notifications.show({
                     color: "red",
-                    title: "Quiz failed to update",
+                    title: "Flashcards failed to update",
                     message: data.message,
                 })
             },
             onSuccess(data, variables, context) {
                 notifications.show({
                     color: "teal",
-                    title: "Quiz updated",
-                    message: "Your quiz has been updated with the new text.",
+                    title: "Flashcards updated",
+                    message: "Your flashcards has been updated with the new text.",
                 })
                 onFinish()
             },
@@ -142,64 +142,62 @@ function QuizEditor({
         1000,
     )
 
-    function extractQuiz() {
+    function extractFlashcards() {
         const titleEl: HTMLInputElement | null =
-            document.querySelector("input#quizTitle")
+            document.querySelector("input#flashcardsTitle")
 
         if (!titleEl) {
-            throw new Error("Could not find quiz title element!")
+            throw new Error("Could not find flashcards title element!")
         }
 
         const titleText = titleEl.value!
         const qstCount = content.questions.length
 
+
+
         const questions: {
             question: string
-            answers: { text: string; correct: boolean }[]
+            answer: string
         }[] = []
+
         for (let q = 0; q < qstCount; q++) {
             const qstEl: HTMLInputElement | null = document.querySelector(
                 `input#question${q}`,
             )
 
             if (!qstEl) {
-                throw new Error(`Could not find quiz question input ${q}!`)
+                throw new Error(`Could not find flashcards question input ${q}!`)
             }
 
             const qstValue = qstEl.value!
-            const answer: { test: string; answer: string} = {}
+            let answer: string = ""
 
-            const a = 0
-            const ansEl: HTMLInputElement | null = document.querySelector(
-                `input#question${q}answer${a}`,
-            )
-            const ansCorrectEl: HTMLInputElement | null =
-                document.querySelector(
-                    `input#question${q}answer${a}correct`,
+            {
+                const ansEl: HTMLInputElement | null = document.querySelector(
+                    `input#answer${q}`,
                 )
 
-            if (!ansEl || !ansCorrectEl) {
-                throw new Error(
-                    `Could not find answer or correct ${a} for question ${q}!`,
-                )
+                if (!ansEl) {
+                    throw new Error(
+                        `Could not find answer ${q} for question ${q}!`,
+                    )
+                }
+
+                const value = ansEl.value!
+                
+                answer = value
             }
-
-            const value = ansEl.value!
-            const correct = ansCorrectEl.checked!
-            console.log(value, correct)
-            console.log(ansCorrectEl)
-
-            questions.push({ question: qstValue, answers })
+            questions.push({ question: qstValue, answer })
 
             // const el.value
         }
 
-        const quiz = {
+        const flashcards = {
             title: titleText,
             questions,
         }
-        console.log("Updated quiz:", quiz)
-        return quiz
+        console.log("Updated flashcards:", flashcards)
+        return flashcards
     }
 
     // useEffect(
@@ -214,7 +212,7 @@ function QuizEditor({
             <Flex gap="lg">
                 {/* <Title style={{ flex: 1 }}>{title}</Title> */}
                 <Input
-                    id="quizTitle"
+                    id="flashcardsTitle"
                     size="xl"
                     defaultValue={title}
                     style={{ flex: 1 }}
@@ -235,20 +233,20 @@ function QuizEditor({
                     <Button
                         onClick={() => {
                             modals.openConfirmModal({
-                                title: "Save quiz",
+                                title: "Save flashcards",
                                 children:
-                                    "Are you sure you want to save this quiz? The previous answers will be overwritten.",
+                                    "Are you sure you want to save this flashcards? The previous answers will be overwritten.",
                                 confirmProps: { color: "teal" },
                                 cancelProps: { color: "red" },
                                 labels: { cancel: "Cancel", confirm: "Save" },
                                 onConfirm() {
-                                    const quiz = extractQuiz()
-                                    mutUpdateQuiz({
+                                    const flashcards = extractFlashcards()
+                                    mutUpdateFlashcards({
                                         promptId,
-                                        quiz: {
-                                            title: quiz.title,
+                                        flashcards: {
+                                            title: flashcards.title,
                                             content: {
-                                                questions: quiz.questions,
+                                                questions: flashcards.questions,
                                             },
                                         },
                                     })
@@ -274,7 +272,8 @@ function QuizEditor({
             </Flex>
             {content.questions.map((qst, qstIdx) => (
                 <Stack key={qstIdx + qst.question}>
-                    {/* <Text>{qst.question}</Text> */}
+                    {/* <Text>{Question}</Text> */}
+                    <Text>Question</Text>
                     <Input
                         key={"question" + qstIdx}
                         id={"question" + qstIdx}
@@ -298,19 +297,14 @@ function QuizEditor({
                         //     setData(newContent)
                         // }}
                     />
-                    <List type="ordered" w="100%">
-                            <List.Item key={qstIdx + qst.answer}>
-                                <Flex gap="md">
-                                    <Input
-                                        id={`question${qstIdx}answer`}
-                                        w="512px"
-                                        style={{ flex: 1 }}
-                                        defaultValue={qst.answer}
-                                    />
-                                </Flex>
-                            </List.Item>
-                        )
-                    </List>
+                    <Text>Answer</Text>
+                    <Input
+                        key={"answer" + qstIdx}
+                        id={"answer" + qstIdx}
+                        defaultValue={qst.answer}
+                        // value={qst.question}
+                        autoFocus={true}
+                    />
                 </Stack>
             ))}
         </Stack>

@@ -1,5 +1,5 @@
 import { Page } from "@/components/Page"
-import { QuizContent } from "@/components/QuizContent"
+import { FlashcardsContent } from "@/components/FlashcardsContent"
 import { db } from "@/lib/database"
 import { trpc } from "@/lib/trpc"
 import { Container, Title } from "@mantine/core"
@@ -19,7 +19,7 @@ export default function FlashcardsPage() {
             <Container>
                 {/* <pre>{JSON.stringify(flashcards.data, undefined, 4)}</pre> */}
                 {flashcards.data?.type === "FLASHCARDS" && (
-                    <QuizContent
+                    <FlashcardsContent
                         promptId={flashcards.data.id}
                         title={flashcards.data.title}
                         editable={flashcards.data.userId === session?.user.userId}
