@@ -7,6 +7,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 
 type PromptTypeContent = {
     SUMMARY: { text: string }
+    ASSIGNMENT: { text: string }
     QUIZ: {
         questions: {
             question: string
@@ -41,6 +42,10 @@ type PromptType = {
           type: "SUMMARY"
           content: PromptTypeContent["SUMMARY"]
       }
+      | {
+        type: "ASSIGNMENT"
+        content: PromptTypeContent["ASSIGNMENT"]
+    }
     | {
           type: "QUIZ"
           content: PromptTypeContent["QUIZ"]
@@ -95,7 +100,7 @@ async function formatPrompt(
         userId: prompt.userId,
         title: prompt.title,
         reaction: !userReaction ? null : userReaction.positive,
-        type: prompt.type as "QUIZ" | "SUMMARY",
+        type: prompt.type as "QUIZ" | "SUMMARY"| "ASSIGNMENT",
         content: prompt.content as any,
         teacherNote: teacherNote ?? undefined,
         pinned: prompt.pinned,
@@ -301,7 +306,7 @@ export const promptRouter = router({
     react: userProcedure
         .input(
             z.object({
-                type: z.enum(["QUIZ", "SUMMARY"]),
+                type: z.enum(["QUIZ", "SUMMARY", "ASSIGNMENT"]),
                 positive: z.boolean(),
                 promptId: z.string().uuid(),
             }),
