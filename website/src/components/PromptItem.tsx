@@ -135,7 +135,7 @@ export function PromptItem({ prompt }: PromptItemProps) {
                     <Stack align="start" style={{ flex: 1 }}>
                         <Link
                             href={`/course/${router.query.course}/${
-                                prompt.type === "QUIZ" ? "quiz" : "summary"
+                                prompt.type === "QUIZ" ? "quiz" : prompt.type === "FLASHCARDS" ? "flashcards" : prompt.type === "SUMMARY" ? "summary" : "unknown"
                             }/${prompt.id}`}
                         >
                             <Title lineClamp={3}>{prompt.title}</Title>
