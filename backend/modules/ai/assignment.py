@@ -16,7 +16,7 @@ def assignment_doc(id: str) -> str:
         text =meta["text"]
         previous_assignment: str | None = results[idx - 1] if idx > 1 else None
 
-        prompt = """ create assignment
+        prompt = """ create one longer assignment
 
 Text: {text}
 
@@ -31,7 +31,7 @@ Context: {context}
 Answer:""".format(assignment = previous_assignment,context=text)
 
         use_prompt = prompt if previous_assignment == None else prompt_with_previous
-        print(f"Summarizing doc {idx + 1}...")
+        print(f"doc {idx + 1}...")
         print(f"Full prompt:")
         print(use_prompt + "\n")
         result = llm(use_prompt)
