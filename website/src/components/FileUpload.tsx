@@ -23,7 +23,45 @@ import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react"
 import { useRouter } from "next/router"
 import type { PromptType } from "@prisma/client"
 import { QuizContent } from "./QuizContent"
+import dynamic from "next/dynamic"
 
+const MultiSelect = dynamic(() => import("@mantine/core").then((el) => el.MultiSelect), {
+    loading: () => <p>Loading...</p>,
+    ssr: false,
+  });
+
+export function Multi() {
+  const [data, setData] = useState<{value:string, label:string}[]>([]);
+  const [key, setkey] = useState();
+  const keyDown = (event) => {
+    setkey(event.key)
+    console.log(event.key)
+}
+  return (
+    typeof window !== undefined && (
+    <MultiSelect
+      dropdownComponent={() => null}
+      maxSelectedValues={10}
+      label="Creatable MultiSelect"
+      data={data}
+      placeholder="Select items"
+      searchable
+      creatable
+      getCreateLabel={(query) => `+ Create ${query}`}
+      onKeyDown={(keyDown) => {if (event.key == "Enter") {(query) => {
+        const item = { value: query, label: query };
+        setData((current) => [...current, item]);
+        return item;
+      }}}}
+      onCreate={(query) => {
+        const item = { value: query, label: query };
+        setData((current) => [...current, item]);
+        return item;
+      }}
+    />
+    )
+  );
+}
 function encode(input: Uint8Array) {
     var keyStr =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
@@ -60,7 +98,7 @@ interface FileUploadProps {
     apiUrl: string
     type: PromptType
     parameters?: {
-        type: "number"
+        type: "number" | "string" | "Multi"
         id: string
         name: string
         placeholder: string
@@ -225,6 +263,50 @@ export default function FileUpload({
                                                     parameter.placeholder
                                                 }
                                             />
+                                        )
+                                    case "string":
+                                        return (
+                                            <TextInput
+                                                key={parameter.id}
+                                                label={parameter.name}
+                                                id={parameter.id}
+                                                name={parameter.id}
+                                                onChange={(e) => {
+                                                    var myString = e.target.value
+                                                    if (myString === "") {
+                                                        return setParams(
+                                                            (curr) => {
+                                                                const newParams =
+                                                                    {
+                                                                        ...curr,
+                                                                        [parameter.id]:
+                                                                            undefined,
+                                                                    }
+                                                                console.log(
+                                                                    newParams,
+                                                                )
+                                                                return newParams
+                                                            },
+                                                        )
+                                                    }
+
+                                                    setParams((curr) => {
+                                                        const newParams = {
+                                                            ...curr,
+                                                            [parameter.id]: myString,
+                                                        }
+                                                        console.log(newParams)
+                                                        return newParams
+                                                    })
+                                                }}
+                                                placeholder={
+                                                    parameter.placeholder
+                                                }
+                                            />
+                                        )
+                                        case "Multi":
+                                        return (
+                                            <Multi/>
                                         )
                                 }
                             })}
