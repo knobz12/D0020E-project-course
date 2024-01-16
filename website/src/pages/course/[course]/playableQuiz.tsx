@@ -2,7 +2,7 @@
 //import React from "react"
 import React, { useState, useRef } from 'react';
 import FileUpload from "@/components/FileUpload"
-import { sleep } from 'openai/core.mjs';
+//import { sleep } from 'openai/core.mjs';
 
 
 import {
@@ -60,7 +60,7 @@ function checkboxTest(choice:string) {
             ref={ref}
         />
     );
-  }
+}
 
 const Question: React.FC<Props> = ({
     question,
@@ -84,7 +84,7 @@ const Question: React.FC<Props> = ({
         >
             <h2 className="">{question}</h2>
             <div className="">
-                <button
+                {/* <button
                 onClick={() =>    onAnswer("rrr")} // This needs to check the checkboxes and return chosen answers           probably use    
                 >
                     {"submit"}
@@ -99,7 +99,7 @@ const Question: React.FC<Props> = ({
                     label={choice}
                     onChange={handleCheckboxChange}
                     />
-                ))}
+                ))} */}
 
 
                 {choices.map((choice) => (
@@ -186,6 +186,7 @@ export default function Quiz(Quizquestions:Content){
             //choicesArray = extractChoises(Quizquestions,currentQuestion,Quizquestions.questions.length)
         } else {
             
+            choicesArray = [];
             alert(`Quiz finished. You scored ${TempScore}/${Quizquestions.questions.length}`);
             setScore(0);            //reset quiz
             setCurrentQuestion(0);  //reset quiz
