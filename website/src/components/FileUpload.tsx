@@ -74,7 +74,7 @@ export default function FileUpload({
     const [isLoading, setIsLoading] = useState<boolean>(false)
     // String is database file ID and File is local user file.
     const [selectedFile, setSelectedFile] = useState<string | File | null>(null)
-    const [fileChoice, setFileChoice] = useState<"select" | "upload">("select")
+    const [fileChoice, setFileChoice] = useState<"select" | "upload">("upload")
     const utils = trpc.useUtils()
 
     useEffect(function () {
@@ -252,12 +252,12 @@ export default function FileUpload({
                         color="teal"
                         data={[
                             {
-                                label: "Select file",
-                                value: "select",
-                            },
-                            {
                                 label: "Upload file",
                                 value: "upload",
+                            },
+                            {
+                                label: "Select file",
+                                value: "select",
                             },
                         ]}
                         onChange={(value) =>
