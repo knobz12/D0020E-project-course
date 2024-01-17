@@ -1,16 +1,8 @@
 import { RouterOutput, trpc } from "@/lib/trpc"
 import React, { useEffect, useState } from "react"
 import { DataTable } from "mantine-datatable"
-import {
-    AspectRatio,
-    Badge,
-    Box,
-    CloseButton,
-    Flex,
-    MultiSelect,
-    Stack,
-    Text,
-} from "@mantine/core"
+import { Box } from "@mantine/core"
+import { useRouter } from "next/router"
 
 interface SelectFileProps {
     isLoading: boolean
@@ -18,7 +10,12 @@ interface SelectFileProps {
 }
 
 export function SelectFile({ isLoading, onSelect }: SelectFileProps) {
-    const files = trpc.files.getFiles.useQuery({ page: 1 })
+    const router = useRouter()
+    const [page, setPage] = useState<number>(1)
+    const files = trpc.files.getFiles.useQuery({
+        page,
+        course: router.query.course as string,
+    })
     const [selected, setSelected] = useState<
         RouterOutput["files"]["getFiles"]["files"][number][]
     >([])
@@ -34,7 +31,7 @@ export function SelectFile({ isLoading, onSelect }: SelectFileProps) {
     )
 
     return (
-        <div>
+        <Box bg="dark.8">
             {/* {typeof window !== "undefined" && ( */}
             <DataTable
                 // records={files.data?.files}
@@ -45,6 +42,7 @@ export function SelectFile({ isLoading, onSelect }: SelectFileProps) {
                               (file) => file.id === selected.at(0)!.id,
                           )
                 }
+                fetching={files.isFetching}
                 selectedRecords={selected}
                 onSelectedRecordsChange={(records) => {
                     if (records.length > 1) {
@@ -53,6 +51,13 @@ export function SelectFile({ isLoading, onSelect }: SelectFileProps) {
 
                     setSelected(records)
                 }}
+                loadingText="Loading documents"
+                noRecordsText="Found no documents"
+                recordsPerPage={files.data?.docsPerPage ?? 5}
+                totalRecords={files.data?.docs ?? 0}
+                minHeight={256}
+                onPageChange={(page) => setPage(page)}
+                page={page}
                 isRecordSelectable={(record) =>
                     selected.length === 0 || record.id === selected.at(0)?.id
                 }
@@ -83,6 +88,6 @@ export function SelectFile({ isLoading, onSelect }: SelectFileProps) {
                     />
                 </Flex>
             ) : null} */}
-        </div>
+        </Box>
     )
 }

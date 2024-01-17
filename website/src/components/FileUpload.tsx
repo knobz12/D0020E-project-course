@@ -1,14 +1,10 @@
-import React, { useCallback, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import {
-    AspectRatio,
     Button,
-    CloseButton,
     Container,
-    Flex,
     NumberInput,
     SegmentedControl,
     Stack,
-    HoverCard,
     Text,
     Title,
 } from "@mantine/core"
@@ -19,8 +15,7 @@ import type { PromptType } from "@prisma/client"
 import { QuizContent } from "./QuizContent"
 import { LocalFilePicker } from "./LocalFilePicker"
 import { SelectFile } from "./SelectFile"
-import dynamic from "next/dynamic"
-import { NoSsr } from "./NoSsr"
+import { trpc } from "@/lib/trpc"
 
 function encode(input: Uint8Array) {
     var keyStr =
@@ -77,9 +72,17 @@ export default function FileUpload({
         Record<string, string | number | undefined>
     >({})
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    // String is database file ID and file is local user file.
+    // String is database file ID and File is local user file.
     const [selectedFile, setSelectedFile] = useState<string | File | null>(null)
     const [fileChoice, setFileChoice] = useState<"select" | "upload">("select")
+    const utils = trpc.useUtils()
+
+    useEffect(function () {
+        utils.files.getFiles.prefetch({
+            page: 1,
+            course: router.query.course as string,
+        })
+    }, [])
 
     async function onClick() {
         setIsLoading(true)
