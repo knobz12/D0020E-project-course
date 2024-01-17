@@ -274,12 +274,12 @@ export default function FileUpload({
                         </HoverCard>
                     </NoSsr> */}
                     {fileChoice === "select" ? (
-                        <LocalFilePicker
+                        <SelectFile
                             isLoading={isLoading}
                             onSelect={onFileSelect}
                         />
                     ) : (
-                        <SelectFile
+                        <LocalFilePicker
                             isLoading={isLoading}
                             onSelect={onFileSelect}
                         />
