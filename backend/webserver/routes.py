@@ -113,6 +113,7 @@ def get_route_parameters() -> tuple[str, str] | Response:
         file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
         if file_hash == None:
             return make_response("Bad file format", 406)
+        return file_hash
     
     file_hash = get_file_hash()
     course_id = get_course_id_from_name(course)
