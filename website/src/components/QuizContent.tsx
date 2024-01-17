@@ -71,6 +71,7 @@ interface QuizViewerProps extends QuizContentProps {
 
 function QuizViewer({ title, content, editable, onEdit }: QuizViewerProps) {
     const router = useRouter()
+
     return (
         <Stack>
             <Flex>
