@@ -316,7 +316,10 @@ export default function FileUpload({
                                 <QuizContent content={JSON.parse(data)} />
                             )
                         ) : type === "FLASHCARDS" ? (
-                            <FlashcardsContent content={JSON.parse(data)} />
+                            typeof data === "string" &&
+                            data !== "" && (
+                                <FlashcardsContent content={JSON.parse(data)} />
+                            )
                         ) : (
                             <Text>
                                 {data.split("\n").map((val, idx) => (
