@@ -16,6 +16,7 @@ import { QuizContent } from "./QuizContent"
 import { LocalFilePicker } from "./LocalFilePicker"
 import { SelectFile } from "./SelectFile"
 import { trpc } from "@/lib/trpc"
+import { FlashcardsContent } from "./FlashcardsContent"
 
 function encode(input: Uint8Array) {
     var keyStr =
@@ -314,6 +315,8 @@ export default function FileUpload({
                             data !== "" && (
                                 <QuizContent content={JSON.parse(data)} />
                             )
+                        ) : type === "FLASHCARDS" ? (
+                            <FlashcardsContent content={JSON.parse(data)} />
                         ) : (
                             <Text>
                                 {data.split("\n").map((val, idx) => (
