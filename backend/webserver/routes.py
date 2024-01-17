@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from modules.ai.summarizer import summarize_doc_stream
 from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
+from modules.ai.flashcards import create_flashcards
 from webserver.app import app
 import os
 from uuid import uuid4
@@ -149,6 +150,43 @@ def quiz():
     conn.close()
 
     return app.response_class(quiz, mimetype='application/json',status=200)
+
+@app.route("/api/flashcards", methods=["POST"])
+def flashcards():
+    params = get_route_parameters()
+    if not isinstance(params, tuple):
+        return params
+    (file_hash, course_id) = params
+    
+    user_id = get_user_id()
+    
+    query = request.args.get("questions")
+    flashcards_count = 3
+
+    if query != None:
+        flashcards_count = int(query)
+
+    print(f"Creating {flashcards_count} flashcards")
+
+    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+    flashcards = create_flashcards(file_hash, flashcards_count)
+
+    print(flashcards)
+    print("Inserting flashcards")
+    user_id = get_user_id()
+    content_id = str(uuid4())
+    if user_id:
+        print("Found user:", user_id)
+        print("Saving flashcards")
+        cur = conn.cursor()
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (content_id, updated_at, "FLASHCARDS", f"Flashcards {updated_at}", flashcards, user_id, course_id))
+        conn.commit()
+
+    conn.close()
+
+    return app.response_class(flashcards, mimetype='application/json',status=200)
 
 @app.route("/api/summary", methods=["POST"])
 def summary():

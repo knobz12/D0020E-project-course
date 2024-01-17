@@ -14,10 +14,16 @@ def chunky():
     from modules.files.chunks import Chunkerizer
     Chunkerizer.text_extraction_test()
 
+
+def flashcards():
+    from modules.ai.flashcards import flashcard_test
+    flashcard_test()
+
 if __name__ == "__main__":
     from modules.ai.utils.args import init_args
     init_args()
     app()
+    # flashcards()
     # playground()
     # quiz()
     # chunky()
