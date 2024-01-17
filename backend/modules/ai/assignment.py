@@ -18,13 +18,13 @@ def assignment_doc_stream(id: str) -> Generator[str, str, None]:
         text =meta["text"]
         previous_assignment: str | None = results[idx - 1] if idx > 1 else None
 
-        prompt = """ create a assignment using the given context
+        prompt = """ create2 an completely original assignment using the given context and add small bit of text att the end saying the amount of hours the assignment will take. Make it an assignment tha someone could do in one day of work
 
 Text: {text}
 
 Answer:""".format(text = text)
 
-        prompt_with_previous=  """ use the information give to improve the given assignemnt so that is covers the most important parts of the given material.
+        prompt_with_previous=  """ improve the assignment using the information given. If its not possible to improve then repeat the assignment word for word
 
 
 assignment: {assignment}
