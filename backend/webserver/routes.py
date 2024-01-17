@@ -77,40 +77,60 @@ def get_course_id_from_name(name: str) -> str:
     conn.close()
     return course_id
 
-@app.route("/api/quiz", methods=["POST"])
-def quiz():
-    if 'file' not in request.files:
-        return make_response("Missing file", 406)
-    
-    file = request.files["file"]
-    file_size = file.seek(0, os.SEEK_END)
-    file.seek(0)
-    print("File size:",file_size)
+from flask import Response
 
-    if file_size <= 0:
-        return make_response("Cannot send empty file! 😡", 406)
-
+def get_route_parameters() -> tuple[str, str] | Response:
+    """
+    Returns tuple where first element is file_hash (file id) and course id.
+    Otherwise returns a response error which in return can be returned from a route return.
+    """
     course_query = request.args.get("course")
     if course_query == None:
         return make_response("Missing required course parameter", 400)
 
     course = course_query
+    file_id = request.form.get("file_id")
 
-    file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
-    if file_hash == None:
-        return make_response("Bad file format", 406)
+    if 'file' not in request.files and file_id == None:
+        return make_response("Missing file and file id.", 406)
+
+    def get_file_hash():
+        if file_id != None:
+            return file_id
+
+        if 'file' not in request.files:
+            return make_response("Missing file", 406)
+        
+        file = request.files["file"]
+        file_size = file.seek(0, os.SEEK_END)
+        file.seek(0)
+        print("File size:",file_size)
+
+        if file_size <= 0:
+            return make_response("Cannot send empty file! 😡", 406)
+
+        file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
+        if file_hash == None:
+            return make_response("Bad file format", 406)
     
+    file_hash = get_file_hash()
+    course_id = get_course_id_from_name(course)
+    return (file_hash, course_id)
+
+@app.route("/api/quiz", methods=["POST"])
+def quiz():
+    params = get_route_parameters()
+    if not isinstance(params, tuple):
+        return params
+    (file_hash, course_id) = params
+
     query = request.args.get("questions")
     questions = 3
 
     if query != None:
         questions = int(query)
 
-    print(f"Creating {questions} questions")
-
-
     conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
-    course_id = get_course_id_from_name(course)
     quiz = create_quiz(file_hash, questions)
 
     print(quiz)
@@ -130,32 +150,12 @@ def quiz():
 
     return app.response_class(quiz, mimetype='application/json',status=200)
 
-
 @app.route("/api/summary", methods=["POST"])
 def summary():
-    if 'file' not in request.files:
-        return make_response("Missing file", 406)
-    
-    file = request.files["file"]
-    file_size = file.seek(0, os.SEEK_END)
-    file.seek(0)
-    print("File size:",file_size)
-
-    if file_size <= 0:
-        return make_response("Cannot send empty file! 😡", 406)
-
-    course_query = request.args.get("course")
-    if course_query == None:
-        return make_response("Missing required course parameter", 400)
-
-    course = course_query
-
-
-    file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
-    if file_hash == None:
-        return make_response("Bad file format", 406)
-
-    course_id = get_course_id_from_name(course)
+    params = get_route_parameters()
+    if not isinstance(params, tuple):
+        return params
+    (file_hash, course_id) = params
     user_id = get_user_id()
 
     def stream():
