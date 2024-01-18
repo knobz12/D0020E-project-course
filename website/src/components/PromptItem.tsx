@@ -25,6 +25,7 @@ import { TeacherNote } from "./TeacherNote"
 import { RouterOutput, trpc } from "@/lib/trpc"
 import { useSession } from "next-auth/react"
 import { showNotification } from "@mantine/notifications"
+import Summary from "@/pages/course/[course]/summary"
 
 interface PromptItemProps {
     prompt: RouterOutput["prompts"]["getPromptById"]
@@ -135,7 +136,8 @@ export function PromptItem({ prompt }: PromptItemProps) {
                     <Stack align="start" style={{ flex: 1 }}>
                         <Link
                             href={`/course/${router.query.course}/${
-                                prompt.type === "QUIZ" ? "quiz" : "summary"
+                                prompt.type === "QUIZ" ? "quiz" : 
+                                prompt.type === "ASSIGNMENT" ? "assignment" : "summary" 
                             }/${prompt.id}`}
                         >
                             <Title lineClamp={3}>{prompt.title}</Title>
