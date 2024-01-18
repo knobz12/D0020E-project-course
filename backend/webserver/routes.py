@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from modules.ai.summarizer import summarize_doc_stream
+from modules.ai.assignment import assignment_doc_stream
 from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
 from modules.ai.flashcards import create_flashcards
@@ -218,6 +219,54 @@ def summary():
 
     return app.response_class(stream(), mimetype='text/plain')
 
+
+@app.route("/api/assignment", methods=["POST"])
+def assignment():
+    if 'file' not in request.files:
+        return make_response("Missing file", 406)
+    
+    file = request.files["file"]
+    file_size = file.seek(0, os.SEEK_END)
+    file.seek(0)
+    print("File size:",file_size)
+
+    if file_size <= 0:
+        return make_response("Cannot send empty file! 😡", 406)
+
+    course_query = request.args.get("course")
+    if course_query == None:
+        return make_response("Missing required course parameter", 400)
+
+    course = course_query
+
+
+    file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
+    if file_hash == None:
+        return make_response("Bad file format", 406)
+
+    course_id = get_course_id_from_name(course)
+    user_id = get_user_id()
+
+    def stream():
+        assignment = ""
+        for chunk in assignment_doc_stream(file_hash):
+            yield chunk
+            assignment += chunk
+
+        if user_id == None:
+            return
+
+        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+        cur = conn.cursor()
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "ASSIGNMENT", f"Assignment {updated_at}", json.dumps({"text":assignment}), user_id, course_id))
+        conn.commit()
+        conn.close()
+
+        
+
+    return app.response_class(stream(), mimetype='text/plain')
 
 @app.route("/api/explanation", methods=["POST"])
 def explanation():
