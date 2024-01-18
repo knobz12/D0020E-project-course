@@ -330,9 +330,7 @@ export default function FileUpload({
                                             />
                                         )
                                         case "Multi":
-                                        return (
-                                            <Multi/>
-                                        )
+                                        return <Multi key={parameter.id} />
                                 }
                             })}
                         </Stack>
