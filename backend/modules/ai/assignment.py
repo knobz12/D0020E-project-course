@@ -34,7 +34,7 @@ Context: {context}
 Answer:""".format(assignment = previous_assignment,context=text)
 
         use_prompt = prompt if previous_assignment == None else prompt_with_previous
-        print(f"Summarizing doc {idx + 1}...")
+        print(f" doc {idx + 1}...")
         print(f"Full prompt:")
         print(use_prompt + "\n")
         result: str = ""
