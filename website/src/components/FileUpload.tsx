@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import {
     AspectRatio,
     Badge,
@@ -31,15 +31,26 @@ const MultiSelect = dynamic(() => import("@mantine/core").then((el) => el.MultiS
   });
 
 export function Multi() {
+  const inputref = useRef<HTMLInputElement>(null)
   const [data, setData] = useState<{value:string, label:string}[]>([]);
-  const [key, setkey] = useState();
-  const keyDown = (event) => {
+  const [key, setkey] = useState("");
+  function keyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     setkey(event.key)
     console.log(event.key)
-}
+    if (event.key === 'Enter') {event.preventDefault(); const inp = document.getElementById("multi") as HTMLInputElement; console.log(inp.value); 
+        const item = { value: inp.value, label: inp.value, selected: true };
+        setData((current) => [...current, item]);
+        inp.value = "";
+        console.log(inp.value);
+
+    }
+  }
+  useEffect(() => console.log(data), [data]);
   return (
     typeof window !== undefined && (
     <MultiSelect
+      ref={inputref}
+      id="multi"
       dropdownComponent={() => null}
       maxSelectedValues={10}
       label="Creatable MultiSelect"
@@ -48,20 +59,18 @@ export function Multi() {
       searchable
       creatable
       getCreateLabel={(query) => `+ Create ${query}`}
-      onKeyDown={(keyDown) => {if (event.key == "Enter") {(query) => {
-        const item = { value: query, label: query };
-        setData((current) => [...current, item]);
-        return item;
-      }}}}
+      onKeyDown={(keyDown)}
+      value={data.map(val => val.value)}
       onCreate={(query) => {
         const item = { value: query, label: query };
         setData((current) => [...current, item]);
         return item;
-      }}
+      }} 
     />
-    )
+    ) 
   );
 }
+
 function encode(input: Uint8Array) {
     var keyStr =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="

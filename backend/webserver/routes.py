@@ -1,7 +1,9 @@
 from bs4 import BeautifulSoup
 from modules.ai.summarizer import summarize_doc_stream
-from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
+from modules.ai.explainerV2 import create_explaination
+from modules.files.chunks import Chunkerizer
+
 from webserver.app import app
 import os
 from uuid import uuid4
@@ -180,7 +182,64 @@ def summary():
     return app.response_class(stream(), mimetype='text/plain')
 
 
+
 @app.route("/api/explanation", methods=["POST"])
 def explanation():
-    guid = create_llm_guidance()
-    pass
+    if 'file' not in request.files:
+        return make_response("Missing file", 406)
+    
+    file = request.files["file"]
+    file_size = file.seek(0, os.SEEK_END)
+    file.seek(0)
+    print("File size:",file_size)
+
+    if file_size <= 0:
+        return make_response("Cannot send empty file! 😡", 406)
+
+    course_query = request.args.get("course")
+    if course_query == None:
+        return make_response("Missing required course parameter", 400)
+
+    course = course_query
+
+
+    file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
+    if file_hash == None:
+        return make_response("Bad file format", 406)
+
+    course_id = get_course_id_from_name(course)
+    user_id = get_user_id()
+
+    query = [request.args.get("amount"), request.args.get("keywords")]
+    amount = 10
+
+    if query[0] != None:
+        amount = int(query[0])
+    custom_keywords = []
+    custom_keywords = query[1]
+
+    print(f"Creating {amount} keywords and explaining additional ones that are {query[1]}")
+
+    try:
+        explanation = create_explaination(file_hash, amount, custom_keywords)
+    except:
+        explanation = ""
+    
+    print(quiz)
+    print("Inserting quiz")
+    user_id = get_user_id()
+    if user_id:
+        print("Found user:", user_id)
+        print("Saving quiz")
+    
+        """conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+        cur = conn.cursor()
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "SUMMARY", f"Summary {updated_at}", json.dumps({"text":summary}), user_id, course_id))
+        conn.commit()
+        conn.close()"""
+
+        
+
+    return app.response_class(explanation, mimetype='application/json',status=200)
