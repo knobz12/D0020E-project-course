@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { createContext, useState } from "react"
 import {
     Box,
     Card,
@@ -68,6 +68,8 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
     },
 ]
 
+export const PaginationContext = createContext<number>(1)
+
 export default function Home({} // prompts,
 : InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
@@ -125,22 +127,34 @@ export default function Home({} // prompts,
                         <Stack>
                             <Title>Prompts</Title>
                             <Stack>
-                                <AnimatePresence>
-                                    {prompts.data?.pinned.map((prompt) => {
-                                        return (
-                                            <motion.div layout key={prompt.id}>
-                                                <PromptItem prompt={prompt} />
-                                            </motion.div>
-                                        )
-                                    })}
-                                    {prompts.data?.prompts.map((prompt) => {
-                                        return (
-                                            <motion.div layout key={prompt.id}>
-                                                <PromptItem prompt={prompt} />
-                                            </motion.div>
-                                        )
-                                    })}
-                                </AnimatePresence>
+                                <PaginationContext.Provider value={page}>
+                                    <AnimatePresence>
+                                        {prompts.data?.pinned.map((prompt) => {
+                                            return (
+                                                <motion.div
+                                                    layout
+                                                    key={prompt.id}
+                                                >
+                                                    <PromptItem
+                                                        prompt={prompt}
+                                                    />
+                                                </motion.div>
+                                            )
+                                        })}
+                                        {prompts.data?.prompts.map((prompt) => {
+                                            return (
+                                                <motion.div
+                                                    layout
+                                                    key={prompt.id}
+                                                >
+                                                    <PromptItem
+                                                        prompt={prompt}
+                                                    />
+                                                </motion.div>
+                                            )
+                                        })}
+                                    </AnimatePresence>
+                                </PaginationContext.Provider>
                             </Stack>
                             <Box pb="xl">
                                 <Pagination

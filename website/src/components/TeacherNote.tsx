@@ -1,4 +1,5 @@
 import { RouterOutput, trpc } from "@/lib/trpc"
+import { PaginationContext } from "@/pages/course/[course]"
 import { ActionIcon, Alert, Box, Flex, Space, Stack, Text } from "@mantine/core"
 import { modals } from "@mantine/modals"
 import { showNotification } from "@mantine/notifications"
@@ -6,7 +7,7 @@ import { IconNote, IconTrash } from "@tabler/icons-react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import { useRouter } from "next/router"
-import React from "react"
+import React, { useContext } from "react"
 
 interface TeacherNoteProps {
     promptId: string
@@ -17,6 +18,7 @@ export function TeacherNote({ promptId, note }: TeacherNoteProps) {
     const utils = trpc.useUtils()
     const session = useSession()
     const router = useRouter()
+    const page = useContext(PaginationContext)
     const { mutate: deleteNote } = trpc.prompts.deleteTeacherNote.useMutation({
         async onSuccess() {
             showNotification({
@@ -33,9 +35,10 @@ export function TeacherNote({ promptId, note }: TeacherNoteProps) {
             }
 
             // Cancel any current requests so we don't break the update
-            await utils.prompts.getNonAndPinnedPrompts.cancel({ course })
+            await utils.prompts.getNonAndPinnedPrompts.cancel({ course, page })
             const data = utils.prompts.getNonAndPinnedPrompts.getData({
                 course,
+                page,
             })
 
             if (!data) {
@@ -63,8 +66,12 @@ export function TeacherNote({ promptId, note }: TeacherNoteProps) {
                 }
             })
             utils.prompts.getNonAndPinnedPrompts.setData(
-                { course },
-                { pinned: pinnedUpdated, prompts: promptsUpdated },
+                { course, page },
+                {
+                    pinned: pinnedUpdated,
+                    prompts: promptsUpdated,
+                    total: data.total,
+                },
             )
         },
     })
