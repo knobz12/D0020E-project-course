@@ -59,7 +59,7 @@ Answer: "{gen(f"answer{idx}", stop='"')}"
 
     res = f"""\
 The following is flashcards questions.
-Generate answers based on the provided context. the answer for each corresponding question must be true.
+Generate answers based on the provided context. the answer for each corresponding question must be true. keep the answers concise.
 The questions MUST be different to one another.
 
 Context: {context}
