@@ -8,7 +8,8 @@
         "start": "next start",
         "lint": "next lint",
         "reset": "pnpm prisma migrate reset -f --skip-seed && pnpm prisma db push && pnpm prisma db seed",
-        "easy": "pnpm i && pnpm reset"
+        "easy": "pnpm i && pnpm reset",
+        "postinstall": "pnpm prisma db push"
     },
     "prisma": {
         "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

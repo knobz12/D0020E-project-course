@@ -222,29 +222,10 @@ def summary():
 
 @app.route("/api/assignment", methods=["POST"])
 def assignment():
-    if 'file' not in request.files:
-        return make_response("Missing file", 406)
-    
-    file = request.files["file"]
-    file_size = file.seek(0, os.SEEK_END)
-    file.seek(0)
-    print("File size:",file_size)
-
-    if file_size <= 0:
-        return make_response("Cannot send empty file! 😡", 406)
-
-    course_query = request.args.get("course")
-    if course_query == None:
-        return make_response("Missing required course parameter", 400)
-
-    course = course_query
-
-
-    file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
-    if file_hash == None:
-        return make_response("Bad file format", 406)
-
-    course_id = get_course_id_from_name(course)
+    params = get_route_parameters()
+    if not isinstance(params, tuple):
+        return params
+    (file_hash, course_id) = params
     user_id = get_user_id()
 
     def stream():
