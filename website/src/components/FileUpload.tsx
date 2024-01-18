@@ -256,6 +256,7 @@ export default function FileUpload({
                                                 label={parameter.name}
                                                 id={parameter.id}
                                                 name={parameter.id}
+                                                min={1}
                                                 onChange={(e) => {
                                                     if (e === "") {
                                                         return setParams(
