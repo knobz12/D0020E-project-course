@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import {
     Button,
     Container,
@@ -17,6 +17,53 @@ import { LocalFilePicker } from "./LocalFilePicker"
 import { SelectFile } from "./SelectFile"
 import { trpc } from "@/lib/trpc"
 import { FlashcardsContent } from "./FlashcardsContent"
+import dynamic from "next/dynamic"
+
+const MultiSelect = dynamic(() => import("@mantine/core").then((el) => el.MultiSelect), {
+    loading: () => <p>Loading...</p>,
+    ssr: false,
+  });
+
+export function Multi() {
+  const inputref = useRef<HTMLInputElement>(null)
+  const [data, setData] = useState<{value:string, label:string}[]>([]);
+  const [key, setkey] = useState("");
+  function keyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    setkey(event.key)
+    console.log(event.key)
+    if (event.key === 'Enter') {event.preventDefault(); const inp = document.getElementById("multi") as HTMLInputElement; console.log(inp.value); 
+        const item = { value: inp.value, label: inp.value, selected: true };
+        setData((current) => [...current, item]);
+        inp.value = "";
+        console.log(inp.value);
+
+    }
+  }
+  useEffect(() => console.log(data), [data]);
+  return (
+    typeof window !== undefined && (
+    <MultiSelect
+      ref={inputref}
+      id="multi"
+      dropdownComponent={() => null}
+      maxSelectedValues={10}
+      label="Creatable MultiSelect"
+      data={data}
+      placeholder="Select items"
+      searchable
+      creatable
+      getCreateLabel={(query) => `+ Create ${query}`}
+      onKeyDown={(keyDown)}
+      value={data.map(val => val.value)}
+      onCreate={(query) => {
+        const item = { value: query, label: query };
+        setData((current) => [...current, item]);
+        return item;
+      }} 
+    />
+    ) 
+  );
+}
 
 function encode(input: Uint8Array) {
     var keyStr =
@@ -54,7 +101,7 @@ interface FileUploadProps {
     apiUrl: string
     type: PromptType
     parameters?: {
-        type: "number"
+        type: "number" | "string" | "Multi"
         id: string
         name: string
         placeholder: string
@@ -240,6 +287,50 @@ export default function FileUpload({
                                                     parameter.placeholder
                                                 }
                                             />
+                                        )
+                                    case "string":
+                                        return (
+                                            <TextInput
+                                                key={parameter.id}
+                                                label={parameter.name}
+                                                id={parameter.id}
+                                                name={parameter.id}
+                                                onChange={(e) => {
+                                                    var myString = e.target.value
+                                                    if (myString === "") {
+                                                        return setParams(
+                                                            (curr) => {
+                                                                const newParams =
+                                                                    {
+                                                                        ...curr,
+                                                                        [parameter.id]:
+                                                                            undefined,
+                                                                    }
+                                                                console.log(
+                                                                    newParams,
+                                                                )
+                                                                return newParams
+                                                            },
+                                                        )
+                                                    }
+
+                                                    setParams((curr) => {
+                                                        const newParams = {
+                                                            ...curr,
+                                                            [parameter.id]: myString,
+                                                        }
+                                                        console.log(newParams)
+                                                        return newParams
+                                                    })
+                                                }}
+                                                placeholder={
+                                                    parameter.placeholder
+                                                }
+                                            />
+                                        )
+                                        case "Multi":
+                                        return (
+                                            <Multi/>
                                         )
                                 }
                             })}
