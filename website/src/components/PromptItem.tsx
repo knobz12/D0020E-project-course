@@ -19,12 +19,14 @@ import {
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import React from "react"
+import React, { useContext } from "react"
 import { CreateTeacherNoteButton } from "./CreateTeacherNoteButton"
 import { TeacherNote } from "./TeacherNote"
 import { RouterOutput, trpc } from "@/lib/trpc"
 import { useSession } from "next-auth/react"
 import { showNotification } from "@mantine/notifications"
+import Summary from "@/pages/course/[course]/summary"
+import { PaginationContext } from "@/pages/course/[course]"
 
 interface PromptItemProps {
     prompt: RouterOutput["prompts"]["getPromptById"]
@@ -35,24 +37,25 @@ export function PromptItem({ prompt }: PromptItemProps) {
     const utils = trpc.useUtils()
     const router = useRouter()
     const course = router.query.course
+    const page = useContext(PaginationContext)
     const { mutate: react } = trpc.prompts.react.useMutation({
         onSuccess() {
             if (typeof course === "string") {
-                utils.prompts.getNonAndPinnedPrompts.refetch({ course })
+                utils.prompts.getNonAndPinnedPrompts.refetch({ course, page })
             }
         },
     })
     const { mutate: deletePrompt } = trpc.prompts.deletePromptById.useMutation({
         onSuccess() {
             if (typeof course === "string") {
-                utils.prompts.getNonAndPinnedPrompts.refetch({ course })
+                utils.prompts.getNonAndPinnedPrompts.refetch({ course, page })
             }
         },
     })
     const { mutate: togglePin } = trpc.prompts.togglePromptPin.useMutation({
         onSuccess() {
             if (typeof course === "string") {
-                utils.prompts.getNonAndPinnedPrompts.refetch({ course })
+                utils.prompts.getNonAndPinnedPrompts.refetch({ course, page })
             }
         },
         onError: (e) =>
@@ -135,7 +138,13 @@ export function PromptItem({ prompt }: PromptItemProps) {
                     <Stack align="start" style={{ flex: 1 }}>
                         <Link
                             href={`/course/${router.query.course}/${
-                                prompt.type === "QUIZ" ? "quiz" : "summary"
+                                prompt.type === "QUIZ"
+                                    ? "quiz"
+                                    : prompt.type === "FLASHCARDS"
+                                      ? "flashcards"
+                                      : prompt.type === "SUMMARY"
+                                        ? "summary"
+                                        : "assignment"
                             }/${prompt.id}`}
                         >
                             <Title lineClamp={3}>{prompt.title}</Title>

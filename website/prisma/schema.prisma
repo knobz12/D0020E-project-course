@@ -24,6 +24,8 @@ model Course {
 enum PromptType {
   SUMMARY
   QUIZ
+  ASSIGNMENT
+  FLASHCARDS
 }
 
 model Prompt {

@@ -1,8 +1,10 @@
-import React from "react"
+import React, { createContext, useState } from "react"
 import {
+    Box,
     Card,
     Center,
     Container,
+    Pagination,
     Paper,
     SimpleGrid,
     Stack,
@@ -15,6 +17,7 @@ import {
     Icon,
     IconBook,
     IconCheck,
+    IconBrandMastercard,
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
@@ -22,7 +25,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { authOptions } from "../../api/auth/[...nextauth]"
 import { useRouter } from "next/router"
 import { trpc } from "@/lib/trpc"
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import { PromptItem } from "@/components/PromptItem"
 
 type Prompt = { icon: Icon; text: string; link: string }
@@ -35,6 +38,11 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 icon: IconQuestionMark,
                 text: "Quiz",
                 link: "/quiz",
+            },
+            {
+                icon: IconBrandMastercard,
+                text: "Flashcards",
+                link: "/flashcards",
             },
             {
                 icon: IconBook,
@@ -65,11 +73,15 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
     },
 ]
 
+export const PaginationContext = createContext<number>(1)
+
 export default function Home({} // prompts,
 : InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
+    const [page, setPage] = useState<number>(1)
     const prompts = trpc.prompts.getNonAndPinnedPrompts.useQuery({
         course: router.query.course as string,
+        page,
     })
 
     return (
@@ -120,23 +132,42 @@ export default function Home({} // prompts,
                         <Stack>
                             <Title>Prompts</Title>
                             <Stack>
-                                <AnimatePresence>
-                                    {prompts.data?.pinned.map((prompt) => {
-                                        return (
-                                            <motion.div layout key={prompt.id}>
-                                                <PromptItem prompt={prompt} />
-                                            </motion.div>
-                                        )
-                                    })}
-                                    {prompts.data?.prompts.map((prompt) => {
-                                        return (
-                                            <motion.div layout key={prompt.id}>
-                                                <PromptItem prompt={prompt} />
-                                            </motion.div>
-                                        )
-                                    })}
-                                </AnimatePresence>
+                                <PaginationContext.Provider value={page}>
+                                    <AnimatePresence>
+                                        {prompts.data?.pinned.map((prompt) => {
+                                            return (
+                                                <motion.div
+                                                    layout
+                                                    key={prompt.id}
+                                                >
+                                                    <PromptItem
+                                                        prompt={prompt}
+                                                    />
+                                                </motion.div>
+                                            )
+                                        })}
+                                        {prompts.data?.prompts.map((prompt) => {
+                                            return (
+                                                <motion.div
+                                                    layout
+                                                    key={prompt.id}
+                                                >
+                                                    <PromptItem
+                                                        prompt={prompt}
+                                                    />
+                                                </motion.div>
+                                            )
+                                        })}
+                                    </AnimatePresence>
+                                </PaginationContext.Provider>
                             </Stack>
+                            <Box pb="xl">
+                                <Pagination
+                                    value={page}
+                                    onChange={setPage}
+                                    total={prompts.data?.total ?? 0}
+                                />
+                            </Box>
                         </Stack>
                     </Stack>
                 </Center>

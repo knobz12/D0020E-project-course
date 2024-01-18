@@ -18,9 +18,9 @@ def create_chroma_client() -> ClientAPI:
         print("✅ Using cached client")
         return client
 
-    client = chromadb.Client(settings=Settings(allow_reset=True))
+    #client = chromadb.Client(settings=Settings(allow_reset=True))
     #client = chromadb.PersistentClient("./chroma_data", settings=Settings(allow_reset=True))
-    #client = chromadb.HttpClient(settings=Settings(allow_reset=True))
+    client = chromadb.HttpClient(settings=Settings(allow_reset=True))
 
     return client
 

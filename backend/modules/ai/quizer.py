@@ -60,7 +60,7 @@ def newQuestionJSONGenerator(lm, context: str, answer_count: int, question_count
     def gen_answer(idx: int,questionIndex:int) -> str:
         answerKey = f"answer{questionIndex}-{idx}"
         isAnswerKey = f"isAnswer{questionIndex}-{idx}"
-        print(answerKey, isAnswerKey)
+        # print(answerKey, isAnswerKey)
         import random
         seed = random.randint(0, 1337)
         answer: str = f"""\"{gen(name=answerKey, stop='"',llm_kwargs={"seed": seed})}\": {select(["True", "False"],name=isAnswerKey)}"""
@@ -78,7 +78,7 @@ Answers:
             question += gen_answer(i, idx) + "\n"
         
 
-        #print(question)
+        ## print(question)
         return question
 
     questions: str = ""
@@ -86,7 +86,7 @@ Answers:
         questions += gen_question(i) + "\n\n"
 
         
-    print("Questions:\n", questions)
+    # print("Questions:\n", questions)
 
 
 
@@ -105,7 +105,7 @@ Questions:
     """
 
 
-    print(res)
+    # print(res)
     lm += res 
     
     return lm
@@ -122,16 +122,16 @@ def create_quiz(id: str, questions: int) -> str:
     vectorstore = create_vectorstore()
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
-    print(docs)
+    # print(docs)
 
 
     obj: dict[str, list[dict[str, Any]]] =  {}
 
     for (i, doc) in enumerate(docs["metadatas"]):
         qsts_cunt = calculate_questions_per_doc(len(docs["metadatas"]), questions, i)
-        print(f"Questions for {i}")
+        # print(f"Questions for {i}")
         result = glmm + newQuestionJSONGenerator(doc["text"], 4, qsts_cunt)
-        print(str(result))
+        # print(str(result))
 
         obj["questions"] = []
 

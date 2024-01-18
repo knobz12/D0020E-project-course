@@ -13,11 +13,12 @@ import {
 import { useDisclosure } from "@mantine/hooks"
 import { IconPencilPlus } from "@tabler/icons-react"
 import { useForm, zodResolver } from "@mantine/form"
-import React from "react"
+import React, { useContext } from "react"
 import { z } from "zod"
 import { showNotification } from "@mantine/notifications"
 import { useRouter } from "next/router"
 import { useSession } from "next-auth/react"
+import { PaginationContext } from "@/pages/course/[course]"
 
 const formSchema = z.object({
     title: z.string().min(3).max(128),
@@ -35,6 +36,7 @@ export function CreateTeacherNoteButton({
     const router = useRouter()
     const utils = trpc.useUtils()
     const user = useSession()
+    const page = useContext(PaginationContext)
     const form = useForm<(typeof formSchema)["_type"]>({
         validate: zodResolver(formSchema),
         initialValues: {
@@ -70,9 +72,10 @@ export function CreateTeacherNoteButton({
             }
 
             // Cancel any current requests so we don't break the update
-            await utils.prompts.getNonAndPinnedPrompts.cancel({ course })
+            await utils.prompts.getNonAndPinnedPrompts.cancel({ course, page })
             const data = utils.prompts.getNonAndPinnedPrompts.getData({
                 course,
+                page,
             })
 
             if (!data || !user.data) {
@@ -114,8 +117,12 @@ export function CreateTeacherNoteButton({
                 }
             })
             utils.prompts.getNonAndPinnedPrompts.setData(
-                { course },
-                { pinned: pinnedUpdated, prompts: promptsUpdated },
+                { course, page },
+                {
+                    pinned: pinnedUpdated,
+                    prompts: promptsUpdated,
+                    total: data.total,
+                },
             )
         },
     })

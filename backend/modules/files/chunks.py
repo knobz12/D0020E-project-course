@@ -41,9 +41,9 @@ class Chunkerizer:
             return None
         (type, text, image_text) = result
 
-        hash = hashlib.md5()
-        hash.update(f"{input}".encode('UTF-8'))
-        file_hash = hash.hexdigest()
+        hash_in = hashlib.md5()
+        hash_in.update(f"{text}".encode('UTF-8'))
+        file_hash = hash_in.hexdigest()
 
         chunks = Chunkerizer.make_chunk(text, 512)
 
@@ -60,6 +60,7 @@ class Chunkerizer:
             doc = {
                 "id":file_hash,
                 "chunk-id": str(i),
+                "filename": filename,
                 "course": course_name,
                 "text":data,
             }
@@ -74,7 +75,6 @@ class Chunkerizer:
 
         print(f"Uploading {len(ids)} doc chunks")
         collection.upsert(ids, metadatas=metadatas,documents=documents)
-
 
         return file_hash
     def make_chunk(text: str = "This is a cool text", chunksize: int = 512) -> list[str]:
