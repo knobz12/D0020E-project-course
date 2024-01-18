@@ -6,6 +6,7 @@ import {
     SegmentedControl,
     Stack,
     Text,
+    TextInput,
     Title,
 } from "@mantine/core"
 import { showNotification } from "@mantine/notifications"
@@ -19,53 +20,85 @@ import { trpc } from "@/lib/trpc"
 import { FlashcardsContent } from "./FlashcardsContent"
 import dynamic from "next/dynamic"
 
-const MultiSelect = dynamic(() => import("@mantine/core").then((el) => el.MultiSelect), {
-    loading: () => <p>Loading...</p>,
-    ssr: false,
-  });
+const MultiSelect = dynamic(
+    () => import("@mantine/core").then((el) => el.MultiSelect),
+    {
+        loading: () => <p>Loading...</p>,
+        ssr: false,
+    },
+)
 
 export function Multi() {
-  const inputref = useRef<HTMLInputElement>(null)
-  const [data, setData] = useState<{value:string, label:string}[]>([]);
-  const [key, setkey] = useState("");
-  function keyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-    setkey(event.key)
-    console.log(event.key)
-    if (event.key === 'Enter') {event.preventDefault(); const inp = document.getElementById("multi") as HTMLInputElement; console.log(inp.value); 
-        const item = { value: inp.value, label: inp.value, selected: true };
-        setData((current) => [...current, item]);
-        inp.value = "";
-        console.log(inp.value);
-
+    const inputref = useRef<HTMLInputElement>(null)
+    const [data, setData] = useState<{ value: string; label: string }[]>([])
+    const [key, setkey] = useState("")
+    function keywordExists(query: string): boolean {
+        if (
+            data.find(
+                (val) =>
+                    val.value.toLocaleLowerCase() === query.toLocaleLowerCase(),
+            )
+        ) {
+            showNotification({
+                color: "blue",
+                title: "Keywords must be unique",
+                message: `You can't add '${query}' since it is already added.`,
+            })
+            return true
+        }
+        return false
     }
-  }
-  useEffect(() => console.log(data), [data]);
-  return (
-    typeof window !== undefined && (
-    <MultiSelect
-      ref={inputref}
-      id="multi"
-      dropdownComponent={() => null}
-      maxSelectedValues={10}
-      label="Creatable MultiSelect"
-      data={data}
-      placeholder="Select items"
-      searchable
-      creatable
-      getCreateLabel={(query) => `+ Create ${query}`}
+    function keyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+        setkey(event.key)
+        console.log(event.key)
+        if (event.key === "Enter") {
+            const inp = document.getElementById("multi") as HTMLInputElement
+            const value = inp.value
+            if (value === "") {
+                showNotification({
+                    color: "blue",
+                    message: "Empty keyword not allowed",
+                })
+                return
+            }
+            const exists = keywordExists(value)
+            if (exists) {
+                return
+            }
+            console.log()
+            const item = { value: value, label: value, selected: true }
+            setData((current) => [...current, item])
+            inp.value = ""
+            console.log(value)
+        }
+    }
+    useEffect(() => console.log(data), [data])
+    return (
+        typeof window !== undefined && (
+            <MultiSelect
+                ref={inputref}
+                id="multi"
+                dropdownComponent={() => null}
+                maxSelectedValues={10}
+                label="Creatable MultiSelect"
+                data={data}
+                placeholder="Select items"
+                searchable
+                creatable
+                getCreateLabel={(query) => `+ Create ${query}`}
                 onKeyDown={keyDown}
                 value={data.map((val) => val.value)}
                 onChange={(value) =>
                     setData(value.map((val) => ({ label: val, value: val })))
                 }
-      onCreate={(query) => {
-        const item = { value: query, label: query };
-        setData((current) => [...current, item]);
-        return item;
-      }} 
-    />
-    ) 
-  );
+                onCreate={(query) => {
+                    const item = { value: query, label: query }
+                    setData((current) => [...current, item])
+                    return item
+                }}
+            />
+        )
+    )
 }
 
 function encode(input: Uint8Array) {
@@ -300,7 +333,8 @@ export default function FileUpload({
                                                 id={parameter.id}
                                                 name={parameter.id}
                                                 onChange={(e) => {
-                                                    var myString = e.target.value
+                                                    var myString =
+                                                        e.target.value
                                                     if (myString === "") {
                                                         return setParams(
                                                             (curr) => {
@@ -321,7 +355,8 @@ export default function FileUpload({
                                                     setParams((curr) => {
                                                         const newParams = {
                                                             ...curr,
-                                                            [parameter.id]: myString,
+                                                            [parameter.id]:
+                                                                myString,
                                                         }
                                                         console.log(newParams)
                                                         return newParams
@@ -332,7 +367,7 @@ export default function FileUpload({
                                                 }
                                             />
                                         )
-                                        case "Multi":
+                                    case "Multi":
                                         return <Multi key={parameter.id} />
                                 }
                             })}
