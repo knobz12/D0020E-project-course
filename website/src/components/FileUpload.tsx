@@ -53,8 +53,9 @@ export function Multi() {
       searchable
       creatable
       getCreateLabel={(query) => `+ Create ${query}`}
-      onKeyDown={(keyDown)}
-      value={data.map(val => val.value)}
+                onChange={(value) =>
+                    setData(value.map((val) => ({ label: val, value: val })))
+                }
       onCreate={(query) => {
         const item = { value: query, label: query };
         setData((current) => [...current, item]);
