@@ -1,8 +1,10 @@
-import React from "react"
+import React, { useState } from "react"
 import {
+    Box,
     Card,
     Center,
     Container,
+    Pagination,
     Paper,
     SimpleGrid,
     Stack,
@@ -15,9 +17,6 @@ import {
     Icon,
     IconBook,
     IconCheck,
-    IconArrowUp,
-    IconArrowDown,
-    IconTrash,
     IconBrandMastercard,
 } from "@tabler/icons-react"
 import Link from "next/link"
@@ -26,7 +25,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { authOptions } from "../../api/auth/[...nextauth]"
 import { useRouter } from "next/router"
 import { trpc } from "@/lib/trpc"
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import { PromptItem } from "@/components/PromptItem"
 
 type Prompt = { icon: Icon; text: string; link: string }
@@ -43,7 +42,7 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
             {
                 icon: IconBrandMastercard,
                 text: "Flashcards",
-                link: "/flashcards"
+                link: "/flashcards",
             },
             {
                 icon: IconBook,
@@ -72,8 +71,10 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
 export default function Home({} // prompts,
 : InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
+    const [page, setPage] = useState<number>(1)
     const prompts = trpc.prompts.getNonAndPinnedPrompts.useQuery({
         course: router.query.course as string,
+        page,
     })
 
     return (
@@ -141,6 +142,13 @@ export default function Home({} // prompts,
                                     })}
                                 </AnimatePresence>
                             </Stack>
+                            <Box pb="xl">
+                                <Pagination
+                                    value={page}
+                                    onChange={setPage}
+                                    total={prompts.data?.total ?? 0}
+                                />
+                            </Box>
                         </Stack>
                     </Stack>
                 </Center>

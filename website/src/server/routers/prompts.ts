@@ -48,10 +48,10 @@ type PromptType = {
           type: "SUMMARY"
           content: PromptTypeContent["SUMMARY"]
       }
-      | {
-        type: "ASSIGNMENT"
-        content: PromptTypeContent["ASSIGNMENT"]
-    }
+    | {
+          type: "ASSIGNMENT"
+          content: PromptTypeContent["ASSIGNMENT"]
+      }
     | {
           type: "QUIZ"
           content: PromptTypeContent["QUIZ"]
@@ -110,8 +110,7 @@ async function formatPrompt(
         userId: prompt.userId,
         title: prompt.title,
         reaction: !userReaction ? null : userReaction.positive,
-        // type: ""
-        type: prompt.type as "FLASHCARDS" | "QUIZ" | "SUMMARY"| "ASSIGNMENT",
+        type: prompt.type as "FLASHCARDS" | "QUIZ" | "SUMMARY" | "ASSIGNMENT",
         content: prompt.content as any,
         teacherNote: teacherNote ?? undefined,
         pinned: prompt.pinned,
@@ -215,39 +214,36 @@ export const promptRouter = router({
             if (!prompt) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "The flashcards you tried to update doesn't exist.",
+                    message:
+                        "The flashcards you tried to update doesn't exist.",
                 })
             }
 
             if (prompt.type !== "FLASHCARDS") {
                 throw new TRPCError({
                     code: "FORBIDDEN",
-                    message: "The prompt you tried to edit is not a flashcards.",
+                    message:
+                        "The prompt you tried to edit is not a flashcards.",
                 })
             }
 
             const isUserOwner = prompt.userId === ctx.user.id
             console.log(isUserOwner)
 
-            if (ctx.user.type === "STUDENT")
-            {
-                if (!isUserOwner)
-                {
+            if (ctx.user.type === "STUDENT") {
+                if (!isUserOwner) {
                     throw new TRPCError({
                         code: "UNAUTHORIZED",
                         message: "You can't edit flashcards you haven't made.",
                     })
                 }
-            }
-            else if (ctx.user.type !== "TEACHER")
-            {
+            } else if (ctx.user.type !== "TEACHER") {
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
                     message:
                         "You must be a teacher to edit prompts you haven't created.",
                 })
             }
-
 
             await db.prompt.update({
                 where: {
@@ -312,11 +308,14 @@ export const promptRouter = router({
             return formatPrompt(summary, ctx.user.id)
         }),
     getNonAndPinnedPrompts: userProcedure
-        .input(z.object({ course: z.string() }))
-        .query(async function ({
-            input,
-            ctx,
-        }): Promise<{ pinned: PromptType[]; prompts: PromptType[] }> {
+        .input(
+            z.object({ course: z.string(), page: z.number().min(1).max(1000) }),
+        )
+        .query(async function ({ input, ctx }): Promise<{
+            pinned: PromptType[]
+            prompts: PromptType[]
+            total: number
+        }> {
             const course = await db.course.findUnique({
                 where: { name: input.course },
                 select: { id: true },
@@ -329,17 +328,24 @@ export const promptRouter = router({
                 })
             }
 
-            const [pinned, nonPinned] = await Promise.all([
-                db.prompt.findMany({
-                    where: { pinned: true, courseId: course.id },
-                    orderBy: { createdAt: "desc" },
-                    // There should only ever be at most 5 pinned prompts.
-                    take: 5,
+            const [totalPromptCount, pinned, nonPinned] = await Promise.all([
+                db.prompt.count({
+                    where: { courseId: course.id },
                 }),
+                // Only get pinned for page 1.
+                input.page === 1
+                    ? db.prompt.findMany({
+                          where: { pinned: true, courseId: course.id },
+                          orderBy: { createdAt: "desc" },
+                          // There should only ever be at most 5 pinned prompts.
+                          take: 5,
+                      })
+                    : [],
                 db.prompt.findMany({
                     where: { pinned: false, courseId: course.id },
                     orderBy: { createdAt: "desc" },
-                    take: 25,
+                    take: 15,
+                    skip: input.page * 15,
                 }),
             ])
 
@@ -362,7 +368,11 @@ export const promptRouter = router({
                 ),
             ])
 
-            return { pinned: formattedPinned, prompts: formattedNonPinned }
+            return {
+                pinned: formattedPinned,
+                prompts: formattedNonPinned,
+                total: Math.floor(totalPromptCount / 15),
+            }
         }),
     getPrompts: userProcedure
         .input(z.object({ course: z.string() }))
