@@ -23,9 +23,9 @@ type FlashcardsContent = (RouterOutput["prompts"]["getPromptById"] & {
 })["content"]
 
 interface FlashcardsContentProps {
-    promptId: string
-    title: string
     content: FlashcardsContent
+    promptId?: string
+    title?: string
     editable?: boolean
 }
 
@@ -39,7 +39,7 @@ export function FlashcardsContent({
     const [editing, setEditing] = useState<boolean>(false)
     // console.log("Content:", content)
 
-    if (editing) {
+    if (editing === true && promptId && title) {
         return (
             <FlashcardsEditor
                 promptId={promptId}
@@ -69,7 +69,12 @@ interface FlashcardsViewerProps extends FlashcardsContentProps {
     onEdit: () => void
 }
 
-function FlashcardsViewer({ title, content, editable, onEdit }: FlashcardsViewerProps) {
+function FlashcardsViewer({
+    title,
+    content,
+    editable,
+    onEdit,
+}: FlashcardsViewerProps) {
     const router = useRouter()
     return (
         <Stack>
@@ -103,6 +108,8 @@ function FlashcardsViewer({ title, content, editable, onEdit }: FlashcardsViewer
 interface FlashcardsEditorProps extends FlashcardsContentProps {
     onCancel: () => void
     onFinish: () => void
+    title: string
+    promptId: string
 }
 
 function FlashcardsEditor({
@@ -126,7 +133,8 @@ function FlashcardsEditor({
                 notifications.show({
                     color: "teal",
                     title: "Flashcards updated",
-                    message: "Your flashcards has been updated with the new text.",
+                    message:
+                        "Your flashcards has been updated with the new text.",
                 })
                 onFinish()
             },
@@ -143,8 +151,9 @@ function FlashcardsEditor({
     )
 
     function extractFlashcards() {
-        const titleEl: HTMLInputElement | null =
-            document.querySelector("input#flashcardsTitle")
+        const titleEl: HTMLInputElement | null = document.querySelector(
+            "input#flashcardsTitle",
+        )
 
         if (!titleEl) {
             throw new Error("Could not find flashcards title element!")
@@ -152,8 +161,6 @@ function FlashcardsEditor({
 
         const titleText = titleEl.value!
         const qstCount = content.questions.length
-
-
 
         const questions: {
             question: string
@@ -166,7 +173,9 @@ function FlashcardsEditor({
             )
 
             if (!qstEl) {
-                throw new Error(`Could not find flashcards question input ${q}!`)
+                throw new Error(
+                    `Could not find flashcards question input ${q}!`,
+                )
             }
 
             const qstValue = qstEl.value!
@@ -184,7 +193,7 @@ function FlashcardsEditor({
                 }
 
                 const value = ansEl.value!
-                
+
                 answer = value
             }
             questions.push({ question: qstValue, answer })

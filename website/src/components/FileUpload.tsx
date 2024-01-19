@@ -19,6 +19,7 @@ import { SelectFile } from "./SelectFile"
 import { trpc } from "@/lib/trpc"
 import { FlashcardsContent } from "./FlashcardsContent"
 import dynamic from "next/dynamic"
+import { IconInfoCircle } from "@tabler/icons-react"
 
 const MultiSelect = dynamic(
     () => import("@mantine/core").then((el) => el.MultiSelect),
@@ -255,6 +256,30 @@ export default function FileUpload({
                 console.log(str)
                 // console.log()
                 setData((current) => (current += str))
+            }
+            // Wait 500 milliseconds before checking for prompt
+            await new Promise<void>((res) => setTimeout(res, 500))
+
+            const prompt = await utils.prompts.getMyLatestPrompts.fetch({
+                course: router.query.course as string,
+            })
+
+            if (prompt) {
+                showNotification({
+                    color: "blue",
+                    icon: <IconInfoCircle />,
+                    message:
+                        "You will be redirected to your prompt in 2 seconds.",
+                })
+                setTimeout(
+                    () =>
+                        router.push(
+                            `/course/${
+                                router.query.course
+                            }/${prompt.type.toLowerCase()}/${prompt.id}`,
+                        ),
+                    2000,
+                )
             }
         } catch (e) {
             if (e instanceof Error) {

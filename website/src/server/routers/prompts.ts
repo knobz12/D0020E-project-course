@@ -371,7 +371,8 @@ export const promptRouter = router({
             return {
                 pinned: formattedPinned,
                 prompts: formattedNonPinned,
-                total: Math.floor(totalPromptCount / 15),
+                // total: Math.max(1, Math.floor(totalPromptCount / 15)),
+                total: Math.ceil(totalPromptCount / 15),
             }
         }),
     getPrompts: userProcedure
@@ -556,6 +557,35 @@ export const promptRouter = router({
                 data: { pinned: newValue },
                 select: { pinned: true },
             })
+        }),
+    getMyLatestPrompts: userProcedure
+        .input(z.object({ course: z.string() }))
+        .query(async function ({ ctx, input }) {
+            const course = await db.course.findUnique({
+                where: { name: input.course },
+                select: { id: true },
+            })
+
+            if (!course) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: `Could not course with name '${input.course}'.`,
+                })
+            }
+
+            const prompt = await db.prompt.findFirst({
+                where: { userId: ctx.user.id },
+                orderBy: { createdAt: "desc" },
+            })
+
+            if (!prompt) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: `Could not find your latest prompt.`,
+                })
+            }
+
+            return formatPrompt(prompt, ctx.user.id)
         }),
 })
 

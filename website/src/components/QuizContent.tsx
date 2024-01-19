@@ -23,10 +23,10 @@ type QuizContent = (RouterOutput["prompts"]["getPromptById"] & {
 })["content"]
 
 interface QuizContentProps {
-    promptId: string
-    title: string
     content: QuizContent
+    title?: string
     editable?: boolean
+    promptId?: string
 }
 
 export function QuizContent({
@@ -39,7 +39,7 @@ export function QuizContent({
     const [editing, setEditing] = useState<boolean>(false)
     // console.log("Content:", content)
 
-    if (editing) {
+    if (editing === true && promptId && title) {
         return (
             <QuizEditor
                 promptId={promptId}
@@ -114,6 +114,8 @@ function QuizViewer({ title, content, editable, onEdit }: QuizViewerProps) {
 interface QuizEditorProps extends QuizContentProps {
     onCancel: () => void
     onFinish: () => void
+    title: string
+    promptId: string
 }
 
 function QuizEditor({
