@@ -17,6 +17,7 @@ import React from "react"
 import { useSession, signOut } from "next-auth/react"
 import { IconLogout } from "@tabler/icons-react"
 import Link from "next/link"
+import Image from "next/image"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -31,7 +32,16 @@ export function Page({ children, center = false }: PageProps) {
     return (
         <div className={clsx(inter.className, "min-h-screen")}>
             <Container className="flex justify-between py-4">
-                <Link href="/" className="no-underline">
+                <Link
+                    href="/"
+                    className="no-underline flex items-center space-x-4"
+                >
+                    <Image
+                        width={64}
+                        height={64}
+                        src="/logo.png"
+                        alt="AI Studybuddy logo"
+                    />
                     <Title>AI Studybuddy</Title>
                 </Link>
                 {status === "authenticated" && (
