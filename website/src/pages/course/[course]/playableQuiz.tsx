@@ -74,6 +74,7 @@ const Question: React.FC<Props> = ({
     const handleCheckboxChange = () => {
         console.log("");
         
+        
     };
 
     
@@ -88,7 +89,8 @@ const Question: React.FC<Props> = ({
             <h2 className="">{question}</h2>
             <div className="">
                  <button
-                onClick={() =>onSubmit([" "])} // This needs to check the checkboxes and return chosen answers
+                onClick={() =>
+                    onSubmit([" "])} // This needs to check the checkboxes and return chosen answers
                 >
                     {"submit"}
                 </button>
@@ -97,6 +99,7 @@ const Question: React.FC<Props> = ({
                     <Checkbox 
                     key={choice}
                     id={choice}
+                    className={"ChoicesElement"}
                     size={30}
                     radius={5}
                     label={choice}
@@ -120,14 +123,13 @@ const Question: React.FC<Props> = ({
 }
 
 function CheckCorrectAnswer(answer:string[], CorrectAnswer:string[]){  // checks if the given answer is in the correct answers
-    console.log(CorrectAnswer)
-    console.log(answer)
+    console.log(CorrectAnswer +" right answer")
+    console.log(answer +" given answer")
     let score = 0;
     for(let i = 0; i < CorrectAnswer.length; i++){
         console.log(i)
-        console.log(CorrectAnswer[i]+" and "+ answer +" test")
         for(let j = 0; j < answer.length; j++){
-            console.log(CorrectAnswer[i]+" and "+ answer[j] +" test2")
+            console.log(CorrectAnswer[i]+" and "+ answer[j])
             if(CorrectAnswer[i] === answer[j]){
                 score += 1;
                 console.log("score+");
@@ -199,7 +201,9 @@ export default function Quiz(Quizquestions:Content){
 
      const handleSubmit = (CorrectAnswer: string[]) => {
         
-        
+        let elements = document.getElementsByClassName("ChoicesElement");
+        console.log(elements + " answers");
+
         console.log(TempScore);
         TempScore = score + CheckCorrectAnswer(CorrectAnswer, choicesArray[1]);
         setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
