@@ -345,7 +345,7 @@ export const promptRouter = router({
                     where: { pinned: false, courseId: course.id },
                     orderBy: { createdAt: "desc" },
                     take: 15,
-                    skip: input.page * 15,
+                    skip: (input.page - 1) * 15,
                 }),
             ])
 
