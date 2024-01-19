@@ -54,6 +54,7 @@ export function Multi() {
         if (event.key === "Enter") {
             const inp = document.getElementById("multi") as HTMLInputElement
             const value = inp.value
+
             if (value === "") {
                 showNotification({
                     color: "blue",
@@ -61,6 +62,7 @@ export function Multi() {
                 })
                 return
             }
+
             const exists = keywordExists(value)
             if (exists) {
                 return
@@ -80,7 +82,7 @@ export function Multi() {
                 id="multi"
                 dropdownComponent={() => null}
                 maxSelectedValues={10}
-                label="Creatable MultiSelect"
+                label="Custom keywords"
                 data={data}
                 placeholder="Select items"
                 searchable
