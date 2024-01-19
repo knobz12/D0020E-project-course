@@ -371,7 +371,7 @@ export const promptRouter = router({
             return {
                 pinned: formattedPinned,
                 prompts: formattedNonPinned,
-                total: Math.min(1, Math.floor(totalPromptCount / 15)),
+                total: Math.max(1, Math.floor(totalPromptCount / 15)),
             }
         }),
     getPrompts: userProcedure
