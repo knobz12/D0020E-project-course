@@ -18,6 +18,9 @@ import {
     IconBook,
     IconCheck,
     IconBrandMastercard,
+    IconBoxMultiple,
+    IconClipboardList,
+    IconMessageQuestion
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
@@ -40,7 +43,7 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 link: "/quiz",
             },
             {
-                icon: IconBrandMastercard,
+                icon: IconBoxMultiple,
                 text: "Flashcards",
                 link: "/flashcards",
             },
@@ -55,7 +58,7 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 link: "/assignment",
             },
             {
-                icon: IconCheck,
+                icon: IconClipboardList,
                 text: "Explainer",
                 link: "/explainer",
             },
@@ -65,7 +68,7 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
         name: "Question",
         prompts: [
             {
-                icon: IconBook,
+                icon: IconMessageQuestion,
                 text: "Question",
                 link: "/question",
             },
