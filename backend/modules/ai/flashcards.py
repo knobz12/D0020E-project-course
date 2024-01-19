@@ -7,7 +7,12 @@ from guidance import select, gen
 
 from modules.files.chunks import *
 
-from typing import Any, Generator
+
+
+from pydantic import BaseModel
+from typing import List
+
+from llama_index.program import GuidancePydanticProgram
 
 
 def calculate_questions_per_doc(total_docs: int, total_questions: int, doc_index: int):
@@ -73,6 +78,11 @@ Flashcards:
     lm += res 
     return lm
 
+
+class Data(BaseModel):
+    data: list[tuple[str, str]]
+
+
 def create_flashcards(id: str, questions: int):
     gllm = create_llm_guidance()
     vectorstore = create_vectorstore()
@@ -80,6 +90,14 @@ def create_flashcards(id: str, questions: int):
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
     # print(docs)
     
+
+    context = docs["metadatas"]["text"]
+    program = GuidancePydanticProgram(Data, 
+        f"Generate questions and answers to be used as flashcards based on the provided context. Context: {context}",
+        model,
+        verbose=True
+    )
+
 
     obj = {}
     obj["questions"] = []

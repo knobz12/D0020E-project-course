@@ -26,8 +26,12 @@ from guidance.models._llama_cpp import LlamaCpp
 from llama_cpp import Llama
 from langchain.llms.llamacpp import LlamaCpp as LangLlamaCpp
 
+from llama_index.llms import *
+
 llm: LangLlamaCpp = None
 guid: LlamaCpp = None
+
+llmi: LlamaCPP = None
 
 def create_llm_guidance() -> LlamaCpp:
     """Create instance of LLaMA 2 model for use with guidance"""
@@ -84,37 +88,29 @@ def create_llm() -> LangLlamaCpp:
     return llm
 
 def create_llm_index(api_key=None, openai=False) -> LlamaCPP | OpenAI:
-    """Create instance of LLaMA 2 model with LlamaCpp API"""
-    global llm
+    global llmi
+    if llmi != None:
+        return llmi
 
-    if llm != None:
-        return llm
+    if openai:
+        llmi = OpenAI(model="gpt-3.5-turbo", temperature=0, api_key=api_key)
+        return llmi
 
     args = get_args()
-    if openai:
-        llm = OpenAI(model="gpt-3.5-turbo", temperature=0, api_key=api_key)
-        return llm
-
-    llm = LlamaCPP(
-        # You can pass in the URL to a GGML model to download it automatically
-        model_path="/home/knobz/Documents/D0020E/D0020E-project-course/backend/models/default_.Q5_K_M.gguf",
-        # optionally, you can set the path to a pre-downloaded model instead of model_url
-        temperature=0,
+    llmi = LlamaCPP(
+        model_path=args.model_path,
         max_new_tokens=2000,
-        # llama2 has a context window of 4096 tokens, but we set it lower to allow for some wiggle room
         context_window=10000,
-        # kwargs to pass to __call__()
         generate_kwargs={},
-        # kwargs to pass to __init__()
-        # set to at least 1 to use GPU
-        model_kwargs={"n_gpu_layers": 25, "use_mmap": True, "f16_kv": True},
-        # transform inputs into Llama2 format
+        model_kwargs={"n_gpu_layers": args.gpu_layers, "use_mmap": True, "f16_kv": True},
+
         messages_to_prompt=messages_to_prompt,
         completion_to_prompt=completion_to_prompt,
         verbose=True
     )
-    return llm
-
+    return llmi
+    
+    """Create instance of LLaMA 2 model with LlamaCpp API"""
 #service_context = ServiceContext.from_defaults(
 #    chunk_size=512,
 #    llm=llm,
