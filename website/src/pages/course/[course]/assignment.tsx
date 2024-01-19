@@ -4,14 +4,14 @@ import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../api/auth/[...nextauth]"
 
-interface SummaryProps {}
+interface assignmentProps {}
 
-export default function Summary({}: SummaryProps) {
+export default function assignment({}: assignmentProps) {
     return (
         <FileUpload
-            type="SUMMARY"
-            title="Generate summary"
-            apiUrl="http://localhost:3030/api/summary"
+            type="ASSIGNMENT"
+            title="Generate assignment"
+            apiUrl="http://localhost:3030/api/assignment"
         />
     )
 }

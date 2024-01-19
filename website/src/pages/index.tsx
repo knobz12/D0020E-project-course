@@ -12,12 +12,13 @@ import {
 import { Page } from "@/components/Page"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
-import { GetServerSideProps } from "next"
+import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { authOptions } from "./api/auth/[...nextauth]"
+import { trpc } from "@/lib/trpc"
 
-const courses: string[] = ["D7032E"]
-
-export default function Home() {
+export default function Home({} // courses,
+: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const courses = trpc.courses.getCourses.useQuery()
     return (
         <Page center>
             <Container w="100%" size="sm">
@@ -28,19 +29,19 @@ export default function Home() {
                             <Stack spacing="xl">
                                 <Stack>
                                     <SimpleGrid cols={3}>
-                                        {courses.map((course) => {
+                                        {courses.data?.map(({ id, name }) => {
                                             // const Icon = prompt.icon
                                             return (
                                                 <Link
-                                                    key={course}
-                                                    href={`/course/${course.toUpperCase()}`}
+                                                    key={id}
+                                                    href={`/course/${name.toUpperCase()}`}
                                                 >
                                                     <Card>
                                                         <Text
                                                             size="lg"
                                                             fw={600}
                                                         >
-                                                            {course}
+                                                            {name}
                                                         </Text>
                                                     </Card>
                                                 </Link>
@@ -57,12 +58,14 @@ export default function Home() {
     )
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-    const session = await getServerSession(req, res, authOptions)
+export const getServerSideProps = (async ({ req, res }) => {
+    const [session] = await Promise.all([
+        getServerSession(req, res, authOptions),
+    ])
 
     return {
         props: {
             session,
         },
     }
-}
+}) satisfies GetServerSideProps

@@ -6,7 +6,13 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint"
+        "lint": "next lint",
+        "reset": "pnpm prisma migrate reset -f --skip-seed && pnpm prisma db push && pnpm prisma db seed",
+        "easy": "pnpm i && pnpm reset",
+        "postinstall": "pnpm prisma db push && pnpm prisma generate"
+    },
+    "prisma": {
+        "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
     },
     "dependencies": {
         "@auth/prisma-adapter": "^1.0.9",
@@ -14,22 +20,32 @@
         "@emotion/server": "^11.11.0",
         "@mantine/core": "^6.0.21",
         "@mantine/dropzone": "^6",
-        "@mantine/form": "^6",
+        "@mantine/form": "^6.0.21",
         "@mantine/hooks": "^6.0.21",
         "@mantine/modals": "^6.0.21",
         "@mantine/next": "^6",
         "@mantine/notifications": "^6.0.21",
         "@mantine/nprogress": "^6.0.21",
-        "@prisma/client": "^5.6.0",
+        "@prisma/client": "^5.8.1",
         "@tabler/icons-react": "^2.40.0",
-        "ai": "^2.2.23",
+        "@tanstack/react-query": "^4.0.0",
+        "@tanstack/react-query-devtools": "^5.17.12",
+        "@trpc/client": "^10.44.1",
+        "@trpc/next": "^10.44.1",
+        "@trpc/react-query": "^10.44.1",
+        "@trpc/server": "^10.44.1",
+        "chromadb": "^1.7.3",
         "clsx": "^2.0.0",
+        "framer-motion": "^10.18.0",
+        "jose": "^5.1.3",
         "jsonwebtoken": "^9.0.2",
+        "mantine-datatable": "6",
         "next": "14.0.2",
         "next-auth": "^4.24.5",
-        "openai": "^4.18.0",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0"
+        "react-dom": "^18.2.0",
+        "superjson": "^2.2.1",
+        "zod": "^3.22.4"
     },
     "devDependencies": {
         "@types/jsonwebtoken": "^9.0.5",
@@ -46,6 +62,7 @@
         "prettier-plugin-tailwindcss": "^0.5.7",
         "prisma": "^5.6.0",
         "tailwindcss": "^3.3.5",
+        "ts-node": "^10.9.2",
         "typescript": "^5.2.2"
     }
 }

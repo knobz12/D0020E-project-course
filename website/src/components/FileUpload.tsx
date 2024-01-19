@@ -1,25 +1,107 @@
-import React, { useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import {
-    AspectRatio,
-    Badge,
-    Box,
     Button,
-    CloseButton,
     Container,
-    Flex,
-    Group,
     NumberInput,
+    SegmentedControl,
     Stack,
     Text,
     TextInput,
     Title,
-    rem,
-    useMantineTheme,
 } from "@mantine/core"
 import { showNotification } from "@mantine/notifications"
 import { Page } from "@/components/Page"
-import { Dropzone } from "@mantine/dropzone"
-import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react"
+import { useRouter } from "next/router"
+import type { PromptType } from "@prisma/client"
+import { QuizContent } from "./QuizContent"
+import { LocalFilePicker } from "./LocalFilePicker"
+import { SelectFile } from "./SelectFile"
+import { trpc } from "@/lib/trpc"
+import { FlashcardsContent } from "./FlashcardsContent"
+import dynamic from "next/dynamic"
+
+const MultiSelect = dynamic(
+    () => import("@mantine/core").then((el) => el.MultiSelect),
+    {
+        loading: () => <p>Loading...</p>,
+        ssr: false,
+    },
+)
+
+export function Multi() {
+    const inputref = useRef<HTMLInputElement>(null)
+    const [data, setData] = useState<{ value: string; label: string }[]>([])
+    const [key, setkey] = useState("")
+    function keywordExists(query: string): boolean {
+        if (
+            data.find(
+                (val) =>
+                    val.value.toLocaleLowerCase() === query.toLocaleLowerCase(),
+            )
+        ) {
+            showNotification({
+                color: "blue",
+                title: "Keywords must be unique",
+                message: `You can't add '${query}' since it is already added.`,
+            })
+            return true
+        }
+        return false
+    }
+    function keyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+        setkey(event.key)
+        console.log(event.key)
+        if (event.key === "Enter") {
+            const inp = document.getElementById("multi") as HTMLInputElement
+            const value = inp.value
+
+            if (value === "") {
+                showNotification({
+                    color: "blue",
+                    message: "Empty keyword not allowed",
+                })
+                return
+            }
+
+            const exists = keywordExists(value)
+            if (exists) {
+                return
+            }
+            console.log()
+            const item = { value: value, label: value, selected: true }
+            setData((current) => [...current, item])
+            inp.value = ""
+            console.log(value)
+        }
+    }
+    useEffect(() => console.log(data), [data])
+    return (
+        typeof window !== undefined && (
+            <MultiSelect
+                ref={inputref}
+                id="multi"
+                dropdownComponent={() => null}
+                maxSelectedValues={10}
+                label="Custom keywords"
+                data={data}
+                placeholder="Select items"
+                searchable
+                creatable
+                getCreateLabel={(query) => `+ Create ${query}`}
+                onKeyDown={keyDown}
+                value={data.map((val) => val.value)}
+                onChange={(value) =>
+                    setData(value.map((val) => ({ label: val, value: val })))
+                }
+                onCreate={(query) => {
+                    const item = { value: query, label: query }
+                    setData((current) => [...current, item])
+                    return item
+                }}
+            />
+        )
+    )
+}
 
 function encode(input: Uint8Array) {
     var keyStr =
@@ -55,8 +137,9 @@ function encode(input: Uint8Array) {
 interface FileUploadProps {
     title: string
     apiUrl: string
+    type: PromptType
     parameters?: {
-        type: "number"
+        type: "number" | "string" | "Multi"
         id: string
         name: string
         placeholder: string
@@ -66,23 +149,40 @@ interface FileUploadProps {
 export default function FileUpload({
     apiUrl,
     title,
+    type,
     parameters,
 }: FileUploadProps) {
+    const router = useRouter()
     const [data, setData] = useState<string | null>(null)
     const [params, setParams] = useState<
         Record<string, string | number | undefined>
     >({})
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    const [inputFile, setFile] = useState<{ file: File; url?: string } | null>(
-        null,
-    )
-    const theme = useMantineTheme()
+    // String is database file ID and File is local user file.
+    const [selectedFile, setSelectedFile] = useState<string | File | null>(null)
+    const [fileChoice, setFileChoice] = useState<"select" | "upload">("upload")
+    const utils = trpc.useUtils()
+
+    useEffect(function () {
+        utils.files.getFiles.prefetch({
+            page: 1,
+            course: router.query.course as string,
+        })
+    }, [])
 
     async function onClick() {
         setIsLoading(true)
         try {
             const data = new FormData()
-            const file = inputFile?.file
+
+            if (selectedFile === null) {
+                return showNotification({
+                    color: "blue",
+                    message: "You must select a file.",
+                })
+            }
+
+            const file = selectedFile
 
             if (!file) {
                 return showNotification({
@@ -91,12 +191,22 @@ export default function FileUpload({
                 })
             }
 
-            data.set("file", file)
+            data.set(typeof file === "string" ? "file_id" : "file", file)
             const url = new URL(apiUrl)
 
             for (const [key, value] of Object.entries(params)) {
                 url.searchParams.set(key, String(value))
             }
+
+            const course = router.query.course
+            if (typeof course !== "string") {
+                return showNotification({
+                    color: "red",
+                    message: "Couldn't find course",
+                })
+            }
+
+            url.searchParams.set("course", course)
 
             console.log("USING URL:", url.toString())
             const res = await fetch(url.toString(), {
@@ -106,6 +216,7 @@ export default function FileUpload({
             }).catch((e) => null)
 
             if (res === null) {
+                console.error(res)
                 return showNotification({
                     color: "red",
                     message: "Failed to make request",
@@ -113,6 +224,7 @@ export default function FileUpload({
             }
 
             if (res.status !== 200) {
+                console.error(res)
                 return showNotification({
                     color: "red",
                     message: await res.text(),
@@ -146,6 +258,7 @@ export default function FileUpload({
             }
         } catch (e) {
             if (e instanceof Error) {
+                console.error(e)
                 showNotification({
                     color: "red",
                     title: "Something went wrong",
@@ -156,6 +269,12 @@ export default function FileUpload({
             setIsLoading(false)
         }
     }
+    const onFileSelect = useCallback(
+        function (file: string | File | null) {
+            setSelectedFile(file)
+        },
+        [setSelectedFile],
+    )
 
     return (
         <Page center>
@@ -175,6 +294,7 @@ export default function FileUpload({
                                                 label={parameter.name}
                                                 id={parameter.id}
                                                 name={parameter.id}
+                                                min={1}
                                                 onChange={(e) => {
                                                     if (e === "") {
                                                         return setParams(
@@ -207,148 +327,136 @@ export default function FileUpload({
                                                 }
                                             />
                                         )
+                                    case "string":
+                                        return (
+                                            <TextInput
+                                                key={parameter.id}
+                                                label={parameter.name}
+                                                id={parameter.id}
+                                                name={parameter.id}
+                                                onChange={(e) => {
+                                                    var myString =
+                                                        e.target.value
+                                                    if (myString === "") {
+                                                        return setParams(
+                                                            (curr) => {
+                                                                const newParams =
+                                                                    {
+                                                                        ...curr,
+                                                                        [parameter.id]:
+                                                                            undefined,
+                                                                    }
+                                                                console.log(
+                                                                    newParams,
+                                                                )
+                                                                return newParams
+                                                            },
+                                                        )
+                                                    }
+
+                                                    setParams((curr) => {
+                                                        const newParams = {
+                                                            ...curr,
+                                                            [parameter.id]:
+                                                                myString,
+                                                        }
+                                                        console.log(newParams)
+                                                        return newParams
+                                                    })
+                                                }}
+                                                placeholder={
+                                                    parameter.placeholder
+                                                }
+                                            />
+                                        )
+                                    case "Multi":
+                                        return <Multi key={parameter.id} />
                                 }
                             })}
                         </Stack>
                     )}
-                    {inputFile !== null ? (
+                    {/* <NoSsr>
+                        <HoverCard openDelay={300}>
+                            <HoverCard.Target> */}
+                    <SegmentedControl
+                        disabled={selectedFile !== null}
+                        color="teal"
+                        data={[
+                            {
+                                label: "Upload file",
+                                value: "upload",
+                            },
+                            {
+                                label: "Select file",
+                                value: "select",
+                            },
+                        ]}
+                        onChange={(value) =>
+                            setFileChoice(value as "select" | "upload")
+                        }
+                    />
+                    {/* </HoverCard.Target>
+                            {selectedFile !== null ? (
+                                <HoverCard.Dropdown color="teal">
+                                    You must remove the selected file if you
+                                    want to choose another file.
+                                </HoverCard.Dropdown>
+                            ) : null}
+                        </HoverCard>
+                    </NoSsr> */}
+                    {fileChoice === "select" ? (
+                        <SelectFile
+                            isLoading={isLoading}
+                            onSelect={onFileSelect}
+                        />
+                    ) : (
+                        <LocalFilePicker
+                            isLoading={isLoading}
+                            onSelect={onFileSelect}
+                        />
+                    )}
+                    {/* {selectedFile && (
                         <Flex align="center" w="100%">
                             <Flex gap="md" align="center" className="grow">
-                                {inputFile.url && (
-                                    <AspectRatio
-                                        ratio={16 / 9}
-                                        className="w-full h-full"
-                                        maw="128px"
-                                        mah="128px"
-                                    >
-                                        <img
-                                            className="w-full h-full"
-                                            src={inputFile.url}
-                                        />
-                                    </AspectRatio>
-                                )}
                                 <Stack spacing="sm">
-                                    <Text size="xl">{inputFile.file.name}</Text>
-                                    <Box>
-                                        <Badge>{inputFile.file.type}</Badge>
-                                    </Box>
+                                    <Text size="xl">
+                                        {typeof selectedFile === "string"
+                                            ? selectedFile
+                                            : selectedFile.name}
+                                    </Text>
                                 </Stack>
                             </Flex>
                             <CloseButton
                                 disabled={isLoading}
-                                onClick={() => setFile(null)}
+                                onClick={() => setSelectedFile(null)}
                                 size="lg"
                             />
                         </Flex>
-                    ) : (
-                        <Dropzone
-                            disabled={isLoading}
-                            accept={[
-                                "text/html",
-                                "image/jpg",
-                                "image/jpeg",
-                                "image/png",
-                                "application/pdf",
-                                "text/plain",
-                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                            ]}
-                            onDrop={async (files) => {
-                                const file = files.at(0)
-
-                                if (!file) {
-                                    return
-                                }
-
-                                if (file.size > 30_000_000) {
-                                    return showNotification({
-                                        color: "orange",
-                                        title: "File too large",
-                                        message:
-                                            "Size of file cannot exceed 30MB.",
-                                    })
-                                }
-
-                                if (file.type.startsWith("image/")) {
-                                    const buffer = await file.arrayBuffer()
-                                    const bytes = new Uint8Array(buffer)
-                                    const url =
-                                        `data:image/png;base64,` + encode(bytes)
-                                    setFile({ file, url: url })
-                                    return
-                                }
-                                setFile({ file })
-                            }}
-                        >
-                            <Group
-                                position="center"
-                                spacing="xl"
-                                style={{
-                                    minHeight: rem(220),
-                                    pointerEvents: "none",
-                                }}
-                            >
-                                <Dropzone.Accept>
-                                    <IconUpload
-                                        size="3.2rem"
-                                        stroke={1.5}
-                                        color={
-                                            theme.colors[theme.primaryColor][
-                                                theme.colorScheme === "dark"
-                                                    ? 4
-                                                    : 6
-                                            ]
-                                        }
-                                    />
-                                </Dropzone.Accept>
-                                <Dropzone.Reject>
-                                    <IconX
-                                        size="3.2rem"
-                                        stroke={1.5}
-                                        color={
-                                            theme.colors.red[
-                                                theme.colorScheme === "dark"
-                                                    ? 4
-                                                    : 6
-                                            ]
-                                        }
-                                    />
-                                </Dropzone.Reject>
-                                <Dropzone.Idle>
-                                    <IconPhoto size="3.2rem" stroke={1.5} />
-                                </Dropzone.Idle>
-
-                                <div>
-                                    <Text size="xl" inline>
-                                        Drag files here or click to select files
-                                    </Text>
-                                    <Text
-                                        size="sm"
-                                        color="dimmed"
-                                        inline
-                                        mt={7}
-                                    >
-                                        Only attach one file, it should not
-                                        exceed 30MB
-                                    </Text>
-                                </div>
-                            </Group>
-                        </Dropzone>
-                    )}
+                    )} */}
                     <Stack w="100%">
                         <Button loading={isLoading} onClick={onClick}>
                             Generate
                         </Button>
                     </Stack>
                     {/* {data !== null && <Textarea h="96rem" value={data} />} */}
-                    {data !== null && (
-                        // <Text dangerouslySetInnerHTML={{ __html: data }} />
-                        <Text>
-                            {data.split("\n").map((val, idx) => (
-                                <Text key={val + idx}>{val}</Text>
-                            ))}
-                        </Text>
-                    )}
+                    {data !== null &&
+                        (type === "QUIZ" ? (
+                            typeof data === "string" &&
+                            data !== "" && (
+                                <QuizContent content={JSON.parse(data)} />
+                            )
+                        ) : type === "FLASHCARDS" ? (
+                            typeof data === "string" &&
+                            data !== "" && (
+                                <FlashcardsContent content={JSON.parse(data)} />
+                            )
+                        ) : (
+                            <Text>
+                                {data.split("\n").map((val, idx) => (
+                                    <Text key={val + idx}>{val}</Text>
+                                ))}
+                            </Text>
+                        ))}
                 </Stack>
             </Container>
         </Page>

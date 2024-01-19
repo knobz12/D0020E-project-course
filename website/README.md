@@ -8,6 +8,20 @@ First, install the package manager:
 npm i -g pnpm
 ```
 
+## Environment variables
+
+OAuth 2.0 is used for authentication. Create kk
+A .env.local file is needed in the root of the website folder with the following variables:
+
+```bash
+COOKIE_DOMAIN=localhost
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=123
+# GitHub OAuth keys created in GitHub profile settings
+GITHUB_ID=********************
+GITHUB_SECRET=****************************************
+```
+
 ## Install dependencies
 
 From the website folder, install dependencies by running:
@@ -26,20 +40,19 @@ docker compose up -d database
 docker compose up -d # to start all services
 ```
 
-Create postgres database schema:
+Create postgres database schema and generate node.js database client and types:
 
 ```bash
 pnpm prisma db push
 ```
 
-## To run local development server
+Seed database with some basic data:
 
-When running local development server, for next.config.js hide the following:
-
-```javascript
-// output: "export",
-// assetPrefix: "/static",
+```bash
+pnpm prisma db seed
 ```
+
+## To run local development server
 
 Run the development server:
 
@@ -51,21 +64,18 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `src/pages/index.tsx`. The page auto-updates as you edit the file.
 
-## Production
+## Production server
 
-### HTML files
-
-For building static html, css, javascript files to the "out" folder, in next.config.js set:
-
-```javascript
-output: "export",
-assetPrefix: "/static",
-```
-
-Then run:
+To build run:
 
 ```bash
 pnpm build
+```
+
+Then to start the production server:
+
+```bash
+pnpm start
 ```
 
 ## Learn More

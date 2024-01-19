@@ -7,8 +7,10 @@ import { Notifications } from "@mantine/notifications"
 import { SessionProvider } from "next-auth/react"
 import type { AppProps } from "next/app"
 import type { Session } from "next-auth"
+import { trpc } from "@/lib/trpc"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
-export default function LlamaApp({
+function LlamaApp({
     Component,
     pageProps,
 }: AppProps & { pageProps: AppProps["pageProps"] & { session: Session } }) {
@@ -19,6 +21,9 @@ export default function LlamaApp({
                 <link rel="icon" href="/lama.png" />
             </Head>
             <SessionProvider session={pageProps.session}>
+                {process.env.NODE_ENV === "development" && (
+                    <ReactQueryDevtools />
+                )}
                 <MantineProvider
                     withGlobalStyles
                     withNormalizeCSS
@@ -95,3 +100,5 @@ export default function LlamaApp({
         </>
     )
 }
+
+export default trpc.withTRPC(LlamaApp)

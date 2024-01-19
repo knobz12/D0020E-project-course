@@ -1,37 +1,35 @@
-import React from "react"
+import React, { createContext, useState } from "react"
 import {
-    Badge,
     Box,
     Card,
     Center,
     Container,
-    Flex,
-    List,
+    Pagination,
     Paper,
     SimpleGrid,
     Stack,
     Text,
-    Textarea,
     Title,
 } from "@mantine/core"
 import { Page } from "@/components/Page"
-import { modals } from "@mantine/modals"
 import {
     IconQuestionMark,
     Icon,
     IconBook,
     IconCheck,
+    IconBrandMastercard,
+    IconBoxMultiple,
+    IconClipboardList,
+    IconMessageQuestion
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
-import {
-    GetServerSideProps,
-    GetStaticPaths,
-    InferGetServerSidePropsType,
-} from "next"
+import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { authOptions } from "../../api/auth/[...nextauth]"
 import { useRouter } from "next/router"
-import { db } from "@/lib/database"
+import { trpc } from "@/lib/trpc"
+import { AnimatePresence, motion } from "framer-motion"
+import { PromptItem } from "@/components/PromptItem"
 
 type Prompt = { icon: Icon; text: string; link: string }
 
@@ -45,9 +43,9 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 link: "/quiz",
             },
             {
-                icon: IconQuestionMark,
-                text: "QuizTest",
-                link: "/quiz2",
+                icon: IconBoxMultiple,
+                text: "Flashcards",
+                link: "/flashcards",
             },
             {
                 icon: IconBook,
@@ -59,13 +57,18 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 text: "Assignment",
                 link: "/assignment",
             },
+            {
+                icon: IconClipboardList,
+                text: "Explainer",
+                link: "/explainer",
+            },
         ],
     },
     {
         name: "Question",
         prompts: [
             {
-                icon: IconBook,
+                icon: IconMessageQuestion,
                 text: "Question",
                 link: "/question",
             },
@@ -73,10 +76,16 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
     },
 ]
 
-export default function Home({
-    prompts,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export const PaginationContext = createContext<number>(1)
+
+export default function Home({} // prompts,
+: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
+    const [page, setPage] = useState<number>(1)
+    const prompts = trpc.prompts.getNonAndPinnedPrompts.useQuery({
+        course: router.query.course as string,
+        page,
+    })
 
     return (
         <Page center>
@@ -126,29 +135,42 @@ export default function Home({
                         <Stack>
                             <Title>Prompts</Title>
                             <Stack>
-                                {prompts.map((prompt, idx) => {
-                                    return (
-                                        <Paper
-                                            onClick={() => {
-                                                modals.open({
-                                                    title: prompt.title,
-                                                })
-                                            }}
-                                            key={prompt.id}
-                                            className="overflow-hidden max-h-48"
-                                            radius="lg"
-                                            p="lg"
-                                        >
-                                            <Flex align="center" gap="md">
-                                                <Title>{prompt.title}</Title>
-                                                <Badge size="lg">
-                                                    {prompt.type}
-                                                </Badge>
-                                            </Flex>
-                                        </Paper>
-                                    )
-                                })}
+                                <PaginationContext.Provider value={page}>
+                                    <AnimatePresence>
+                                        {prompts.data?.pinned.map((prompt) => {
+                                            return (
+                                                <motion.div
+                                                    layout
+                                                    key={prompt.id}
+                                                >
+                                                    <PromptItem
+                                                        prompt={prompt}
+                                                    />
+                                                </motion.div>
+                                            )
+                                        })}
+                                        {prompts.data?.prompts.map((prompt) => {
+                                            return (
+                                                <motion.div
+                                                    layout
+                                                    key={prompt.id}
+                                                >
+                                                    <PromptItem
+                                                        prompt={prompt}
+                                                    />
+                                                </motion.div>
+                                            )
+                                        })}
+                                    </AnimatePresence>
+                                </PaginationContext.Provider>
                             </Stack>
+                            <Box pb="xl">
+                                <Pagination
+                                    value={page}
+                                    onChange={setPage}
+                                    total={prompts.data?.total ?? 0}
+                                />
+                            </Box>
                         </Stack>
                     </Stack>
                 </Center>
@@ -165,128 +187,11 @@ export const getServerSideProps = (async ({ req, res, params }) => {
         return { notFound: true }
     }
 
-    async function getQuizes() {
-        const quizes = await db.quizPrompt.findMany({
-            orderBy: { createdAt: "desc" },
-            take: 25,
-            where: { course: { name: "D7032E" } },
-            select: {
-                id: true,
-                title: true,
-                createdAt: true,
-            },
-        })
-
-        const formatted = await Promise.all(
-            quizes.map(
-                (quiz) =>
-                    new Promise<
-                        Omit<typeof quiz, "createdAt"> & {
-                            createdAt: string
-                            score: number
-                            type: "QUIZ" | "SUMMARY"
-                        }
-                    >(async (res) => {
-                        const [positiveReactions, negativeReactions] =
-                            await Promise.all([
-                                db.quizPromptReaction.count({
-                                    where: {
-                                        quizPromptId: quiz.id,
-                                        positive: true,
-                                    },
-                                }),
-                                db.quizPromptReaction.count({
-                                    where: {
-                                        quizPromptId: quiz.id,
-                                        positive: false,
-                                    },
-                                }),
-                            ])
-
-                        const score = positiveReactions - negativeReactions
-
-                        res({
-                            ...quiz,
-                            createdAt: quiz.createdAt.toISOString(),
-                            type: "QUIZ",
-                            score,
-                        })
-                    }),
-            ),
-        )
-
-        return formatted
-    }
-
-    async function getSummaries() {
-        const summaries = await db.summaryPrompt.findMany({
-            orderBy: { createdAt: "desc" },
-            take: 25,
-            where: { course: { name: "D7032E" } },
-            select: {
-                id: true,
-                title: true,
-                createdAt: true,
-            },
-        })
-
-        const formatted = await Promise.all(
-            summaries.map(
-                (summary) =>
-                    new Promise<
-                        Omit<typeof summary, "createdAt"> & {
-                            createdAt: string
-                            score: number
-                            type: "QUIZ" | "SUMMARY"
-                        }
-                    >(async (res) => {
-                        const [positiveReactions, negativeReactions] =
-                            await Promise.all([
-                                db.summaryPromptReaction.count({
-                                    where: {
-                                        summaryPromptId: summary.id,
-                                        positive: true,
-                                    },
-                                }),
-                                db.summaryPromptReaction.count({
-                                    where: {
-                                        summaryPromptId: summary.id,
-                                        positive: false,
-                                    },
-                                }),
-                            ])
-
-                        const score = positiveReactions - negativeReactions
-
-                        res({
-                            ...summary,
-                            createdAt: summary.createdAt.toISOString(),
-                            type: "SUMMARY",
-                            score,
-                        })
-                    }),
-            ),
-        )
-
-        return formatted
-    }
-
-    const [session, quizes, summaries] = await Promise.all([
-        getServerSession(req, res, authOptions),
-        getQuizes(),
-        getSummaries(),
-    ])
-
-    // Combine into one list ordered by created at date
-    const prompts = [...quizes, ...summaries].sort((a, b) =>
-        new Date(a.createdAt).valueOf() < new Date(b.createdAt).valueOf()
-            ? 1
-            : -1,
-    )
+    const session = await getServerSession(req, res, authOptions)
 
     return {
         props: {
-            prompts,
+            session,
         },
     }
 }) satisfies GetServerSideProps

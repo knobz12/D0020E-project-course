@@ -3,4 +3,6 @@ backend/venv
 **/__pycache__
 .mypy_cache
 **/.dmypy.json
+.vscode
+/chroma_data
 backendV2/secret.txt

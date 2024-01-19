@@ -1,9 +1,15 @@
 from bs4 import BeautifulSoup
 from modules.ai.summarizer import summarize_doc_stream
+from modules.ai.assignment import assignment_doc_stream
 from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
+from modules.ai.flashcards import create_flashcards
+from modules.ai.explainerV2 import create_explaination
 from webserver.app import app
 import os
+from uuid import uuid4
+import json
+import datetime
 
 from modules.ai.utils.llm import create_llm_guidance
 from modules.files.hash_and_json.HashFunction import TextToHash
@@ -14,7 +20,6 @@ from flask_caching import Cache
 
 from werkzeug.datastructures import FileStorage
 from chromadb import GetResult
-from modules.files.correct_chunks import TextSplit
 import psycopg2
 import jwt
 
@@ -48,60 +53,6 @@ def quiz_page():
     return app.send_static_file("quiz.html")
 
 
-def upload_chunks(file_hash: str, chunks: list[str]):
-    collection = create_collection()
-    ids: list[str] = []
-    metadatas: list[dict] = []
-    documents: list[str] = []
-
-    for (i, data) in enumerate(chunks):
-        print(f"Creating chunk {i}")
-        doc_id = file_hash + str(i)
-        ids.append(doc_id)
-        doc = {
-            "id":file_hash,
-            "chunk-id": str(i),
-            "course": "D7032E",
-            "text":data,
-        }
-        metadatas.append(doc)
-        documents.append(data)
-
-    print(len(ids))
-    for i in range(0,len(ids)):
-        print(ids[i])
-        print(metadatas[i])
-        print()
-
-    print(f"Uploading {len(ids)} doc chunks")
-    collection.upsert(ids, metadatas=metadatas,documents=documents)
-
-
-
-def upsert_file(file: FileStorage) -> tuple[str, GetResult] | None:
-    file_bytes: bytes = file.read()
-    res = Chunkerizer.text_and_image_text_from_file_bytes(file_bytes, file.filename)
-
-    if res == None:
-        print("Chunky returned None")
-        return None
-    (_, text, __) = res
-
-    hasher = TextToHash() 
-    (file_hash, _) = hasher.ConvertToHash(text)
-    collection = create_collection()
-    docs = collection.get(where={"id":file_hash})
-
-    if len(docs['ids']) > 0:
-        return (file_hash, docs)
-
-    # chunks = Chunkerizer.make_chunk(text,512)
-    chunks = TextSplit(text, 512)
-    print("chunks length",len(chunks))
-    upload_chunks(file_hash,chunks)
-    return (file_hash, collection.get(where={"id":file_hash}))
-
-
 def get_user_id() -> str | None:
     token = request.cookies.get("aisb.session-token")
     token = token.replace("'","\"")
@@ -110,6 +61,9 @@ def get_user_id() -> str | None:
         return None
 
     token = jwt.decode(token, "123",algorithms=["HS256"])
+
+    #encrypted_token = jwe.encrypt('Secret message', 'Token secret', algorithm='dir', encryption='A128GCM')
+    #decrypted_token = jwe.decrypt(token 'asecret128bitkey')
     print("Token str:",token)
     if not "userId" in token:
         return None
@@ -117,57 +71,186 @@ def get_user_id() -> str | None:
     user_id = token["userId"]
     return user_id
 
+def get_course_id_from_name(name: str) -> str:
+    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM courses WHERE name=%s",(name,))
+    courses = cur.fetchall()
+    course_id = courses[0][0]
+    conn.close()
+    return course_id
+
+from flask import Response
+
+def get_route_parameters() -> tuple[str, str] | Response:
+    """
+    Returns tuple where first element is file_hash (file id) and course id.
+    Otherwise returns a response error which in return can be returned from a route return.
+    """
+    course_query = request.args.get("course")
+    if course_query == None:
+        return make_response("Missing required course parameter", 400)
+
+    course = course_query
+    file_id = request.form.get("file_id")
+
+    if 'file' not in request.files and file_id == None:
+        return make_response("Missing file and file id.", 406)
+
+    def get_file_hash():
+        if file_id != None:
+            return file_id
+
+        if 'file' not in request.files:
+            return make_response("Missing file", 406)
+        
+        file = request.files["file"]
+        file_size = file.seek(0, os.SEEK_END)
+        file.seek(0)
+        print("File size:",file_size)
+
+        if file_size <= 0:
+            return make_response("Cannot send empty file! 😡", 406)
+
+        file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
+        if file_hash == None:
+            return make_response("Bad file format", 406)
+        return file_hash
+    
+    file_hash = get_file_hash()
+    course_id = get_course_id_from_name(course)
+    return (file_hash, course_id)
 
 @app.route("/api/quiz", methods=["POST"])
 def quiz():
-    if 'file' not in request.files:
-        return make_response("Missing file", 406)
-    
-    file = request.files["file"]
-    file_size = file.seek(0, os.SEEK_END)
-    file.seek(0)
-    print("File size:",file_size)
+    params = get_route_parameters()
+    if not isinstance(params, tuple):
+        return params
+    (file_hash, course_id) = params
 
-    if file_size <= 0:
-        return make_response("Cannot send empty file! 😡", 406)
-
-    result = upsert_file(file)
-
-    if result == None:
-        return make_response("Bad file format", 406)
-    
     query = request.args.get("questions")
     questions = 3
 
     if query != None:
         questions = int(query)
 
-    print(f"Creating {questions} questions")
-    (file_hash, _) = result
-
-    
-
-    quiz = ""
-    for chunk in create_quiz(file_hash, questions):
-        quiz += chunk
+    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+    quiz = create_quiz(file_hash, questions)
 
     print(quiz)
     print("Inserting quiz")
-    from uuid import uuid4
     user_id = get_user_id()
+    quiz_id = str(uuid4())
     if user_id:
         print("Found user:", user_id)
         print("Saving quiz")
-        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
         cur = conn.cursor()
-        cur.execute("INSERT INTO quiz (id, text, user_id) VALUES (%s, %s, %s);", (str(uuid4()), quiz, user_id))
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (quiz_id, updated_at, "QUIZ", f"Quiz {updated_at}", quiz, user_id, course_id))
         conn.commit()
-    
-    return make_response(quiz, 200)
 
+    conn.close()
+
+    return app.response_class(quiz, mimetype='application/json',status=200)
+
+@app.route("/api/flashcards", methods=["POST"])
+def flashcards():
+    params = get_route_parameters()
+    if not isinstance(params, tuple):
+        return params
+    (file_hash, course_id) = params
+    
+    user_id = get_user_id()
+    
+    query = request.args.get("questions")
+    flashcards_count = 3
+
+    if query != None:
+        flashcards_count = int(query)
+
+    print(f"Creating {flashcards_count} flashcards")
+
+    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+    flashcards = create_flashcards(file_hash, flashcards_count)
+
+    print(flashcards)
+    print("Inserting flashcards")
+    user_id = get_user_id()
+    content_id = str(uuid4())
+    if user_id:
+        print("Found user:", user_id)
+        print("Saving flashcards")
+        cur = conn.cursor()
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (content_id, updated_at, "FLASHCARDS", f"Flashcards {updated_at}", flashcards, user_id, course_id))
+        conn.commit()
+
+    conn.close()
+
+    return app.response_class(flashcards, mimetype='application/json',status=200)
 
 @app.route("/api/summary", methods=["POST"])
 def summary():
+    params = get_route_parameters()
+    if not isinstance(params, tuple):
+        return params
+    (file_hash, course_id) = params
+    user_id = get_user_id()
+
+    def stream():
+        summary = ""
+        for chunk in summarize_doc_stream(file_hash):
+            yield chunk
+            summary += chunk
+
+        if user_id == None:
+            return
+
+        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+        cur = conn.cursor()
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "SUMMARY", f"Summary {updated_at}", json.dumps({"text":summary}), user_id, course_id))
+        conn.commit()
+        conn.close()
+
+        
+
+    return app.response_class(stream(), mimetype='text/plain')
+
+@app.route("/api/assignment", methods=["POST"])
+def assignment():
+    params = get_route_parameters()
+    if not isinstance(params, tuple):
+        return params
+    (file_hash, course_id) = params
+    user_id = get_user_id()
+
+    def stream():
+        assignment = ""
+        for chunk in assignment_doc_stream(file_hash):
+            yield chunk
+            assignment += chunk
+
+        if user_id == None:
+            return
+
+        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+        cur = conn.cursor()
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "ASSIGNMENT", f"Assignment {updated_at}", json.dumps({"text":assignment}), user_id, course_id))
+        conn.commit()
+        conn.close()
+
+        
+
+    return app.response_class(stream(), mimetype='text/plain')
+
+@app.route("/api/explanation", methods=["POST"])
+def explanation():
     if 'file' not in request.files:
         return make_response("Missing file", 406)
     
@@ -179,17 +262,50 @@ def summary():
     if file_size <= 0:
         return make_response("Cannot send empty file! 😡", 406)
 
+    course_query = request.args.get("course")
+    if course_query == None:
+        return make_response("Missing required course parameter", 400)
 
-    result = upsert_file(file)
-    if result == None:
+    course = course_query
+
+
+    file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
+    if file_hash == None:
         return make_response("Bad file format", 406)
 
-    (file_hash, _) = result
+    course_id = get_course_id_from_name(course)
+    user_id = get_user_id()
 
-    return app.response_class(summarize_doc_stream(file_hash), mimetype='text/plain')
+    query = [request.args.get("amount"), request.args.get("keywords")]
+    amount = 10
 
+    if query[0] != None:
+        amount = int(query[0])
+    custom_keywords = []
+    custom_keywords = query[1]
 
-@app.route("/api/explanation", methods=["POST"])
-def explanation():
-    guid = create_llm_guidance()
-    pass
+    print(f"Creating {amount} keywords and explaining additional ones that are {query[1]}")
+
+    try:
+        explanation = create_explaination(file_hash, amount, custom_keywords)
+    except:
+        explanation = ""
+    
+    print(quiz)
+    print("Inserting quiz")
+    user_id = get_user_id()
+    if user_id:
+        print("Found user:", user_id)
+        print("Saving quiz")
+    
+        """conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+        cur = conn.cursor()
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "SUMMARY", f"Summary {updated_at}", json.dumps({"text":summary}), user_id, course_id))
+        conn.commit()
+        conn.close()"""
+
+        
+
+    return app.response_class(explanation, mimetype='application/json',status=200)

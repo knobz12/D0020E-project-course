@@ -1,4 +1,16 @@
-import { Avatar, Box, Container, Flex, Menu, Text, Title } from "@mantine/core"
+import {
+    Avatar,
+    Badge,
+    Box,
+    Button,
+    Container,
+    Flex,
+    Menu,
+    Stack,
+    Text,
+    Title,
+    UnstyledButton,
+} from "@mantine/core"
 import clsx from "clsx"
 import { Inter } from "next/font/google"
 import React from "react"
@@ -26,22 +38,43 @@ export function Page({ children, center = false }: PageProps) {
                     <div>
                         <Menu>
                             <Menu.Target>
-                                <header className="flex justify-end">
+                                <Button
+                                    variant="subtle"
+                                    color="blue"
+                                    p={4}
+                                    h={54}
+                                    className="flex justify-end"
+                                >
                                     <Flex align="center" gap="sm">
                                         {data.user?.image && (
                                             <Avatar src={data.user.image} />
                                         )}
                                         {data.user?.name && (
-                                            <Text
-                                                size="xl"
-                                                color="white"
-                                                fw={600}
-                                            >
-                                                {data.user.name}
-                                            </Text>
+                                            <Stack spacing={0}>
+                                                <Text
+                                                    size="xl"
+                                                    color="white"
+                                                    fw={600}
+                                                >
+                                                    {data.user.name}
+                                                </Text>
+                                                <Box>
+                                                    <Badge
+                                                        color={
+                                                            data.user.type ===
+                                                            "STUDENT"
+                                                                ? "blue"
+                                                                : "green"
+                                                        }
+                                                        size="sm"
+                                                    >
+                                                        {data.user.type}
+                                                    </Badge>
+                                                </Box>
+                                            </Stack>
                                         )}
                                     </Flex>
-                                </header>
+                                </Button>
                             </Menu.Target>
                             <Menu.Dropdown>
                                 <Menu.Item

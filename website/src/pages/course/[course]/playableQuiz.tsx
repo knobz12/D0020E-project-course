@@ -2,7 +2,7 @@
 //import React from "react"
 import React, { useState, useRef } from 'react';
 import FileUpload from "@/components/FileUpload"
-import { sleep } from 'openai/core.mjs';
+//import { sleep } from 'openai/core.mjs';
 
 
 import {
@@ -15,7 +15,10 @@ import {
     Text,
     Title,
     Checkbox,
+    CheckboxProps,
 } from "@mantine/core"
+import { IconBiohazard, IconRadioactive } from '@tabler/icons-react';
+
 import { Page } from "@/components/Page"
 import Link from "next/link"
 
@@ -23,56 +26,54 @@ import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../api/auth/[...nextauth]"
 
+import { useRouter } from "next/router"
+import { RouterOutput, trpc } from "@/lib/trpc"
+
 //insperation 👌 https://www.geeksforgeeks.org/how-to-build-a-quiz-app-with-react-and-typescript/
 
+type Content = (RouterOutput["prompts"]["getPromptById"] & { type: "QUIZ" })["content"]
 
-const questions = [
-    {
-        question: "What is the boiling point of water?",
-        choices: ["100°C", "1°C", "2°C"],
-        CorrectAnswer: ["100°C","1°C"],
-    },
-    {
-        question: 'What is the capital of France?',
-        choices: ['Paris', 'London', 'bollar'],
-        CorrectAnswer: ['Paris'],
-    },
-    {
-        question: 'What is the largest planet in our solar system?',
-        choices: ['Jupiter','Mars',  'Venus'],
-        CorrectAnswer: ['Jupiter'],
-    },
-    {
-        question: "What is the boiling point of water?",
-        choices: ["100°C", "0°C", "50°C"],
-        CorrectAnswer: ["100°C"],
-    },
-    {
-        question: 'What is the largest planet in our solar system?',
-        choices: ['Jupiter', 'Mars',  'Venus'],
-        CorrectAnswer: ['Jupiter'],
-    },
-    {
-        question: "What is the boiling point of water?",
-        choices: ["100°C", "0°C", "50°C,"],
-        CorrectAnswer: ["100°C"],
-    },
-]
+
+
 
 interface Props {
     question: string
     choices: string[]
     CorrectAnswer: string[]
     onAnswer: (CorrectAnswer: string) => void
+    //onSubmit: (CorrectAnswer: string) => void
 }
 
+var tempChoices:string [];
+
+
+function checkboxTest(choice:string) {
+    
+    const ref = useRef(null);
+    return (
+        <Checkbox 
+            key={"choice"}
+            id={"choice"}
+            size={50}
+            radius={10}
+            label={choice}
+            ref={ref}
+        />
+    );
+}
 
 const Question: React.FC<Props> = ({
     question,
     choices,
     CorrectAnswer,
     onAnswer,
+    //onSubmit,
 }) => {
+
+    let tempAnswers:string[];
+    const handleCheckboxChange = () => {
+        console.log("yes32");
+    };
     return (
         <div
             className="d-flex 
@@ -83,17 +84,23 @@ const Question: React.FC<Props> = ({
         >
             <h2 className="">{question}</h2>
             <div className="">
-                
-                <button>
+                {/* <button
+                onClick={() =>    onAnswer("rrr")} // This needs to check the checkboxes and return chosen answers           probably use    
+                >
                     {"submit"}
                 </button>
 
                 {choices.map((choice) => (
-                    <Checkbox
-                    
-                    label={choice}/>
-                    
-                ))}
+                    <Checkbox 
+                    key={choice}
+                    id={choice}
+                    size={100}
+                    radius={10}
+                    label={choice}
+                    onChange={handleCheckboxChange}
+                    />
+                ))} */}
+
 
                 {choices.map((choice) => (
                     <button
@@ -104,16 +111,16 @@ const Question: React.FC<Props> = ({
                         {choice}
                     </button>
                 ))}
-                {/*<button className="btn btn-success m-2">Reset{}</button>*/}
             </div>
         </div>
     )
 }
-function CheckCorrectAnswer(answer:string, CorrectAnswer:string[]){
+
+function CheckCorrectAnswer(answer:string, CorrectAnswer:string[]){  // checks if the given answer is in the correct answers
     console.log(CorrectAnswer)
     console.log(answer)
     for(let i = 0; i < CorrectAnswer.length; i++){
-        console.log("dm"+i)
+        console.log(i)
         console.log(CorrectAnswer[i]+" and "+ answer)
         if(CorrectAnswer[i] === answer){
             console.log("correct")
@@ -124,14 +131,70 @@ function CheckCorrectAnswer(answer:string, CorrectAnswer:string[]){
     return 0
 }
 
-function Quiz(){
+function extractChoises(Quizquestions:Content,questionID:number){
+
+    if(questionID >= Quizquestions.questions.length){
+        return [[],[]]
+    }
+
+    var choices:string[] = [];
+    var correctChoices:string[] = [];
+    var num = questionID;
+    
+    let y = 0;
+    for (let i = 0; i<Quizquestions.questions[questionID].answers.length; i++){
+        if(Quizquestions.questions[num].answers[i].correct){  // if correct answer -> add to array
+            correctChoices[y] = Quizquestions.questions[num].answers[i].text 
+            y++
+        }
+
+        choices[i] = Quizquestions.questions[num].answers[i].text
+        
+    }
+    return [choices,correctChoices]
+}
+
+export default function Quiz(Quizquestions:Content){
+
+    
+
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [score, setScore] = useState(0);
-    var TempScore = score;  
+    var TempScore = score;
     
+
+
+
+    let choicesArray = extractChoises(Quizquestions,currentQuestion)
+    
+   
     const handleAnswer = (CorrectAnswer: string) => {
-        if (CheckCorrectAnswer(CorrectAnswer, questions[currentQuestion].CorrectAnswer)===1){
+        if (CheckCorrectAnswer(CorrectAnswer, choicesArray[1])===1){  //  choicesArray[1] is correct choices
         //if (CorrectAnswer === questions[currentQuestion].CorrectAnswer[0]) {
+            console.log(TempScore);
+            TempScore = score + 1;
+            setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
+            console.log(TempScore);
+                
+        }else{
+            alert(`Wrong 🤢`);
+        }
+ 
+        const nextQuestion = currentQuestion + 1;
+        if (nextQuestion < Quizquestions.questions.length) {
+            setCurrentQuestion(nextQuestion);
+            //choicesArray = extractChoises(Quizquestions,currentQuestion,Quizquestions.questions.length)
+        } else {
+            
+            choicesArray = [];
+            alert(`Quiz finished. You scored ${TempScore}/${Quizquestions.questions.length}`);
+            setScore(0);            //reset quiz
+            setCurrentQuestion(0);  //reset quiz
+        }
+    }
+
+    /* const handleSubmit = (CorrectAnswer: string) => {
+        if (CheckCorrectAnswer(CorrectAnswer, choicesArray[1])===1){  //  choicesArray[1] is correct choices
             console.log(TempScore);
             TempScore = score + 1;
             setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
@@ -151,16 +214,21 @@ function Quiz(){
             setCurrentQuestion(0);  //reset quiz
         }
     }
+        
+    */ 
 
     return (
+        
         <div>
+            {Quizquestions.questions[0].answers[0].text}
             <h1 className="text-center">Quiz</h1>
-            {currentQuestion < questions.length ? (
+            {currentQuestion < Quizquestions.questions.length ? (
                 <Question
-                    question={questions[currentQuestion].question}
-                    choices={questions[currentQuestion].choices}
-                    CorrectAnswer={questions[currentQuestion].CorrectAnswer}
+                    question={Quizquestions.questions[currentQuestion].question}
+                    choices={choicesArray[0]}
+                    CorrectAnswer={choicesArray[1]}   
                     onAnswer={handleAnswer}
+                    //onSubmit={handleSubmit}
                 />
             ) : (
                 "null"
@@ -171,14 +239,7 @@ function Quiz(){
 
 
 
-export default function QuizSite() {
-    var test = <FileUpload 
-    title=   "Generate quiz"
-    apiUrl=  "http://localhost:3030/api/quiz"
-    />
-
-    
-
+function QuizSite() {
   
     return (
         <>
@@ -192,7 +253,7 @@ export default function QuizSite() {
                                 <Stack>
                                     <SimpleGrid cols={1}>
                                         <div className="">
-                                            <Quiz />
+                                            
                                         </div>
                                     </SimpleGrid>
                                 </Stack>
