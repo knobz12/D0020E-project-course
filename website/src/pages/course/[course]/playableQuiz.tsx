@@ -84,7 +84,7 @@ const Question: React.FC<Props> = ({
         >
             <h2 className="">{question}</h2>
             <div className="">
-                {/* <button
+                 <button
                 onClick={() =>    onAnswer("rrr")} // This needs to check the checkboxes and return chosen answers           probably use    
                 >
                     {"submit"}
@@ -94,12 +94,12 @@ const Question: React.FC<Props> = ({
                     <Checkbox 
                     key={choice}
                     id={choice}
-                    size={100}
-                    radius={10}
+                    size={30}
+                    radius={5}
                     label={choice}
                     onChange={handleCheckboxChange}
                     />
-                ))} */}
+                ))} 
 
 
                 {choices.map((choice) => (
@@ -193,7 +193,8 @@ export default function Quiz(Quizquestions:Content){
         }
     }
 
-    /* const handleSubmit = (CorrectAnswer: string) => {
+     const handleSubmit = (CorrectAnswer: string) => {
+        
         if (CheckCorrectAnswer(CorrectAnswer, choicesArray[1])===1){  //  choicesArray[1] is correct choices
             console.log(TempScore);
             TempScore = score + 1;
@@ -201,26 +202,25 @@ export default function Quiz(Quizquestions:Content){
             console.log(TempScore);
                 
         }else{
-            alert(`Wrong 🤢`);
+            alert(`Wrong`);
         }
  
         const nextQuestion = currentQuestion + 1;
-        if (nextQuestion < questions.length) {
+        if (nextQuestion < Quizquestions.questions.length) {
             setCurrentQuestion(nextQuestion);
         } else {
 
-            alert(`Quiz finished. You scored ${TempScore}/${questions.length}`);
+            alert(`Quiz finished. You scored ${TempScore}/${Quizquestions.questions.length}`);
             setScore(0);            //reset quiz
             setCurrentQuestion(0);  //reset quiz
         }
     }
         
-    */ 
+    
 
     return (
         
         <div>
-            {Quizquestions.questions[0].answers[0].text}
             <h1 className="text-center">Quiz</h1>
             {currentQuestion < Quizquestions.questions.length ? (
                 <Question
