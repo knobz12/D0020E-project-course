@@ -201,8 +201,9 @@ export default function Quiz(Quizquestions:Content){
 
      const handleSubmit = (CorrectAnswer: string[]) => {
         
-        let elements = document.getElementsByClassName("ChoicesElement");
-        console.log(elements + " answers");
+        let elements = document.getElementsByClassName("mantine-Checkbox-root ChoicesElement mantine-yxmaw9");
+        console.log(elements);
+        console.log(elements[0].children);
 
         console.log(TempScore);
         TempScore = score + CheckCorrectAnswer(CorrectAnswer, choicesArray[1]);
