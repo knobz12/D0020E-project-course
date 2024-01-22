@@ -1,8 +1,7 @@
-//import FileUpload from "@/components/FileUpload"
-//import React from "react"
+
+
 import React, { useState, useRef } from 'react';
 import FileUpload from "@/components/FileUpload"
-//import { sleep } from 'openai/core.mjs';
 
 
 import {
@@ -39,11 +38,10 @@ interface Props {
     choices: string[]
     CorrectAnswer: string[]
     onAnswer: (CorrectAnswer: string) => void
-    onSubmit: (CorrectAnswer: string[]) => void
+    onSubmit: () => void
 }
 
 var tempChoices:string [];
-
 
 
 const Question: React.FC<Props> = ({
@@ -54,12 +52,6 @@ const Question: React.FC<Props> = ({
     onSubmit,
 }) => {
 
-    
-    const [selectedCheckbox, setCheckbox] = React.useState("Layered Architecture Pattern")
-
-    const isCheckboxSelected = (value:string): boolean => selectedCheckbox === value; 
-
-    const handleCheckboxClick = (e: React.ChangeEvent<HTMLInputElement>): void => setCheckbox(e.currentTarget.value)
     
     return (
         <div
@@ -74,7 +66,7 @@ const Question: React.FC<Props> = ({
             <div className="">
                  <button
                 onClick={() =>
-                    onSubmit([" "])} // This needs to check the checkboxes and return chosen answers
+                    onSubmit()} 
                 >
                     {"submit"}
                 </button>
@@ -110,16 +102,6 @@ const Question: React.FC<Props> = ({
 function CheckCorrectAnswer(answer:string[], CorrectAnswer:string[]){  // checks if the given answer is in the correct answers
 
     let score = 0;
-    /* for(let i = 0; i < CorrectAnswer.length; i++){    // checks if answers are correct
-        for(let j = 0; j < answer.length; j++){
-            console.log(CorrectAnswer[i]+" and "+ answer[j])
-            if(CorrectAnswer[i] === answer[j]){
-                score += 1;
-                console.log("score+");
-            }
-        }
-        
-    } */
 
     for(let i = 0; i < answer.length; i++){ 
         if(CorrectAnswer.includes(answer[i])){
@@ -165,9 +147,6 @@ export default function Quiz(Quizquestions:Content){
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [score, setScore] = useState(0);
     var TempScore = score;
-    
-
-
 
     let choicesArray = extractChoises(Quizquestions,currentQuestion)
     
@@ -204,17 +183,10 @@ export default function Quiz(Quizquestions:Content){
                 ChossenAnswer.push(elements[i].children[0].children[1].children[0].innerHTML)
             }
         }
-    
-        if(elements[0].children[0].children[0].children[0].checked == true){
-            console.log("banananan")
-        }
-        
-        
 
-        console.log(TempScore);
+       
         TempScore = score + CheckCorrectAnswer(ChossenAnswer, choicesArray[1]);
         setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
-        console.log(TempScore);
                 
         alert(CheckCorrectAnswer(ChossenAnswer, choicesArray[1]));
        
@@ -231,9 +203,7 @@ export default function Quiz(Quizquestions:Content){
     }
         
     
-
     return (
-        
         <div>
             <h1 className="text-center">Quiz</h1>
             {currentQuestion < Quizquestions.questions.length ? (
@@ -248,37 +218,6 @@ export default function Quiz(Quizquestions:Content){
                 "null"
             )}
         </div>
-    )
-}
-
-
-
-function QuizSite() {
-  
-    return (
-        <>
-        <Page center>
-            <Container w="100%" size="sm">
-                <Center w="100%" h="100%">
-                    <Stack w="100%">
-                        <Title>Quiz_test</Title>
-                        <Paper px="xl" py="lg">
-                            <Stack spacing="xl">
-                                <Stack>
-                                    <SimpleGrid cols={1}>
-                                        <div className="">
-                                            
-                                        </div>
-                                    </SimpleGrid>
-                                </Stack>
-                            </Stack>
-                        </Paper>
-                    </Stack>
-                </Center>
-            </Container>
-        </Page>
-            
-        </>
     )
 }
 
