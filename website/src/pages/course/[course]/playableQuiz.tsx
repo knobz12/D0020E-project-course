@@ -248,6 +248,7 @@ export default function Quiz(Quizquestions:Content){
     return (
         <div>
             <h1 className="text-center">Quiz</h1>
+            <div className="grid place-items-center h-full">
             {currentQuestion < Quizquestions.questions.length ? (
                 <Question
                     question={Quizquestions.questions[currentQuestion].question}
@@ -259,6 +260,7 @@ export default function Quiz(Quizquestions:Content){
             ) : (
                 "null"
             )}
+            </div>
         </div>
     )
 }
