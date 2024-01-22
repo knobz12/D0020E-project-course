@@ -4,6 +4,7 @@ import {
     Container,
     NumberInput,
     SegmentedControl,
+    Skeleton,
     Stack,
     Text,
     TextInput,
@@ -24,7 +25,7 @@ import { IconInfoCircle } from "@tabler/icons-react"
 const MultiSelect = dynamic(
     () => import("@mantine/core").then((el) => el.MultiSelect),
     {
-        loading: () => <p>Loading...</p>,
+        loading: () => <Skeleton h="48px" w="100%" />,
         ssr: false,
     },
 )
@@ -38,8 +39,8 @@ interface MultiProps {
 export function Multi({ id, name, onChange }: MultiProps) {
     const inputref = useRef<HTMLInputElement>(null)
     const [data, setData] = useState<{ value: string; label: string }[]>([])
-    const [key, setkey] = useState("")
     const multiId = id ?? "multi"
+
     function keywordExists(query: string): boolean {
         if (
             data.find(
@@ -58,7 +59,6 @@ export function Multi({ id, name, onChange }: MultiProps) {
     }
 
     function keyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-        setkey(event.key)
         console.log(event.key)
         if (event.key === "Enter") {
             const inp = document.getElementById(multiId) as HTMLInputElement
@@ -85,36 +85,33 @@ export function Multi({ id, name, onChange }: MultiProps) {
     }
 
     useEffect(() => {
-        console.log(data)
         onChange(data.map((val) => val.value).join(","))
-    }, [data, onChange])
+    }, [data])
 
     return (
-        typeof window !== undefined && (
-            <MultiSelect
-                ref={inputref}
-                id={multiId}
-                name={name ?? "multi"}
-                dropdownComponent={() => null}
-                maxSelectedValues={10}
-                label="Custom keywords"
-                data={data}
-                placeholder="Select items"
-                searchable
-                creatable
-                getCreateLabel={(query) => `+ Create ${query}`}
-                onKeyDown={keyDown}
-                value={data.map((val) => val.value)}
-                onChange={(value) =>
-                    setData(value.map((val) => ({ label: val, value: val })))
-                }
-                onCreate={(query) => {
-                    const item = { value: query, label: query }
-                    setData((current) => [...current, item])
-                    return item
-                }}
-            />
-        )
+        <MultiSelect
+            ref={inputref}
+            id={multiId}
+            name={name ?? "multi"}
+            dropdownComponent={() => null}
+            maxSelectedValues={10}
+            label="Custom keywords"
+            data={data}
+            placeholder="Select items"
+            searchable
+            creatable
+            getCreateLabel={(query) => `+ Create ${query}`}
+            onKeyDown={keyDown}
+            value={data.map((val) => val.value)}
+            onChange={(value) =>
+                setData(value.map((val) => ({ label: val, value: val })))
+            }
+            onCreate={(query) => {
+                const item = { value: query, label: query }
+                setData((current) => [...current, item])
+                return item
+            }}
+        />
     )
 }
 
