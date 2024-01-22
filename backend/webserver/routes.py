@@ -249,6 +249,43 @@ def assignment():
 
     return app.response_class(stream(), mimetype='text/plain')
 
+def create_title(content: str):
+    return "AI_GENERATED_TITLE"
+
+@app.route("/api/generate_title", methods=["POST"])
+def generate_title():
+    prompt_id = request.args.get("prompt_id")
+
+    if prompt_id == None:
+        return make_response("Missing prompt id", 400)
+
+
+
+
+    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+    cur = conn.cursor()
+
+    cur.execute("SELECT content FROM prompts WHERE id=%s;", (prompt_id,))
+
+    prompt = cur.fetchone()
+    if prompt == None:
+        conn.close()
+        return make_response(f"Could not find prompt with id {prompt_id}", 400)
+
+
+
+    content: str = (str(prompt[0]))[0:4096]
+    title: str = create_title(content)
+
+    cur.execute("UPDATE prompts SET title=%s WHERE id=%s;", (title, prompt_id))
+    conn.commit()
+    conn.close()
+
+        
+
+    return make_response(title, 200)
+
+
 @app.route("/api/explainer", methods=["POST"])
 def explanation():
     params = get_route_parameters()
