@@ -252,7 +252,7 @@ def assignment():
 def create_title(content: str):
     return "AI_GENERATED_TITLE"
 
-@app.route("/api/generate_title", methods=["GET"])
+@app.route("/api/generate_title", methods=["POST"])
 def generate_title():
     prompt_id = request.args.get("prompt_id")
 
