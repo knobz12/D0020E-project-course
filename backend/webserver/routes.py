@@ -292,8 +292,7 @@ def explanation():
     if not isinstance(params, tuple):
         return params
     (file_hash, course_id) = params
-<<<<<<< Updated upstream
-=======
+
 
     if 'file' not in request.files:
         return make_response("Missing file", 406)
@@ -311,7 +310,6 @@ def explanation():
         return make_response("Missing required course parameter", 400)
 
     course_id = get_course_id_from_name(course)
->>>>>>> Stashed changes
     user_id = get_user_id()
 
     query = [request.args.get("amount"), request.args.get("keywords")]
