@@ -29,10 +29,17 @@ const MultiSelect = dynamic(
     },
 )
 
-export function Multi() {
+interface MultiProps {
+    id?: string
+    name?: string
+    onChange: (values: string) => void
+}
+
+export function Multi({ id, name, onChange }: MultiProps) {
     const inputref = useRef<HTMLInputElement>(null)
     const [data, setData] = useState<{ value: string; label: string }[]>([])
     const [key, setkey] = useState("")
+    const multiId = id ?? "multi"
     function keywordExists(query: string): boolean {
         if (
             data.find(
@@ -49,11 +56,12 @@ export function Multi() {
         }
         return false
     }
+
     function keyDown(event: React.KeyboardEvent<HTMLInputElement>) {
         setkey(event.key)
         console.log(event.key)
         if (event.key === "Enter") {
-            const inp = document.getElementById("multi") as HTMLInputElement
+            const inp = document.getElementById(multiId) as HTMLInputElement
             const value = inp.value
 
             if (value === "") {
@@ -71,16 +79,22 @@ export function Multi() {
             console.log()
             const item = { value: value, label: value, selected: true }
             setData((current) => [...current, item])
-            inp.value = ""
+            console.log(inputref.current)
             console.log(value)
         }
     }
-    useEffect(() => console.log(data), [data])
+
+    useEffect(() => {
+        console.log(data)
+        onChange(data.map((val) => val.value).join(","))
+    }, [data, onChange])
+
     return (
         typeof window !== undefined && (
             <MultiSelect
                 ref={inputref}
-                id="multi"
+                id={multiId}
+                name={name ?? "multi"}
                 dropdownComponent={() => null}
                 maxSelectedValues={10}
                 label="Custom keywords"
@@ -196,7 +210,10 @@ export default function FileUpload({
             const url = new URL(apiUrl)
 
             for (const [key, value] of Object.entries(params)) {
-                url.searchParams.set(key, String(value))
+                const val = String(value)
+                if (val !== "") {
+                    url.searchParams.set(key, val)
+                }
             }
 
             const course = router.query.course
@@ -315,8 +332,8 @@ export default function FileUpload({
                                     case "number":
                                         return (
                                             <NumberInput
-                                                key={parameter.id}
                                                 label={parameter.name}
+                                                key={parameter.id}
                                                 id={parameter.id}
                                                 name={parameter.id}
                                                 min={1}
@@ -395,14 +412,23 @@ export default function FileUpload({
                                             />
                                         )
                                     case "Multi":
-                                        return <Multi key={parameter.id} />
+                                        return (
+                                            <Multi
+                                                id={parameter.id}
+                                                key={parameter.id}
+                                                name={parameter.id}
+                                                onChange={(values) =>
+                                                    setParams((current) => ({
+                                                        ...current,
+                                                        [parameter.id]: values,
+                                                    }))
+                                                }
+                                            />
+                                        )
                                 }
                             })}
                         </Stack>
                     )}
-                    {/* <NoSsr>
-                        <HoverCard openDelay={300}>
-                            <HoverCard.Target> */}
                     <SegmentedControl
                         disabled={selectedFile !== null}
                         color="primary"
