@@ -34,8 +34,6 @@ import { RouterOutput, trpc } from "@/lib/trpc"
 type Content = (RouterOutput["prompts"]["getPromptById"] & { type: "QUIZ" })["content"]
 
 
-
-
 interface Props {
     question: string
     choices: string[]
@@ -47,20 +45,6 @@ interface Props {
 var tempChoices:string [];
 
 
-function checkboxTest(choice:string) {
-    
-    const ref = useRef(null);
-    return (
-        <Checkbox 
-            key={"choice"}
-            id={"choice"}
-            size={50}
-            radius={10}
-            label={choice}
-            ref={ref}
-        />
-    );
-}
 
 const Question: React.FC<Props> = ({
     question,
@@ -70,16 +54,16 @@ const Question: React.FC<Props> = ({
     onSubmit,
 }) => {
 
-    let tempAnswers:string[];
-    const handleCheckboxChange = () => {
-        console.log("");
-        
-        
-    };
+    
+    const [selectedCheckbox, setCheckbox] = React.useState("Layered Architecture Pattern")
 
+    const isCheckboxSelected = (value:string): boolean => selectedCheckbox === value; 
+
+    const handleCheckboxClick = (e: React.ChangeEvent<HTMLInputElement>): void => setCheckbox(e.currentTarget.value)
     
     return (
         <div
+        
             className="d-flex 
                         justify-content-center 
                         align-center 
@@ -103,9 +87,19 @@ const Question: React.FC<Props> = ({
                     size={30}
                     radius={5}
                     label={choice}
-                    onChange={handleCheckboxChange}
+                    
                     />
                 ))} 
+                
+                    <Checkbox 
+                    key={"banan"}
+                    id={"banan"}
+                    className={"ChoicesElement"}
+                    size={30}
+                    radius={5}
+                    label={"banan"}
+                    
+                    />
 
 
                 {choices.map((choice) => (
@@ -177,9 +171,9 @@ export default function Quiz(Quizquestions:Content){
     let choicesArray = extractChoises(Quizquestions,currentQuestion)
     
    
-    const handleAnswer = (CorrectAnswer: string) => {
+    const handleAnswer = (ChossenAnswer: string) => {
         console.log(TempScore);
-        let tempAnswers = [CorrectAnswer]
+        let tempAnswers = [ChossenAnswer]
         TempScore = score + CheckCorrectAnswer(tempAnswers, choicesArray[1]);
         setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
         console.log(TempScore);
@@ -199,18 +193,29 @@ export default function Quiz(Quizquestions:Content){
         }
     }
 
-     const handleSubmit = (CorrectAnswer: string[]) => {
+     const handleSubmit = () => {
         
         let elements = document.getElementsByClassName("mantine-Checkbox-root ChoicesElement mantine-yxmaw9");
-        console.log(elements);
-        console.log(elements[0].children);
+        let ChossenAnswer = []
+
+        for(let i = 0; i< elements.length; i++){
+            if(elements[i].children[0].children[0].children[0].checked == true){
+                ChossenAnswer.push(elements[i].children[0].children[1].children[0].innerHTML)
+            }
+        }
+    
+        if(elements[0].children[0].children[0].children[0].checked == true){
+            console.log("banananan")
+        }
+        
+        
 
         console.log(TempScore);
-        TempScore = score + CheckCorrectAnswer(CorrectAnswer, choicesArray[1]);
+        TempScore = score + CheckCorrectAnswer(ChossenAnswer, choicesArray[1]);
         setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
         console.log(TempScore);
                 
-        alert(CheckCorrectAnswer(CorrectAnswer, choicesArray[1]));
+        alert(CheckCorrectAnswer(ChossenAnswer, choicesArray[1]));
        
  
         const nextQuestion = currentQuestion + 1;
