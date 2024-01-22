@@ -405,7 +405,7 @@ export default function FileUpload({
                             <HoverCard.Target> */}
                     <SegmentedControl
                         disabled={selectedFile !== null}
-                        color="teal"
+                        color="primary"
                         data={[
                             {
                                 label: "Upload file",
