@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import FileUpload from "@/components/FileUpload"
+import { showNotification } from "@mantine/notifications"
 
 
 import {
@@ -154,11 +155,32 @@ export default function Quiz(Quizquestions:Content){
     const handleAnswer = (ChossenAnswer: string) => {
         console.log(TempScore);
         let tempAnswers = [ChossenAnswer]
-        TempScore = score + CheckCorrectAnswer(tempAnswers, choicesArray[1]);
+        let questionScore = CheckCorrectAnswer(tempAnswers, choicesArray[1]);
+        TempScore = score + questionScore;
         setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
         console.log(TempScore);
-                
-        alert(CheckCorrectAnswer(tempAnswers, choicesArray[1]));
+
+        let title = ""
+        let colour = ""
+
+        if(questionScore == 1){
+            title = "very good"
+            colour = "green"
+        }else if(questionScore>=0.5){
+            title = "good"
+            colour = "blue"
+        }else if(questionScore>0){
+            title = "ok"
+            colour = "orange"
+        }else{
+            title = "💀"
+            colour = "black"
+        }
+        showNotification({
+            color: colour,
+            title: title,
+            message: `You got '${questionScore}' points for that question`,
+        })
  
         const nextQuestion = currentQuestion + 1;
         if (nextQuestion < Quizquestions.questions.length) {
@@ -184,11 +206,31 @@ export default function Quiz(Quizquestions:Content){
             }
         }
 
-       
-        TempScore = score + CheckCorrectAnswer(ChossenAnswer, choicesArray[1]);
+        let questionScore = CheckCorrectAnswer(ChossenAnswer, choicesArray[1]);
+        TempScore = score + questionScore;
         setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
+
+        let title = ""
+        let colour = ""
                 
-        alert(CheckCorrectAnswer(ChossenAnswer, choicesArray[1]));
+        if(questionScore == 1){
+            title = "very good"
+            colour = "green"
+        }else if(questionScore>=0.5){
+            title = "good"
+            colour = "blue"
+        }else if(questionScore>0){
+            title = "ok"
+            colour = "orange"
+        }else{
+            title = "💀"
+            colour = "black"
+        }
+        showNotification({
+            color: colour,
+            title: title,
+            message: `You got '${questionScore}' points for that question`,
+        })
        
  
         const nextQuestion = currentQuestion + 1;
