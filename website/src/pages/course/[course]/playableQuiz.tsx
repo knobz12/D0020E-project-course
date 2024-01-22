@@ -108,11 +108,9 @@ const Question: React.FC<Props> = ({
 }
 
 function CheckCorrectAnswer(answer:string[], CorrectAnswer:string[]){  // checks if the given answer is in the correct answers
-    console.log(CorrectAnswer +" right answer")
-    console.log(answer +" given answer")
+
     let score = 0;
-    for(let i = 0; i < CorrectAnswer.length; i++){
-        console.log(i)
+    /* for(let i = 0; i < CorrectAnswer.length; i++){    // checks if answers are correct
         for(let j = 0; j < answer.length; j++){
             console.log(CorrectAnswer[i]+" and "+ answer[j])
             if(CorrectAnswer[i] === answer[j]){
@@ -121,7 +119,19 @@ function CheckCorrectAnswer(answer:string[], CorrectAnswer:string[]){  // checks
             }
         }
         
+    } */
+
+    for(let i = 0; i < answer.length; i++){ 
+        if(CorrectAnswer.includes(answer[i])){
+            score += 1;
+        }else{
+            score += -1;
+        }
+
     }
+
+    if(score <= 0 ){ score = 0}  // cant get negative points from question
+
     return (score/CorrectAnswer.length)
 }
 
