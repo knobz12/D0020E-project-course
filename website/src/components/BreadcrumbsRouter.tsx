@@ -16,7 +16,12 @@ function GoodBreadcrumbs({ links }: GoodBreadcrumbsProps) {
         <nav>
             <Breadcrumbs>
                 {links.map((link) => (
-                    <Link key={link.href} href={link.href} legacyBehavior>
+                    <Link
+                        key={link.href}
+                        href={link.href}
+                        legacyBehavior
+                        passHref
+                    >
                         <Anchor size="lg">{link.name}</Anchor>
                     </Link>
                 ))}
