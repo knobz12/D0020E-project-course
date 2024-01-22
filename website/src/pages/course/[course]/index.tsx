@@ -20,7 +20,7 @@ import {
     IconBrandMastercard,
     IconBoxMultiple,
     IconClipboardList,
-    IconMessageQuestion
+    IconMessageQuestion,
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
@@ -93,8 +93,8 @@ export default function Home({} // prompts,
                 <Center w="100%" h="100%">
                     <Stack w="100%" spacing="xl">
                         <Stack>
-                            <Title>Prompts</Title>
-                            <Paper px="xl" py="lg">
+                            <Title px="md">Create prompts</Title>
+                            <Paper px="xl" py="lg" radius="lg">
                                 <Stack spacing="xl">
                                     {promptGroups.map((group) => (
                                         <Stack key={group.name}>
@@ -133,7 +133,7 @@ export default function Home({} // prompts,
                             </Paper>
                         </Stack>
                         <Stack>
-                            <Title>Prompts</Title>
+                            <Title px="md">Prompts</Title>
                             <Stack>
                                 <PaginationContext.Provider value={page}>
                                     <AnimatePresence>
