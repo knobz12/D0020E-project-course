@@ -38,9 +38,11 @@ model Prompt {
   content Json   @db.JsonB
 
   /// What type this prompt is. Determines the structure of the content data.
-  type   PromptType
+  type      PromptType
   /// If this prompt has been pinned to appear at the top of the list.
-  pinned Boolean    @default(false)
+  pinned    Boolean    @default(false)
+  /// If the user has published this prompt and therefore made it publicly visible to others
+  published Boolean    @default(false)
 
   userId String @map("user_id") @db.Uuid
   /// The user who made this prompt
