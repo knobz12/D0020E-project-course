@@ -1,67 +1,69 @@
-import React from "react"
-import {
-    Card,
-    Center,
-    Container,
-    Paper,
-    SimpleGrid,
-    Stack,
-    Text,
-    Title,
-} from "@mantine/core"
 import { Page } from "@/components/Page"
-import Link from "next/link"
+import {
+    Container,
+    Title,
+    List,
+    ThemeIcon,
+    rem,
+    Group,
+    Button,
+    Text,
+    Box,
+} from "@mantine/core"
+import { IconCheck } from "@tabler/icons-react"
+import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth"
-import { GetServerSideProps, InferGetServerSidePropsType } from "next"
+import Image from "next/image"
+import Link from "next/link"
+import React from "react"
 import { authOptions } from "./api/auth/[...nextauth]"
-import { trpc } from "@/lib/trpc"
+import { useSession } from "next-auth/react"
 
-export default function Home({} // courses,
-: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const courses = trpc.courses.getCourses.useQuery()
+interface LandingPageProps {}
+
+export default function LandingPage({}: LandingPageProps) {
+    const auth = useSession()
     return (
-        <Page center>
-            <Container w="100%" size="sm">
-                <Center w="100%" h="100%">
-                    <Stack w="100%">
-                        <Title>Courses</Title>
-                        <Paper px="xl" py="lg">
-                            <Stack spacing="xl">
-                                <Stack>
-                                    <SimpleGrid cols={3}>
-                                        {courses.data?.map(({ id, name }) => {
-                                            // const Icon = prompt.icon
-                                            return (
-                                                <Link
-                                                    key={id}
-                                                    href={`/course/${name.toUpperCase()}`}
-                                                >
-                                                    <Card>
-                                                        <Text
-                                                            size="lg"
-                                                            fw={600}
-                                                        >
-                                                            {name}
-                                                        </Text>
-                                                    </Card>
-                                                </Link>
-                                            )
-                                        })}
-                                    </SimpleGrid>
-                                </Stack>
-                            </Stack>
-                        </Paper>
-                    </Stack>
-                </Center>
-            </Container>
+        <Page>
+            {/* <Box> */}
+            <div className="relative px-6 pt-14 lg:px-8">
+                <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
+                    <div className="text-center">
+                        <h1 className="text-4xl font-bold tracking-tight text-zinc-100 sm:text-6xl">
+                            The worlds best AI studying assistant
+                        </h1>
+                        <p className="mt-6 text-lg leading-8 text-gray-400">
+                            Anim aute id magna aliqua ad ad non deserunt sunt.
+                            Qui irure qui lorem cupidatat commodo. Elit sunt
+                            amet fugiat veniam occaecat fugiat aliqua.
+                        </p>
+                        <Group position="center">
+                            <Link href={"/courses"} passHref legacyBehavior>
+                                <Button component="a" size="lg" variant="white">
+                                    View app
+                                </Button>
+                            </Link>
+                            {auth.status !== "authenticated" && (
+                                <Link
+                                    href="/api/auth/signin"
+                                    passHref
+                                    legacyBehavior
+                                >
+                                    <Button component="a" size="lg">
+                                        Log in
+                                    </Button>
+                                </Link>
+                            )}
+                        </Group>
+                    </div>
+                </div>
+            </div>
         </Page>
     )
 }
 
 export const getServerSideProps = (async ({ req, res }) => {
-    const [session] = await Promise.all([
-        getServerSession(req, res, authOptions),
-    ])
+    const session = await getServerSession(req, res, authOptions)
 
     return {
         props: {

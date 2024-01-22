@@ -94,7 +94,7 @@ function QuizViewer({
                 <Flex gap="md" w="max-content">
                     <Link
                         className="w-full"
-                        href={`/course/${router.query.course}/quiz/${router.query.quizId}/play`}
+                        href={`/courses/${router.query.course}/quiz/${router.query.quizId}/play`}
                     >
                         <Button w="100%" color="blue" variant="filled">
                             Play

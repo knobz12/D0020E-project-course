@@ -92,7 +92,7 @@ function FlashcardsViewer({
                 <Flex gap="md" w="max-content">
                     <Link
                         className="w-full"
-                        href={`/course/${router.query.course}/flashcards/${router.query.flashcardsId}/play`}
+                        href={`/courses/${router.query.course}/flashcards/${router.query.flashcardsId}/play`}
                     >
                         <Button w="100%" color="blue" variant="filled">
                             Play

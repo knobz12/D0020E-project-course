@@ -288,7 +288,7 @@ export default function FileUpload({
                 setTimeout(
                     () =>
                         router.push(
-                            `/course/${
+                            `/courses/${
                                 router.query.course
                             }/${prompt.type.toLowerCase()}/${prompt.id}`,
                         ),

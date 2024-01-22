@@ -18,7 +18,7 @@ import { z } from "zod"
 import { showNotification } from "@mantine/notifications"
 import { useRouter } from "next/router"
 import { useSession } from "next-auth/react"
-import { PaginationContext } from "@/pages/course/[course]"
+import { PaginationContext } from "@/pages/courses/[course]"
 
 const formSchema = z.object({
     title: z.string().min(3).max(128),

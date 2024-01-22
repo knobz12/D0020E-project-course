@@ -6,8 +6,9 @@ export async function middleware(request: NextRequest) {
     const token = request.cookies.get("aisb.session-token")
 
     if (!token?.value) {
-        const url = new URL(request.url)
-        return NextResponse.redirect(`${url.origin}/api/auth/signin`)
+        // const url = new URL(request.url)
+        // return NextResponse.redirect(`${url.origin}/api/auth/signin`)
+        return NextResponse.next()
     }
 
     try {

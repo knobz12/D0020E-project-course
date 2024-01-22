@@ -1,5 +1,10 @@
 import { z } from "zod"
-import { router, teacherProcedure, userProcedure } from "../trpc"
+import {
+    publicProcedure,
+    router,
+    teacherProcedure,
+    userProcedure,
+} from "../trpc"
 import { db } from "@/lib/database"
 import { TRPCError } from "@trpc/server"
 import { Prisma, Prompt } from "@prisma/client"
@@ -67,7 +72,7 @@ type PromptType = {
 
 async function formatPrompt(
     prompt: Prompt & { course: { name: string } },
-    userId: string,
+    userId?: string | null,
 ): Promise<PromptType> {
     const [positiveReactions, negativeReactions, userReaction, teacherNote] =
         await Promise.all([
@@ -83,15 +88,17 @@ async function formatPrompt(
                     positive: false,
                 },
             }),
-            db.promptReaction.findUnique({
-                where: {
-                    promptId_userId: {
-                        promptId: prompt.id,
-                        userId,
-                    },
-                },
-                select: { id: true, positive: true },
-            }),
+            userId
+                ? db.promptReaction.findUnique({
+                      where: {
+                          promptId_userId: {
+                              promptId: prompt.id,
+                              userId,
+                          },
+                      },
+                      select: { id: true, positive: true },
+                  })
+                : null,
             db.teacherNote.findUnique({
                 where: {
                     promptId: prompt.id,
@@ -280,7 +287,6 @@ export const promptRouter = router({
             }
 
             const isUserOwner = prompt.userId === ctx.user.id
-            console.log(isUserOwner)
 
             if (ctx.user.type === "STUDENT") {
                 if (!isUserOwner) {
@@ -360,7 +366,7 @@ export const promptRouter = router({
             }
             return formatPrompt(summary, ctx.user.id)
         }),
-    getNonAndPinnedPrompts: userProcedure
+    getNonAndPinnedPrompts: publicProcedure
         .input(
             z.object({ course: z.string(), page: z.number().min(1).max(1000) }),
         )
@@ -417,7 +423,7 @@ export const promptRouter = router({
                     pinned.map(
                         (prompt) =>
                             new Promise<PromptType>(async (res) => {
-                                res(formatPrompt(prompt, ctx.user.id))
+                                res(formatPrompt(prompt, ctx.user?.id))
                             }),
                     ),
                 ),
@@ -425,7 +431,7 @@ export const promptRouter = router({
                     nonPinned.map(
                         (prompt) =>
                             new Promise<PromptType>(async (res) => {
-                                res(formatPrompt(prompt, ctx.user.id))
+                                res(formatPrompt(prompt, ctx.user?.id))
                             }),
                     ),
                 ),
@@ -607,7 +613,6 @@ export const promptRouter = router({
             })
 
             const newValue = !prompt.pinned
-            console.log(newValue, count)
 
             if (newValue === true && count >= 5) {
                 throw new TRPCError({

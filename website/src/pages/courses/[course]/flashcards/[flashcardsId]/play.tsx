@@ -5,19 +5,20 @@ import { Text } from "@mantine/core"
 import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth/next"
 import { useRouter } from "next/router"
-import Quiz from "../../quiz"
-import playableQuiz from "../../playableQuiz"
+import Flashcards from ".."
+import playableFlashcards from "../../playableFlashcards"
 
-export default function QuizPlay() {
+export default function FlashcardsPlay() {
     const router = useRouter()
-    const quizQuery = trpc.prompts.getPromptById.useQuery({
-        id: router.query.quizId! as string,
+    const flashcardsQuery = trpc.prompts.getPromptById.useQuery({
+        id: router.query.flashcardsId! as string,
     })
 
     return (
         <Page>
-            {quizQuery.data && quizQuery.data.type === "QUIZ" ? (
-                <Player data={quizQuery.data} />
+            {flashcardsQuery.data &&
+            flashcardsQuery.data.type === "FLASHCARDS" ? (
+                <Player data={flashcardsQuery.data} />
             ) : null}
         </Page>
     )
@@ -26,13 +27,15 @@ export default function QuizPlay() {
 function Player({
     data,
 }: {
-    data: RouterOutput["prompts"]["getPromptById"] & { type: "QUIZ" }
+    data: RouterOutput["prompts"]["getPromptById"] & { type: "FLASHCARDS" }
 }) {
-    const quiz = data.content
+    const flashcards = data.content
 
-    type Content = (RouterOutput["prompts"]["getPromptById"] & { type: "QUIZ" })["content"]
+    type Content = (RouterOutput["prompts"]["getPromptById"] & {
+        type: "FLASHCARDS"
+    })["content"]
 
-    return <div>{playableQuiz(quiz)}</div>
+    return <div>{playableFlashcards(flashcards)}</div>
 }
 
 export const getServerSideProps = (async ({ req, res, params }) => {

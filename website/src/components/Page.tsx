@@ -18,131 +18,159 @@ import { IconList, IconLogout, IconUser } from "@tabler/icons-react"
 import Link from "next/link"
 import Image from "next/image"
 import { BreadcrumbsRouter } from "./BreadcrumbsRouter"
+import { GradientBackground } from "./GradientBackground"
+import { useRouter } from "next/router"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 interface PageProps {
     children: React.ReactNode
     center?: boolean
+    navbar?: boolean
 }
 
-export function Page({ children, center = false }: PageProps) {
+export function Page({ children, navbar = true }: PageProps) {
     const { data, status } = useSession()
 
     return (
         <div className={clsx(inter.className, "min-h-screen")}>
-            <Container className="flex justify-between py-4">
-                <Stack w="100%">
-                    <Flex justify="space-between" w="100%">
-                        <Link
-                            href="/"
-                            className="no-underline flex items-center space-x-4"
-                        >
-                            <Image
-                                loading="eager"
-                                width={64}
-                                height={64}
-                                src="/logo.png"
-                                alt="AI Studybuddy logo"
-                            />
-                            <Title>AI Studybuddy</Title>
-                        </Link>
-                        {status === "authenticated" && (
-                            <div>
-                                <Menu>
-                                    <Menu.Target>
-                                        <Button
-                                            variant="subtle"
-                                            color="blue"
-                                            p={4}
-                                            h={54}
-                                            className="flex justify-end"
-                                        >
-                                            <Flex align="center" gap="sm">
-                                                {data.user?.image && (
-                                                    <Avatar
-                                                        src={data.user.image}
-                                                    />
-                                                )}
-                                                {data.user?.name && (
-                                                    <Stack spacing={0}>
-                                                        <Text
-                                                            size="xl"
-                                                            color="white"
-                                                            fw={600}
-                                                        >
-                                                            {data.user.name}
-                                                        </Text>
-                                                        <Box>
-                                                            <Badge
-                                                                color={
-                                                                    data.user
-                                                                        .type ===
-                                                                    "STUDENT"
-                                                                        ? "blue"
-                                                                        : "green"
-                                                                }
-                                                                size="sm"
+            {navbar && (
+                <Container className="flex justify-between py-4">
+                    <Stack w="100%">
+                        <Flex justify="space-between" w="100%" align="center">
+                            <Link
+                                href={
+                                    status === "authenticated"
+                                        ? "/courses"
+                                        : "/"
+                                }
+                                className="no-underline flex items-center space-x-4"
+                            >
+                                <Image
+                                    loading="eager"
+                                    width={64}
+                                    height={64}
+                                    src="/logo.png"
+                                    alt="AI Studybuddy logo"
+                                />
+                                <Title>AI Studybuddy</Title>
+                            </Link>
+                            {status === "authenticated" ? (
+                                <div>
+                                    <Menu>
+                                        <Menu.Target>
+                                            <Button
+                                                variant="subtle"
+                                                color="blue"
+                                                p={4}
+                                                h={54}
+                                                className="flex justify-end"
+                                            >
+                                                <Flex align="center" gap="sm">
+                                                    {data.user?.image && (
+                                                        <Avatar
+                                                            src={
+                                                                data.user.image
+                                                            }
+                                                        />
+                                                    )}
+                                                    {data.user?.name && (
+                                                        <Stack spacing={0}>
+                                                            <Text
+                                                                size="xl"
+                                                                color="white"
+                                                                fw={600}
                                                             >
-                                                                {data.user.type}
-                                                            </Badge>
-                                                        </Box>
-                                                    </Stack>
-                                                )}
-                                            </Flex>
+                                                                {data.user.name}
+                                                            </Text>
+                                                            <Box>
+                                                                <Badge
+                                                                    color={
+                                                                        data
+                                                                            .user
+                                                                            .type ===
+                                                                        "STUDENT"
+                                                                            ? "blue"
+                                                                            : "green"
+                                                                    }
+                                                                    size="sm"
+                                                                >
+                                                                    {
+                                                                        data
+                                                                            .user
+                                                                            .type
+                                                                    }
+                                                                </Badge>
+                                                            </Box>
+                                                        </Stack>
+                                                    )}
+                                                </Flex>
+                                            </Button>
+                                        </Menu.Target>
+                                        <Menu.Dropdown>
+                                            <Link
+                                                href="/profile"
+                                                passHref
+                                                legacyBehavior
+                                            >
+                                                <Menu.Item
+                                                    component="a"
+                                                    icon={<IconUser />}
+                                                >
+                                                    Profile
+                                                </Menu.Item>
+                                            </Link>
+                                            <Link
+                                                href="/profile/prompts"
+                                                passHref
+                                                legacyBehavior
+                                            >
+                                                <Menu.Item
+                                                    component="a"
+                                                    icon={<IconList />}
+                                                >
+                                                    Your prompts
+                                                </Menu.Item>
+                                            </Link>
+                                            <Menu.Divider />
+                                            <Menu.Item
+                                                icon={<IconLogout />}
+                                                onClick={() => signOut()}
+                                            >
+                                                Logout
+                                            </Menu.Item>
+                                        </Menu.Dropdown>
+                                    </Menu>
+                                </div>
+                            ) : (
+                                <Flex gap="sm">
+                                    <Link
+                                        href={`/api/auth/signin`}
+                                        passHref
+                                        legacyBehavior
+                                        className="no-underline"
+                                    >
+                                        <Button component="a">Log in</Button>
+                                    </Link>
+                                    <Link
+                                        href="/api/auth/signin"
+                                        passHref
+                                        legacyBehavior
+                                        className="no-underline"
+                                    >
+                                        <Button component="a" variant="white">
+                                            Sign up
                                         </Button>
-                                    </Menu.Target>
-                                    <Menu.Dropdown>
-                                        <Link href="/profile" passHref>
-                                            <Menu.Item
-                                                component="a"
-                                                icon={<IconUser />}
-                                            >
-                                                Profile
-                                            </Menu.Item>
-                                        </Link>
-                                        <Link href="/profile/prompts" passHref>
-                                            <Menu.Item
-                                                component="a"
-                                                icon={<IconList />}
-                                            >
-                                                Your prompts
-                                            </Menu.Item>
-                                        </Link>
-                                        <Menu.Divider />
-                                        <Menu.Item
-                                            icon={<IconLogout />}
-                                            onClick={() => signOut()}
-                                        >
-                                            Logout
-                                        </Menu.Item>
-                                    </Menu.Dropdown>
-                                </Menu>
-                            </div>
-                        )}
-                    </Flex>
-                    <BreadcrumbsRouter />
-                </Stack>
-            </Container>
+                                    </Link>
+                                </Flex>
+                            )}
+                        </Flex>
+                        <BreadcrumbsRouter />
+                    </Stack>
+                </Container>
+            )}
 
-            <Box
-                component="main"
-                className={clsx(
-                    center &&
-                        "flex flex-grow justify-center items-center h-full",
-                )}
-            >
-                <Box
-                    sx={(theme) => ({
-                        backgroundImage: theme.fn.radialGradient(
-                            theme.colors.bluegray[8],
-                            theme.colors.bluegray[9],
-                        ),
-                    })}
-                    className="top-0 fixed w-screen min-h-screen -z-50"
-                ></Box>
-                {children}
-            </Box>
+            <GradientBackground center>{children}</GradientBackground>
         </div>
     )
 }

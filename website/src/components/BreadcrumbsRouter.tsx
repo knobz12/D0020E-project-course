@@ -37,9 +37,8 @@ export function BreadcrumbsRouter() {
 
     const links: GoodBreadcrumbsProps["links"] | null = useMemo(
         function () {
-            console.log(router.route)
             switch (router.route) {
-                // case "/":
+                // case "/"
                 //     return [{ href: "/", name: "Courses" }]
                 // case "/profile":
                 //     return [
@@ -50,151 +49,151 @@ export function BreadcrumbsRouter() {
                         { href: "/profile", name: data?.user.name as string },
                         { href: "/profile/prompts", name: "prompts" },
                     ]
-                case "/course/[course]":
+                case "/courses/[course]":
                     return [
-                        { href: "/", name: "Courses" },
+                        { href: "/courses", name: "Courses" },
                         {
-                            href: `/course/${router.query.course}`,
+                            href: `/courses/${router.query.course}`,
                             name: router.query.course as string,
                         },
                     ]
-                case "/course/[course]/quiz":
+                case "/courses/[course]/quiz":
                     return [
                         { href: "/", name: "Courses" },
                         {
-                            href: `/course/${router.query.course}`,
+                            href: `/courses/${router.query.course}`,
                             name: router.query.course as string,
                         },
                         {
-                            href: `/course/${router.query.course}/quiz`,
+                            href: `/courses/${router.query.course}/quiz`,
                             name: "Quiz",
                         },
                     ]
-                case "/course/[course]/quiz/[quizId]":
+                case "/courses/[course]/quiz/[quizId]":
                     return [
                         { href: "/", name: "Courses" },
                         {
-                            href: `/course/${router.query.course}`,
+                            href: `/courses/${router.query.course}`,
                             name: router.query.course as string,
                         },
                         {
-                            href: `/course/${router.query.course}/quiz`,
+                            href: `/courses/${router.query.course}/quiz`,
                             name: "Quiz",
                         },
                         {
-                            href: `/course/${router.query.course}/quiz/${router.query.quizId}`,
+                            href: `/courses/${router.query.course}/quiz/${router.query.quizId}`,
                             name: router.query.quizId as string,
                         },
                     ]
-                case "/course/[course]/assignment":
+                case "/courses/[course]/assignment":
                     return [
                         { href: "/", name: "Courses" },
                         {
-                            href: `/course/${router.query.course}`,
+                            href: `/courses/${router.query.course}`,
                             name: router.query.course as string,
                         },
                         {
-                            href: `/course/${router.query.course}/quiz`,
+                            href: `/courses/${router.query.course}/quiz`,
                             name: "Assignment",
                         },
                     ]
-                case "/course/[course]/assignment/[assignmentId]":
+                case "/courses/[course]/assignment/[assignmentId]":
                     return [
                         { href: "/", name: "Courses" },
                         {
-                            href: `/course/${router.query.course}`,
+                            href: `/courses/${router.query.course}`,
                             name: router.query.course as string,
                         },
                         {
-                            href: `/course/${router.query.course}/assignment`,
+                            href: `/courses/${router.query.course}/assignment`,
                             name: "Assignment",
                         },
                         {
-                            href: `/course/${router.query.course}/assignment/${router.query.assignmentId}`,
+                            href: `/courses/${router.query.course}/assignment/${router.query.assignmentId}`,
                             name: router.query.assignmentId as string,
                         },
                     ]
-                case "/course/[course]/flashcards":
+                case "/courses/[course]/flashcards":
                     return [
                         { href: "/", name: "Courses" },
                         {
-                            href: `/course/${router.query.course}`,
+                            href: `/courses/${router.query.course}`,
                             name: router.query.course as string,
                         },
                         {
-                            href: `/course/${router.query.course}/flashcards`,
+                            href: `/courses/${router.query.course}/flashcards`,
                             name: "Flashcards",
                         },
                     ]
-                case "/course/[course]/flashcards/[flashcardsId]":
+                case "/courses/[course]/flashcards/[flashcardsId]":
                     return [
                         { href: "/", name: "Courses" },
                         {
-                            href: `/course/${router.query.course}`,
+                            href: `/courses/${router.query.course}`,
                             name: router.query.course as string,
                         },
                         {
-                            href: `/course/${router.query.course}/flashcards`,
+                            href: `/courses/${router.query.course}/flashcards`,
                             name: "Flashcards",
                         },
                         {
-                            href: `/course/${router.query.course}/flashcards/${router.query.flashcardsId}`,
+                            href: `/courses/${router.query.course}/flashcards/${router.query.flashcardsId}`,
                             name: router.query.flashcardsId as string,
                         },
                     ]
-                case "/course/[course]/summary":
+                case "/courses/[course]/summary":
                     return [
                         { href: "/", name: "Courses" },
                         {
-                            href: `/course/${router.query.course}`,
+                            href: `/courses/${router.query.course}`,
                             name: router.query.course as string,
                         },
                         {
-                            href: `/course/${router.query.course}/summary`,
+                            href: `/courses/${router.query.course}/summary`,
                             name: "Summary",
                         },
                     ]
-                case "/course/[course]/summary/[summaryId]":
+                case "/courses/[course]/summary/[summaryId]":
                     return [
                         { href: "/", name: "Courses" },
                         {
-                            href: `/course/${router.query.course}`,
+                            href: `/courses/${router.query.course}`,
                             name: router.query.course as string,
                         },
                         {
-                            href: `/course/${router.query.course}/summary`,
+                            href: `/courses/${router.query.course}/summary`,
                             name: "Summary",
                         },
                         {
-                            href: `/course/${router.query.course}/summary/${router.query.summaryId}`,
+                            href: `/courses/${router.query.course}/summary/${router.query.summaryId}`,
                             name: router.query.summaryId as string,
                         },
                     ]
-                case "/course/[course]/explainer":
+                case "/courses/[course]/explainer":
                     return [
                         { href: "/", name: "Courses" },
                         {
-                            href: `/course/${router.query.course}`,
+                            href: `/courses/${router.query.course}`,
                             name: router.query.course as string,
                         },
                         {
-                            href: `/course/${router.query.course}/explainer`,
+                            href: `/courses/${router.query.course}/explainer`,
                             name: "Explainer",
                         },
                     ]
-                case "/course/[course]/explainer/[explainerId]":
+                case "/courses/[course]/explainer/[explainerId]":
                     return [
                         { href: "/", name: "Courses" },
                         {
-                            href: `/course/${router.query.course}`,
+                            href: `/courses/${router.query.course}`,
                             name: router.query.course as string,
                         },
                         {
-                            href: `/course/${router.query.course}/explainer`,
+                            href: `/courses/${router.query.course}/explainer`,
                             name: "Explainer",
                         },
                         {
-                            href: `/course/${router.query.course}/explainer/${router.query.explainerId}`,
+                            href: `/courses/${router.query.course}/explainer/${router.query.explainerId}`,
                             name: router.query.explainerId as string,
                         },
                     ]

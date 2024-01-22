@@ -27,8 +27,8 @@ import { TeacherNote } from "./TeacherNote"
 import { RouterOutput, trpc } from "@/lib/trpc"
 import { useSession } from "next-auth/react"
 import { showNotification } from "@mantine/notifications"
-import Summary from "@/pages/course/[course]/summary"
-import { PaginationContext } from "@/pages/course/[course]"
+import Summary from "@/pages/courses/[course]/summary"
+import { PaginationContext } from "@/pages/courses/[course]"
 import { PublishPromptButton } from "./PublishPromptButton"
 
 interface PromptItemProps {
@@ -46,6 +46,13 @@ export function PromptItem({ prompt }: PromptItemProps) {
             if (typeof course === "string") {
                 utils.prompts.getNonAndPinnedPrompts.refetch({ course, page })
             }
+            utils.prompts.getMyPrompts.refetch()
+        },
+        onError(error) {
+            showNotification({
+                title: "Couldn't react",
+                message: error.message,
+            })
         },
     })
     const { mutate: deletePrompt } = trpc.prompts.deletePromptById.useMutation({
@@ -73,21 +80,30 @@ export function PromptItem({ prompt }: PromptItemProps) {
         <Paper key={prompt.id} className="overflow-hidden" radius="lg" p="lg">
             <Flex gap="md">
                 <Stack>
-                    {session.data?.user.type === "TEACHER" ? (
-                        <ActionIcon
-                            color="indigo"
-                            onClick={() => togglePin({ promptId: prompt.id })}
-                            opacity={prompt.pinned ? 1 : 0.6}
-                        >
-                            {prompt.pinned ? <IconPinFilled /> : <IconPin />}
-                        </ActionIcon>
-                    ) : prompt.pinned ? (
-                        <Box
-                            sx={(theme) => ({ color: theme.colors.indigo[2] })}
-                        >
-                            <IconPinFilled />
-                        </Box>
-                    ) : null}
+                    {router.route.startsWith("/courses/[courseId]") &&
+                        (session.data?.user.type === "TEACHER" ? (
+                            <ActionIcon
+                                color="indigo"
+                                onClick={() =>
+                                    togglePin({ promptId: prompt.id })
+                                }
+                                opacity={prompt.pinned ? 1 : 0.6}
+                            >
+                                {prompt.pinned ? (
+                                    <IconPinFilled />
+                                ) : (
+                                    <IconPin />
+                                )}
+                            </ActionIcon>
+                        ) : prompt.pinned ? (
+                            <Box
+                                sx={(theme) => ({
+                                    color: theme.colors.indigo[2],
+                                })}
+                            >
+                                <IconPinFilled />
+                            </Box>
+                        ) : null)}
                     <Stack align="center" spacing="sm">
                         <ActionIcon
                             variant={
@@ -140,7 +156,8 @@ export function PromptItem({ prompt }: PromptItemProps) {
                 <Flex w="100%">
                     <Stack align="start" style={{ flex: 1 }}>
                         <Link
-                            href={`/course/${prompt.courseName}/${
+                            className="no-underline"
+                            href={`/courses/${prompt.courseName}/${
                                 prompt.type === "QUIZ"
                                     ? "quiz"
                                     : prompt.type === "FLASHCARDS"
@@ -150,7 +167,9 @@ export function PromptItem({ prompt }: PromptItemProps) {
                                         : "assignment"
                             }/${prompt.id}`}
                         >
-                            <Title lineClamp={3}>{prompt.title}</Title>
+                            <Title order={3} size={32} lineClamp={3}>
+                                {prompt.title}
+                            </Title>
                         </Link>
                         <Group>
                             {prompt.userId === session.data?.user.userId && (
@@ -167,7 +186,7 @@ export function PromptItem({ prompt }: PromptItemProps) {
                                 </Badge>
                             )}
                             <Badge size="lg">{prompt.type}</Badge>
-                            <Link href={`/course/${prompt.courseName}`}>
+                            <Link href={`/courses/${prompt.courseName}`}>
                                 <Badge size="lg" variant="dot">
                                     {prompt.courseName}
                                 </Badge>

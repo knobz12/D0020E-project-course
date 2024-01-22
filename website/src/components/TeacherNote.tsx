@@ -1,5 +1,5 @@
 import { RouterOutput, trpc } from "@/lib/trpc"
-import { PaginationContext } from "@/pages/course/[course]"
+import { PaginationContext } from "@/pages/courses/[course]"
 import { ActionIcon, Alert, Box, Flex, Space, Stack, Text } from "@mantine/core"
 import { modals } from "@mantine/modals"
 import { showNotification } from "@mantine/notifications"

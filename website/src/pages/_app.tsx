@@ -30,6 +30,7 @@ function LlamaApp({
                     theme={{
                         colorScheme: "dark",
                         fontFamily: "var(--font-inter)",
+                        headings: { fontFamily: "var(--font-inter)" },
                         colors: {
                             bluegray: [
                                 "#f9fafb",
@@ -77,12 +78,18 @@ function LlamaApp({
                                     }
                                 },
                             },
+                            Text: {
+                                defaultProps: { color: "gray.2" },
+                            },
                             Title: {
                                 defaultProps(theme) {
                                     return { color: "gray.1" }
                                 },
                                 styles: {
-                                    root: { letterSpacing: "-0.025em" },
+                                    root: {
+                                        letterSpacing: "-0.025em",
+                                        fontFamily: "var(--font-inter)",
+                                    },
                                 },
                             },
                             Input: {

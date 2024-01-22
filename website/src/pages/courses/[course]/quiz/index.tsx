@@ -2,11 +2,11 @@ import React from "react"
 import FileUpload from "@/components/FileUpload"
 import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth"
-import { authOptions } from "../../api/auth/[...nextauth]"
+import { authOptions } from "../../../api/auth/[...nextauth]"
 
-interface QuizProps {}
+interface GenerateQuizPageProps {}
 
-export default function Quiz({}: QuizProps) {
+export default function GenerateQuizPage({}: GenerateQuizPageProps) {
     return (
         <FileUpload
             type="QUIZ"
@@ -27,6 +27,12 @@ export default function Quiz({}: QuizProps) {
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     const session = await getServerSession(req, res, authOptions)
+
+    if (!session) {
+        return {
+            redirect: { destination: "/api/auth/signin", permanent: false },
+        }
+    }
 
     return {
         props: {

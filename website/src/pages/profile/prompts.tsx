@@ -34,9 +34,11 @@ export default function MyPromptsPage({}: MyPromptsPageProps) {
 }
 
 export const getServerSideProps = (async ({ req, res }) => {
-    const [session] = await Promise.all([
-        getServerSession(req, res, authOptions),
-    ])
+    const session = await getServerSession(req, res, authOptions)
+
+    if (!session) {
+        return { redirect: { permanent: false, destination: "/courses" } }
+    }
 
     return {
         props: {

@@ -15,7 +15,7 @@ const loggedIn = t.middleware(async (opts) => {
     if (opts.ctx.user === null) {
         throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "You must be logged in to access this route.",
+            message: "You must be logged in to do this.",
         })
     }
 
@@ -40,7 +40,7 @@ const isTeacher = t.middleware(async (opts) => {
     if (opts.ctx.user.type !== "TEACHER") {
         throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "You must be a teacher to access this route.",
+            message: "You must be a teacher to do this.",
         })
     }
 

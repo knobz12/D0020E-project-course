@@ -109,12 +109,15 @@ export default function Home({} // prompts,
                                                                 prompt.link
                                                             }
                                                             href={`${router.asPath}${prompt.link}`}
+                                                            className="no-underline"
                                                         >
                                                             <Card>
                                                                 <Icon
+                                                                    color="white"
                                                                     size={48}
                                                                 />
                                                                 <Text
+                                                                    color="gray.3"
                                                                     size="lg"
                                                                     fw={600}
                                                                 >
@@ -181,7 +184,6 @@ export default function Home({} // prompts,
 
 export const getServerSideProps = (async ({ req, res, params }) => {
     const course = params?.course
-    console.log("Params:", params)
 
     if (typeof course !== "string") {
         return { notFound: true }
