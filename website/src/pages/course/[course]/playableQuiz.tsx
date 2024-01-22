@@ -1,8 +1,7 @@
-//import FileUpload from "@/components/FileUpload"
-//import React from "react"
+
+
 import React, { useState, useRef } from 'react';
 import FileUpload from "@/components/FileUpload"
-//import { sleep } from 'openai/core.mjs';
 
 
 import {
@@ -34,33 +33,16 @@ import { RouterOutput, trpc } from "@/lib/trpc"
 type Content = (RouterOutput["prompts"]["getPromptById"] & { type: "QUIZ" })["content"]
 
 
-
-
 interface Props {
     question: string
     choices: string[]
     CorrectAnswer: string[]
     onAnswer: (CorrectAnswer: string) => void
-    onSubmit: (CorrectAnswer: string[]) => void
+    onSubmit: () => void
 }
 
 var tempChoices:string [];
 
-
-function checkboxTest(choice:string) {
-    
-    const ref = useRef(null);
-    return (
-        <Checkbox 
-            key={"choice"}
-            id={"choice"}
-            size={50}
-            radius={10}
-            label={choice}
-            ref={ref}
-        />
-    );
-}
 
 const Question: React.FC<Props> = ({
     question,
@@ -70,16 +52,10 @@ const Question: React.FC<Props> = ({
     onSubmit,
 }) => {
 
-    let tempAnswers:string[];
-    const handleCheckboxChange = () => {
-        console.log("");
-        
-        
-    };
-
     
     return (
         <div
+        
             className="d-flex 
                         justify-content-center 
                         align-center 
@@ -90,7 +66,7 @@ const Question: React.FC<Props> = ({
             <div className="">
                  <button
                 onClick={() =>
-                    onSubmit([" "])} // This needs to check the checkboxes and return chosen answers
+                    onSubmit()} 
                 >
                     {"submit"}
                 </button>
@@ -103,9 +79,10 @@ const Question: React.FC<Props> = ({
                     size={30}
                     radius={5}
                     label={choice}
-                    onChange={handleCheckboxChange}
+                    
                     />
                 ))} 
+            
 
 
                 {choices.map((choice) => (
@@ -123,20 +100,20 @@ const Question: React.FC<Props> = ({
 }
 
 function CheckCorrectAnswer(answer:string[], CorrectAnswer:string[]){  // checks if the given answer is in the correct answers
-    console.log(CorrectAnswer +" right answer")
-    console.log(answer +" given answer")
+
     let score = 0;
-    for(let i = 0; i < CorrectAnswer.length; i++){
-        console.log(i)
-        for(let j = 0; j < answer.length; j++){
-            console.log(CorrectAnswer[i]+" and "+ answer[j])
-            if(CorrectAnswer[i] === answer[j]){
-                score += 1;
-                console.log("score+");
-            }
+
+    for(let i = 0; i < answer.length; i++){ 
+        if(CorrectAnswer.includes(answer[i])){
+            score += 1;
+        }else{
+            score += -1;
         }
-        
+
     }
+
+    if(score <= 0 ){ score = 0}  // cant get negative points from question
+
     return (score/CorrectAnswer.length)
 }
 
@@ -170,16 +147,13 @@ export default function Quiz(Quizquestions:Content){
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [score, setScore] = useState(0);
     var TempScore = score;
-    
-
-
 
     let choicesArray = extractChoises(Quizquestions,currentQuestion)
     
    
-    const handleAnswer = (CorrectAnswer: string) => {
+    const handleAnswer = (ChossenAnswer: string) => {
         console.log(TempScore);
-        let tempAnswers = [CorrectAnswer]
+        let tempAnswers = [ChossenAnswer]
         TempScore = score + CheckCorrectAnswer(tempAnswers, choicesArray[1]);
         setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
         console.log(TempScore);
@@ -199,18 +173,22 @@ export default function Quiz(Quizquestions:Content){
         }
     }
 
-     const handleSubmit = (CorrectAnswer: string[]) => {
+     const handleSubmit = () => {
         
         let elements = document.getElementsByClassName("mantine-Checkbox-root ChoicesElement mantine-yxmaw9");
-        console.log(elements);
-        console.log(elements[0].children);
+        let ChossenAnswer = []
 
-        console.log(TempScore);
-        TempScore = score + CheckCorrectAnswer(CorrectAnswer, choicesArray[1]);
+        for(let i = 0; i< elements.length; i++){
+            if(elements[i].children[0].children[0].children[0].checked == true){
+                ChossenAnswer.push(elements[i].children[0].children[1].children[0].innerHTML)
+            }
+        }
+
+       
+        TempScore = score + CheckCorrectAnswer(ChossenAnswer, choicesArray[1]);
         setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
-        console.log(TempScore);
                 
-        alert(CheckCorrectAnswer(CorrectAnswer, choicesArray[1]));
+        alert(CheckCorrectAnswer(ChossenAnswer, choicesArray[1]));
        
  
         const nextQuestion = currentQuestion + 1;
@@ -225,9 +203,7 @@ export default function Quiz(Quizquestions:Content){
     }
         
     
-
     return (
-        
         <div>
             <h1 className="text-center">Quiz</h1>
             {currentQuestion < Quizquestions.questions.length ? (
@@ -242,37 +218,6 @@ export default function Quiz(Quizquestions:Content){
                 "null"
             )}
         </div>
-    )
-}
-
-
-
-function QuizSite() {
-  
-    return (
-        <>
-        <Page center>
-            <Container w="100%" size="sm">
-                <Center w="100%" h="100%">
-                    <Stack w="100%">
-                        <Title>Quiz_test</Title>
-                        <Paper px="xl" py="lg">
-                            <Stack spacing="xl">
-                                <Stack>
-                                    <SimpleGrid cols={1}>
-                                        <div className="">
-                                            
-                                        </div>
-                                    </SimpleGrid>
-                                </Stack>
-                            </Stack>
-                        </Paper>
-                    </Stack>
-                </Center>
-            </Container>
-        </Page>
-            
-        </>
     )
 }
 
