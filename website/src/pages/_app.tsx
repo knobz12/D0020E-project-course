@@ -29,6 +29,7 @@ function LlamaApp({
                     withNormalizeCSS
                     theme={{
                         colorScheme: "dark",
+                        fontFamily: "var(--font-inter)",
                         colors: {
                             bluegray: [
                                 "#f9fafb",
@@ -55,7 +56,7 @@ function LlamaApp({
                                 "#064e3b",
                             ],
                         },
-                        primaryColor: "emerald",
+                        primaryColor: "blue",
                         primaryShade: { dark: 6, light: 6 },
                         components: {
                             // Paper: {
@@ -71,6 +72,9 @@ function LlamaApp({
                             Title: {
                                 defaultProps(theme) {
                                     return { color: "gray.1" }
+                                },
+                                styles: {
+                                    root: { letterSpacing: "-0.025em" },
                                 },
                             },
                             Input: {
