@@ -41,7 +41,7 @@ interface Props {
     choices: string[]
     CorrectAnswer: string[]
     onAnswer: (CorrectAnswer: string) => void
-    //onSubmit: (CorrectAnswer: string) => void
+    onSubmit: (CorrectAnswer: string[]) => void
 }
 
 var tempChoices:string [];
@@ -67,13 +67,17 @@ const Question: React.FC<Props> = ({
     choices,
     CorrectAnswer,
     onAnswer,
-    //onSubmit,
+    onSubmit,
 }) => {
 
     let tempAnswers:string[];
     const handleCheckboxChange = () => {
-        console.log("yes32");
+        console.log("");
+        
+        
     };
+
+    
     return (
         <div
             className="d-flex 
@@ -84,8 +88,9 @@ const Question: React.FC<Props> = ({
         >
             <h2 className="">{question}</h2>
             <div className="">
-                {/* <button
-                onClick={() =>    onAnswer("rrr")} // This needs to check the checkboxes and return chosen answers           probably use    
+                 <button
+                onClick={() =>
+                    onSubmit([" "])} // This needs to check the checkboxes and return chosen answers
                 >
                     {"submit"}
                 </button>
@@ -94,12 +99,13 @@ const Question: React.FC<Props> = ({
                     <Checkbox 
                     key={choice}
                     id={choice}
-                    size={100}
-                    radius={10}
+                    className={"ChoicesElement"}
+                    size={30}
+                    radius={5}
                     label={choice}
                     onChange={handleCheckboxChange}
                     />
-                ))} */}
+                ))} 
 
 
                 {choices.map((choice) => (
@@ -116,19 +122,22 @@ const Question: React.FC<Props> = ({
     )
 }
 
-function CheckCorrectAnswer(answer:string, CorrectAnswer:string[]){  // checks if the given answer is in the correct answers
-    console.log(CorrectAnswer)
-    console.log(answer)
+function CheckCorrectAnswer(answer:string[], CorrectAnswer:string[]){  // checks if the given answer is in the correct answers
+    console.log(CorrectAnswer +" right answer")
+    console.log(answer +" given answer")
+    let score = 0;
     for(let i = 0; i < CorrectAnswer.length; i++){
         console.log(i)
-        console.log(CorrectAnswer[i]+" and "+ answer)
-        if(CorrectAnswer[i] === answer){
-            console.log("correct")
-            return 1
+        for(let j = 0; j < answer.length; j++){
+            console.log(CorrectAnswer[i]+" and "+ answer[j])
+            if(CorrectAnswer[i] === answer[j]){
+                score += 1;
+                console.log("score+");
+            }
         }
+        
     }
-    console.log("wrong")
-    return 0
+    return (score/CorrectAnswer.length)
 }
 
 function extractChoises(Quizquestions:Content,questionID:number){
@@ -169,16 +178,13 @@ export default function Quiz(Quizquestions:Content){
     
    
     const handleAnswer = (CorrectAnswer: string) => {
-        if (CheckCorrectAnswer(CorrectAnswer, choicesArray[1])===1){  //  choicesArray[1] is correct choices
-        //if (CorrectAnswer === questions[currentQuestion].CorrectAnswer[0]) {
-            console.log(TempScore);
-            TempScore = score + 1;
-            setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
-            console.log(TempScore);
+        console.log(TempScore);
+        let tempAnswers = [CorrectAnswer]
+        TempScore = score + CheckCorrectAnswer(tempAnswers, choicesArray[1]);
+        setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
+        console.log(TempScore);
                 
-        }else{
-            alert(`Wrong 🤢`);
-        }
+        alert(CheckCorrectAnswer(tempAnswers, choicesArray[1]));
  
         const nextQuestion = currentQuestion + 1;
         if (nextQuestion < Quizquestions.questions.length) {
@@ -193,34 +199,36 @@ export default function Quiz(Quizquestions:Content){
         }
     }
 
-    /* const handleSubmit = (CorrectAnswer: string) => {
-        if (CheckCorrectAnswer(CorrectAnswer, choicesArray[1])===1){  //  choicesArray[1] is correct choices
-            console.log(TempScore);
-            TempScore = score + 1;
-            setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
-            console.log(TempScore);
+     const handleSubmit = (CorrectAnswer: string[]) => {
+        
+        let elements = document.getElementsByClassName("mantine-Checkbox-root ChoicesElement mantine-yxmaw9");
+        console.log(elements);
+        console.log(elements[0].children);
+
+        console.log(TempScore);
+        TempScore = score + CheckCorrectAnswer(CorrectAnswer, choicesArray[1]);
+        setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
+        console.log(TempScore);
                 
-        }else{
-            alert(`Wrong 🤢`);
-        }
+        alert(CheckCorrectAnswer(CorrectAnswer, choicesArray[1]));
+       
  
         const nextQuestion = currentQuestion + 1;
-        if (nextQuestion < questions.length) {
+        if (nextQuestion < Quizquestions.questions.length) {
             setCurrentQuestion(nextQuestion);
         } else {
 
-            alert(`Quiz finished. You scored ${TempScore}/${questions.length}`);
+            alert(`Quiz finished. You scored ${TempScore}/${Quizquestions.questions.length}`);
             setScore(0);            //reset quiz
             setCurrentQuestion(0);  //reset quiz
         }
     }
         
-    */ 
+    
 
     return (
         
         <div>
-            {Quizquestions.questions[0].answers[0].text}
             <h1 className="text-center">Quiz</h1>
             {currentQuestion < Quizquestions.questions.length ? (
                 <Question
@@ -228,7 +236,7 @@ export default function Quiz(Quizquestions:Content){
                     choices={choicesArray[0]}
                     CorrectAnswer={choicesArray[1]}   
                     onAnswer={handleAnswer}
-                    //onSubmit={handleSubmit}
+                    onSubmit={handleSubmit}
                 />
             ) : (
                 "null"
