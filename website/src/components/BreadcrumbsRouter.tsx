@@ -1,4 +1,5 @@
 import { Breadcrumbs, Anchor, Box } from "@mantine/core"
+import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { useMemo } from "react"
@@ -32,13 +33,23 @@ function GoodBreadcrumbs({ links }: GoodBreadcrumbsProps) {
 
 export function BreadcrumbsRouter() {
     const router = useRouter()
+    const { data } = useSession()
 
     const links: GoodBreadcrumbsProps["links"] | null = useMemo(
         function () {
             console.log(router.route)
             switch (router.route) {
-                case "/":
-                    return [{ href: "/", name: "Courses" }]
+                // case "/":
+                //     return [{ href: "/", name: "Courses" }]
+                // case "/profile":
+                //     return [
+                //         { href: "/profile", name: data?.user.name as string },
+                //     ]
+                case "/profile/prompts":
+                    return [
+                        { href: "/profile", name: data?.user.name as string },
+                        { href: "/profile/prompts", name: "prompts" },
+                    ]
                 case "/course/[course]":
                     return [
                         { href: "/", name: "Courses" },

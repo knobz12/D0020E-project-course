@@ -14,7 +14,7 @@ import clsx from "clsx"
 import { Inter } from "next/font/google"
 import React from "react"
 import { useSession, signOut } from "next-auth/react"
-import { IconLogout } from "@tabler/icons-react"
+import { IconList, IconLogout, IconUser } from "@tabler/icons-react"
 import Link from "next/link"
 import Image from "next/image"
 import { BreadcrumbsRouter } from "./BreadcrumbsRouter"
@@ -93,6 +93,23 @@ export function Page({ children, center = false }: PageProps) {
                                         </Button>
                                     </Menu.Target>
                                     <Menu.Dropdown>
+                                        <Link href="/profile" passHref>
+                                            <Menu.Item
+                                                component="a"
+                                                icon={<IconUser />}
+                                            >
+                                                Profile
+                                            </Menu.Item>
+                                        </Link>
+                                        <Link href="/profile/prompts" passHref>
+                                            <Menu.Item
+                                                component="a"
+                                                icon={<IconList />}
+                                            >
+                                                Your prompts
+                                            </Menu.Item>
+                                        </Link>
+                                        <Menu.Divider />
                                         <Menu.Item
                                             icon={<IconLogout />}
                                             onClick={() => signOut()}
