@@ -59,16 +59,24 @@ function LlamaApp({
                         primaryColor: "blue",
                         primaryShade: { dark: 6, light: 6 },
                         components: {
-                            // Paper: {
-                            //     styles(theme, params, context) {
-                            //         return {
-                            //             root: {
-                            //                 backgroundColor:
-                            //                     theme.colors.teal[6] + "AA",
-                            //             },
-                            //         }
-                            //     },
-                            // },
+                            Paper: {
+                                styles(theme, params, context) {
+                                    return {
+                                        root: {
+                                            backgroundColor: `${theme.colors.blue[8]}33`,
+                                        },
+                                    }
+                                },
+                            },
+                            Card: {
+                                styles(theme, params, context) {
+                                    return {
+                                        root: {
+                                            background: `${theme.colors.blue[8]}66`,
+                                        },
+                                    }
+                                },
+                            },
                             Title: {
                                 defaultProps(theme) {
                                     return { color: "gray.1" }
