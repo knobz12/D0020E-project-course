@@ -18,7 +18,7 @@ export default function Quiz({}: QuizProps) {
             parameters={[
                 {
                     id: "amount",
-                    name: "Keywords",
+                    name: "Amount of keywords",
                     placeholder:
                         "The amount of keywords you want to generate",
                     type: "number",
