@@ -249,15 +249,71 @@ def assignment():
 
     return app.response_class(stream(), mimetype='text/plain')
 
+def create_title(content: str):
+    return "AI_GENERATED_TITLE"
+
+@app.route("/api/generate_title", methods=["POST"])
+def generate_title():
+    prompt_id = request.args.get("prompt_id")
+
+    if prompt_id == None:
+        return make_response("Missing prompt id", 400)
+
+
+
+
+    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+    cur = conn.cursor()
+
+    cur.execute("SELECT content FROM prompts WHERE id=%s;", (prompt_id,))
+
+    prompt = cur.fetchone()
+    if prompt == None:
+        conn.close()
+        return make_response(f"Could not find prompt with id {prompt_id}", 400)
+
+
+
+    content: str = (str(prompt[0]))[0:4096]
+    title: str = create_title(content)
+
+    cur.execute("UPDATE prompts SET title=%s WHERE id=%s;", (title, prompt_id))
+    conn.commit()
+    conn.close()
+
+        
+
+    return make_response(title, 200)
+
+
 @app.route("/api/explainer", methods=["POST"])
 def explanation():
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
     (file_hash, course_id) = params
+
+
+    if 'file' not in request.files:
+        return make_response("Missing file", 406)
+    
+    file = request.files["file"]
+    file_size = file.seek(0, os.SEEK_END)
+    file.seek(0)
+    print("File size:",file_size)
+
+    if file_size <= 0:
+        return make_response("Cannot send empty file! 😡", 406)
+
+    course = request.args.get("course")
+    if course == None:
+        return make_response("Missing required course parameter", 400)
+
+    course_id = get_course_id_from_name(course)
     user_id = get_user_id()
 
     query = [request.args.get("amount"), request.args.get("keywords")]
+    print(request.args)
     amount = 10
 
     if query[0] != None:
@@ -266,19 +322,19 @@ def explanation():
     if query[1] != None:
         custom_keywords = query[1]
 
-    print(f"Creating {amount} keywords and explaining additional ones that are {query[1]}")
+    print(f"Creating {amount} keywords and explaining additional ones that are: {query[1]}")
 
     try:
         explanation = create_explaination(file_hash, amount, custom_keywords)
     except:
         explanation = ""
     
-    print(quiz)
-    print("Inserting quiz")
+    print(explanation)
+    print("Inserting explaination")
     user_id = get_user_id()
     if user_id:
         print("Found user:", user_id)
-        print("Saving quiz")
+        print("Saving explainations")
     
         """conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
         cur = conn.cursor()
