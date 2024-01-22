@@ -8,6 +8,7 @@ import {
     Badge,
     Text,
     Box,
+    Group,
 } from "@mantine/core"
 import { modals } from "@mantine/modals"
 import {
@@ -16,6 +17,7 @@ import {
     IconTrash,
     IconPin,
     IconPinFilled,
+    IconEye,
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { useRouter } from "next/router"
@@ -27,6 +29,7 @@ import { useSession } from "next-auth/react"
 import { showNotification } from "@mantine/notifications"
 import Summary from "@/pages/course/[course]/summary"
 import { PaginationContext } from "@/pages/course/[course]"
+import { PublishPromptButton } from "./PublishPromptButton"
 
 interface PromptItemProps {
     prompt: RouterOutput["prompts"]["getPromptById"]
@@ -137,7 +140,7 @@ export function PromptItem({ prompt }: PromptItemProps) {
                 <Flex w="100%">
                     <Stack align="start" style={{ flex: 1 }}>
                         <Link
-                            href={`/course/${router.query.course}/${
+                            href={`/course/${prompt.courseName}/${
                                 prompt.type === "QUIZ"
                                     ? "quiz"
                                     : prompt.type === "FLASHCARDS"
@@ -149,7 +152,27 @@ export function PromptItem({ prompt }: PromptItemProps) {
                         >
                             <Title lineClamp={3}>{prompt.title}</Title>
                         </Link>
-                        <Badge size="lg">{prompt.type}</Badge>
+                        <Group>
+                            {prompt.userId === session.data?.user.userId && (
+                                <Badge
+                                    size="lg"
+                                    color={prompt.published ? "teal" : "orange"}
+                                >
+                                    <Flex align="center" gap={4}>
+                                        <IconEye />
+                                        {prompt.published
+                                            ? "Public"
+                                            : "Private"}
+                                    </Flex>
+                                </Badge>
+                            )}
+                            <Badge size="lg">{prompt.type}</Badge>
+                            <Link href={`/course/${prompt.courseName}`}>
+                                <Badge size="lg" variant="dot">
+                                    {prompt.courseName}
+                                </Badge>
+                            </Link>
+                        </Group>
                         {prompt.teacherNote && (
                             <TeacherNote
                                 promptId={prompt.id}
@@ -187,6 +210,12 @@ export function PromptItem({ prompt }: PromptItemProps) {
                                 <IconTrash />
                             </ActionIcon>
                         ) : null}
+                        {prompt.userId === session.data?.user?.userId && (
+                            <PublishPromptButton
+                                promptId={prompt.id}
+                                published={prompt.published}
+                            />
+                        )}
                         {prompt.teacherNote === undefined &&
                         session.data?.user.type === "TEACHER" ? (
                             <CreateTeacherNoteButton promptId={prompt.id} />

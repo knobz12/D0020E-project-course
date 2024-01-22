@@ -1,4 +1,5 @@
 import { Page } from "@/components/Page"
+import { PromptViewer } from "@/components/PromptViewer"
 import { QuizContent } from "@/components/QuizContent"
 import { db } from "@/lib/database"
 import { trpc } from "@/lib/trpc"
@@ -19,7 +20,8 @@ export default function QuizPage() {
             <Container>
                 {/* <pre>{JSON.stringify(quiz.data, undefined, 4)}</pre> */}
                 {quiz.data?.type === "QUIZ" && (
-                    <QuizContent
+                    <PromptViewer
+                        type="QUIZ"
                         promptId={quiz.data.id}
                         title={quiz.data.title}
                         editable={

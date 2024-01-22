@@ -9,17 +9,17 @@ import {
     Stack,
     Text,
     Title,
-    UnstyledButton,
 } from "@mantine/core"
 import clsx from "clsx"
 import { Inter } from "next/font/google"
 import React from "react"
 import { useSession, signOut } from "next-auth/react"
-import { IconLogout } from "@tabler/icons-react"
+import { IconList, IconLogout, IconUser } from "@tabler/icons-react"
 import Link from "next/link"
 import Image from "next/image"
+import { BreadcrumbsRouter } from "./BreadcrumbsRouter"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 interface PageProps {
     children: React.ReactNode
@@ -32,72 +32,99 @@ export function Page({ children, center = false }: PageProps) {
     return (
         <div className={clsx(inter.className, "min-h-screen")}>
             <Container className="flex justify-between py-4">
-                <Link
-                    href="/"
-                    className="no-underline flex items-center space-x-4"
-                >
-                    <Image
-                        width={64}
-                        height={64}
-                        src="/logo.png"
-                        alt="AI Studybuddy logo"
-                    />
-                    <Title>AI Studybuddy</Title>
-                </Link>
-                {status === "authenticated" && (
-                    <div>
-                        <Menu>
-                            <Menu.Target>
-                                <Button
-                                    variant="subtle"
-                                    color="blue"
-                                    p={4}
-                                    h={54}
-                                    className="flex justify-end"
-                                >
-                                    <Flex align="center" gap="sm">
-                                        {data.user?.image && (
-                                            <Avatar src={data.user.image} />
-                                        )}
-                                        {data.user?.name && (
-                                            <Stack spacing={0}>
-                                                <Text
-                                                    size="xl"
-                                                    color="white"
-                                                    fw={600}
-                                                >
-                                                    {data.user.name}
-                                                </Text>
-                                                <Box>
-                                                    <Badge
-                                                        color={
-                                                            data.user.type ===
-                                                            "STUDENT"
-                                                                ? "blue"
-                                                                : "green"
-                                                        }
-                                                        size="sm"
-                                                    >
-                                                        {data.user.type}
-                                                    </Badge>
-                                                </Box>
-                                            </Stack>
-                                        )}
-                                    </Flex>
-                                </Button>
-                            </Menu.Target>
-                            <Menu.Dropdown>
-                                <Menu.Item
-                                    icon={<IconLogout />}
-                                    onClick={() => signOut()}
-                                >
-                                    Logout
-                                </Menu.Item>
-                            </Menu.Dropdown>
-                        </Menu>
-                    </div>
-                )}
+                <Stack w="100%">
+                    <Flex justify="space-between" w="100%">
+                        <Link
+                            href="/"
+                            className="no-underline flex items-center space-x-4"
+                        >
+                            <Image
+                                loading="eager"
+                                width={64}
+                                height={64}
+                                src="/logo.png"
+                                alt="AI Studybuddy logo"
+                            />
+                            <Title>AI Studybuddy</Title>
+                        </Link>
+                        {status === "authenticated" && (
+                            <div>
+                                <Menu>
+                                    <Menu.Target>
+                                        <Button
+                                            variant="subtle"
+                                            color="blue"
+                                            p={4}
+                                            h={54}
+                                            className="flex justify-end"
+                                        >
+                                            <Flex align="center" gap="sm">
+                                                {data.user?.image && (
+                                                    <Avatar
+                                                        src={data.user.image}
+                                                    />
+                                                )}
+                                                {data.user?.name && (
+                                                    <Stack spacing={0}>
+                                                        <Text
+                                                            size="xl"
+                                                            color="white"
+                                                            fw={600}
+                                                        >
+                                                            {data.user.name}
+                                                        </Text>
+                                                        <Box>
+                                                            <Badge
+                                                                color={
+                                                                    data.user
+                                                                        .type ===
+                                                                    "STUDENT"
+                                                                        ? "blue"
+                                                                        : "green"
+                                                                }
+                                                                size="sm"
+                                                            >
+                                                                {data.user.type}
+                                                            </Badge>
+                                                        </Box>
+                                                    </Stack>
+                                                )}
+                                            </Flex>
+                                        </Button>
+                                    </Menu.Target>
+                                    <Menu.Dropdown>
+                                        <Link href="/profile" passHref>
+                                            <Menu.Item
+                                                component="a"
+                                                icon={<IconUser />}
+                                            >
+                                                Profile
+                                            </Menu.Item>
+                                        </Link>
+                                        <Link href="/profile/prompts" passHref>
+                                            <Menu.Item
+                                                component="a"
+                                                icon={<IconList />}
+                                            >
+                                                Your prompts
+                                            </Menu.Item>
+                                        </Link>
+                                        <Menu.Divider />
+                                        <Menu.Item
+                                            icon={<IconLogout />}
+                                            onClick={() => signOut()}
+                                        >
+                                            Logout
+                                        </Menu.Item>
+                                    </Menu.Dropdown>
+                                </Menu>
+                            </div>
+                        )}
+                    </Flex>
+                    <BreadcrumbsRouter />
+                </Stack>
             </Container>
+
             <Box
                 component="main"
                 className={clsx(

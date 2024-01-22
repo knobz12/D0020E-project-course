@@ -16,7 +16,8 @@ import { modals } from "@mantine/modals"
 import { notifications } from "@mantine/notifications"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useCallback, useState } from "react"
+import { GeneratePromptTitleButton } from "./GeneratePromptTitleButton"
 
 type FlashcardsContent = (RouterOutput["prompts"]["getPromptById"] & {
     type: "FLASHCARDS"
@@ -74,27 +75,47 @@ function FlashcardsViewer({
     content,
     editable,
     onEdit,
+    promptId,
 }: FlashcardsViewerProps) {
     const router = useRouter()
+    const onGenerateSuccess = useCallback(
+        async function () {
+            await new Promise<void>((res) => setTimeout(res, 2000))
+            router.reload()
+        },
+        [router],
+    )
     return (
         <Stack>
-            <Flex>
+            <Stack>
                 <Title style={{ flex: 1 }}>{title}</Title>
-                <Group>
+                <Flex gap="md" w="max-content">
                     <Link
+                        className="w-full"
                         href={`/course/${router.query.course}/flashcards/${router.query.flashcardsId}/play`}
                     >
-                        <Button color="blue" variant="filled">
+                        <Button w="100%" color="blue" variant="filled">
                             Play
                         </Button>
                     </Link>
+                    {promptId && (
+                        <GeneratePromptTitleButton
+                            onSuccess={onGenerateSuccess}
+                            promptId={promptId}
+                        />
+                    )}
                     {editable && (
-                        <Button onClick={onEdit} color="teal" variant="filled">
+                        <Button
+                            w="100%"
+                            onClick={onEdit}
+                            color="teal"
+                            variant="filled"
+                        >
                             Edit
                         </Button>
                     )}
-                </Group>
-            </Flex>
+                </Flex>
+            </Stack>
             {content.questions.map((qst, idx) => (
                 <Stack key={idx + qst.question}>
                     <Text>{qst.question}</Text>

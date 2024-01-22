@@ -1,5 +1,5 @@
 import json
-from modules.ai.utils.llm import create_llm_guidance
+from modules.ai.utils.llm import create_llm_guidance, create_llm_index
 from modules.ai.utils.vectorstore import *
 
 import guidance
@@ -8,6 +8,16 @@ from guidance import select, gen
 from modules.files.chunks import *
 
 from typing import Any, Generator
+
+from llama_index.llms import LlamaCPP, OpenAI
+from llama_index import (
+    LLMPredictor,
+    ServiceContext,
+    StorageContext,
+    set_global_service_context,
+    SimpleDirectoryReader,
+    VectorStoreIndex,
+)
 
 def calculate_questions_per_doc(total_docs: int, total_questions: int, doc_index: int):
     """
@@ -36,108 +46,35 @@ def calculate_questions_per_doc(total_docs: int, total_questions: int, doc_index
 
     return questions_for_current_doc
 
-@guidance()
-def determineQuestionBias(lm, question: str):
-    lm += f"""I want you to determine if a question for a quiz is factual or opinion based.
-    For example a question about your opinion about something would be opinion based and a question about a fact is factual.
-
-    Question: {question}
-
-    Answer: {select(options=["factual", "opinion"])}"""
-    return lm
-
-
-@guidance()
-def newQuestionJSONGenerator(lm, context: str, answer_count: int, question_count: int):
-
-    def gen_answer(idx: int,questionIndex:int) -> str:
-        answerKey = f"answer{questionIndex}-{idx}"
-        isAnswerKey = f"isAnswer{questionIndex}-{idx}"
-        print(answerKey, isAnswerKey)
-        import random
-        seed = random.randint(0, 1337)
-        answer: str = f"""\"{gen(name=answerKey, stop='"',llm_kwargs={"seed": seed})}\": {select(["True", "False"],name=isAnswerKey)}"""
-        return answer
-
-    def gen_question(idx: int):
-        # question: str = f"""{{ "question":"{gen(f"question{idx}",stop='"',)}", "answers":["""
-        question: str = f"""\
-Question: "{gen(f"question{idx}",stop='"')}"
-Answers:
-"""
-
-        # answers: str = ""
-        for i in range(0, answer_count):
-            question += gen_answer(i, idx) + "\n"
-        
-
-        #print(question)
-        return question
-
-    questions: str = ""
-    for i in range(0, question_count):
-        questions += gen_question(i) + "\n\n"
-
-        
-    print("Questions:\n", questions)
-
-
-
-
-    res = f"""\
-The following is a quiz question in JSON format.
-Generate answers based on the provided context. Only ONE of the answers is. true, and the others shall be false.
-The incorrect answers must be different from each other but still related to the topic.
-The questions MUST be different to one another.
-
-Context: {context}
-
-Questions:
-
-{questions}
-    """
-
-
-    print(res)
-    lm += res 
-    
-    return lm
-
-def create_explaination(id: str, questions: int) -> str:
-    glmm = create_llm_guidance()
+def create_explaination(id: str, amount: int = 10, custom_keywords: list = []) -> str:
+    #doc_id = "b53998910b5a91c141f890fa76fbcb7f"
     vectorstore = create_vectorstore()
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
-    print(docs)
+    #docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
+    qsts_cunt = calculate_questions_per_doc(len(docs["metadatas"]), amount, id)
+    documents = docs["metadatas"]
+    print(documents)
+    return
+    llm = create_llm_index()
+    if isinstance(llm, LlamaCPP):
+        service_context = ServiceContext.from_defaults(
+            chunk_size=512,
+            llm=llm,
+            embed_model='local'
+            )
+    elif isinstance(llm, OpenAI):
+        service_context = ServiceContext.from_defaults(
+            chunk_size=512,
+            llm=llm,
+            )
+        
+    set_global_service_context(service_context)
 
-
-    obj: dict[str, list[dict[str, Any]]] =  {}
-
-    for (i, doc) in enumerate(docs["metadatas"]):
-        qsts_cunt = calculate_questions_per_doc(len(docs["metadatas"]), questions, i)
-        print(f"Questions for {i}")
-        result = glmm + newQuestionJSONGenerator(doc["text"], 4, qsts_cunt)
-        print(str(result))
-
-        obj["questions"] = []
-
-        for i in range(0, qsts_cunt):
-            question: str = result[f"question{i}"]
-            obj["questions"].append({"question" : question, "answers": []})
-
-            for j in range(0,4):
-                answer: str = result[f"answer{i}-{j}"]
-                correct: str = result[f"isAnswer{i}-{j}"]
-                obj["questions"][i]["answers"].append({"text": answer, "correct" : False if correct == "False" else True})
+    index = VectorStoreIndex.from_documents(documents)
+    query_engine = index.as_query_engine(similarity_top_k=3, service_context=service_context)
+    response_stream1 = query_engine.query(f"Pick out {str(amount)} keywords that are important across the document. For each keyword write a short explaination. Give the output in json format.")
+    if custom_keywords != []:
+        response_stream2 = query_engine.query(f"These are some keywords that needs to be explained: {custom_keywords}. For each keyword write a short explaination. Give the output in json format.")
     
-    result: str = json.dumps(obj)
-    return result
-
-
-
-def quiz_test():
-    file_hash = Chunkerizer.upload_chunks_from_file("backend/tests/sample_files/Test_htmls/Architectural Design Patterns.html", "D0072E")
-    print(create_explaination(file_hash, 3)) 
-
-if __name__ == "__main__":
-    quiz_test()
+    return json.dumps(f"{response_stream1}\n{response_stream2}")

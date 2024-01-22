@@ -6,6 +6,7 @@ import { Container, Title } from "@mantine/core"
 import { GetServerSideProps } from "next"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/router"
+import { PromptViewer } from "@/components/PromptViewer"
 
 export default function FlashcardsPage() {
     const { data: session } = useSession()
@@ -19,10 +20,13 @@ export default function FlashcardsPage() {
             <Container>
                 {/* <pre>{JSON.stringify(flashcards.data, undefined, 4)}</pre> */}
                 {flashcards.data?.type === "FLASHCARDS" && (
-                    <FlashcardsContent
+                    <PromptViewer
+                        type="FLASHCARDS"
                         promptId={flashcards.data.id}
                         title={flashcards.data.title}
-                        editable={flashcards.data.userId === session?.user.userId}
+                        editable={
+                            flashcards.data.userId === session?.user.userId
+                        }
                         content={flashcards.data.content}
                     />
                 )}
@@ -54,7 +58,11 @@ export const getServerSideProps = (async ({ req, res, params }) => {
         }
 
         const flashcards = await db.prompt.findUnique({
-            where: { id: flashcardsId, course: { id: dbCourse.id }, type: "FLASHCARDS" },
+            where: {
+                id: flashcardsId,
+                course: { id: dbCourse.id },
+                type: "FLASHCARDS",
+            },
             select: {
                 id: true,
                 title: true,

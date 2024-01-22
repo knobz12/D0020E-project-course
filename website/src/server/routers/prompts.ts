@@ -38,7 +38,10 @@ type PromptType = {
     updatedAt: Date
     userId: string
     title: string
+    courseId: string
+    courseName: string
     /** The requesting users reaction on this prompt. Null if they haven't reacted else true/false depending on how they reacted to it. */
+    published: boolean
     reaction: boolean | null
     teacherNote?: TeacherNote
     pinned: boolean
@@ -63,7 +66,7 @@ type PromptType = {
 )
 
 async function formatPrompt(
-    prompt: Prompt,
+    prompt: Prompt & { course: { name: string } },
     userId: string,
 ): Promise<PromptType> {
     const [positiveReactions, negativeReactions, userReaction, teacherNote] =
@@ -111,6 +114,9 @@ async function formatPrompt(
         title: prompt.title,
         reaction: !userReaction ? null : userReaction.positive,
         type: prompt.type as "FLASHCARDS" | "QUIZ" | "SUMMARY" | "ASSIGNMENT",
+        courseId: prompt.courseId,
+        published: prompt.published,
+        courseName: prompt.course.name,
         content: prompt.content as any,
         teacherNote: teacherNote ?? undefined,
         pinned: prompt.pinned,
@@ -119,6 +125,52 @@ async function formatPrompt(
 }
 
 export const promptRouter = router({
+    publishPrompt: userProcedure
+        .input(
+            z.object({
+                promptId: z.string().uuid(),
+            }),
+        )
+        .mutation(async function ({
+            ctx,
+            input,
+        }): Promise<{ published: boolean }> {
+            const prompt = await db.prompt.findUnique({
+                where: { id: input.promptId },
+                select: { userId: true, published: true },
+            })
+
+            if (!prompt) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "The prompt you tried to publish doesn't exist.",
+                })
+            }
+
+            const isUserOwner = prompt.userId === ctx.user.id
+            if (!isUserOwner) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "You can't publish prompts you haven't made.",
+                })
+            }
+
+            // if (prompt.published) {
+            //     throw new TRPCError({
+            //         code: "NOT_FOUND",
+            //         message: "This prompt has already been published.",
+            //     })
+            // }
+
+            await db.prompt.update({
+                where: {
+                    id: input.promptId,
+                },
+                data: { published: !prompt.published },
+            })
+
+            return { published: !prompt.published }
+        }),
     updateQuizPrompt: userProcedure
         .input(
             z.object({
@@ -298,6 +350,7 @@ export const promptRouter = router({
         .query(async function ({ input, ctx }): Promise<PromptType> {
             const summary = await db.prompt.findUnique({
                 where: { id: input.id },
+                include: { course: { select: { name: true } } },
             })
             if (!summary) {
                 throw new TRPCError({
@@ -330,22 +383,32 @@ export const promptRouter = router({
 
             const [totalPromptCount, pinned, nonPinned] = await Promise.all([
                 db.prompt.count({
-                    where: { courseId: course.id },
+                    where: { courseId: course.id, published: true },
                 }),
                 // Only get pinned for page 1.
                 input.page === 1
                     ? db.prompt.findMany({
-                          where: { pinned: true, courseId: course.id },
+                          where: {
+                              pinned: true,
+                              courseId: course.id,
+                              published: true,
+                          },
                           orderBy: { createdAt: "desc" },
                           // There should only ever be at most 5 pinned prompts.
                           take: 5,
+                          include: { course: { select: { name: true } } },
                       })
                     : [],
                 db.prompt.findMany({
-                    where: { pinned: false, courseId: course.id },
+                    where: {
+                        pinned: false,
+                        courseId: course.id,
+                        published: true,
+                    },
                     orderBy: { createdAt: "desc" },
                     take: 15,
                     skip: (input.page - 1) * 15,
+                    include: { course: { select: { name: true } } },
                 }),
             ])
 
@@ -375,26 +438,28 @@ export const promptRouter = router({
                 total: Math.ceil(totalPromptCount / 15),
             }
         }),
-    getPrompts: userProcedure
-        .input(z.object({ course: z.string() }))
-        .query(async function ({ input, ctx }): Promise<PromptType[]> {
-            const prompts = await db.prompt.findMany({
-                orderBy: { createdAt: "desc" },
-                take: 25,
-                where: { course: { name: input.course } },
-            })
+    getMyPrompts: userProcedure.query(async function ({
+        input,
+        ctx,
+    }): Promise<PromptType[]> {
+        const prompts = await db.prompt.findMany({
+            orderBy: { createdAt: "desc" },
+            take: 25,
+            where: { userId: ctx.user.id },
+            include: { course: { select: { name: true } } },
+        })
 
-            const formatted = await Promise.all(
-                prompts.map(
-                    (prompt) =>
-                        new Promise<PromptType>(async (res) => {
-                            res(formatPrompt(prompt, ctx.user.id))
-                        }),
-                ),
-            )
+        const formatted = await Promise.all(
+            prompts.map(
+                (prompt) =>
+                    new Promise<PromptType>(async (res) => {
+                        res(formatPrompt(prompt, ctx.user.id))
+                    }),
+            ),
+        )
 
-            return formatted
-        }),
+        return formatted
+    }),
     react: userProcedure
         .input(
             z.object({
@@ -576,6 +641,7 @@ export const promptRouter = router({
             const prompt = await db.prompt.findFirst({
                 where: { userId: ctx.user.id },
                 orderBy: { createdAt: "desc" },
+                include: { course: { select: { name: true } } },
             })
 
             if (!prompt) {
