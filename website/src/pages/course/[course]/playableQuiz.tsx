@@ -90,16 +90,7 @@ const Question: React.FC<Props> = ({
                     
                     />
                 ))} 
-                
-                    <Checkbox 
-                    key={"banan"}
-                    id={"banan"}
-                    className={"ChoicesElement"}
-                    size={30}
-                    radius={5}
-                    label={"banan"}
-                    
-                    />
+            
 
 
                 {choices.map((choice) => (
