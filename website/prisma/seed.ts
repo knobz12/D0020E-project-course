@@ -23,6 +23,7 @@ async function main() {
                 "This course delves deeper into the theory and mathematical methodology of subsymbolic AI methods for both machine learning and pattern recognition.",
         },
     ]
+    console.log(`Upserting ${courses.length} courses...`)
     for (const course of courses) {
         await db.course.upsert({
             where: { name: course.name },
@@ -30,6 +31,7 @@ async function main() {
             update: { ...course },
         })
     }
+    console.log(`Done`)
 }
 
 main()

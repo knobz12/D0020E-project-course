@@ -9,7 +9,7 @@ function getBaseUrl() {
         // browser should use relative path
         return ""
     // assume localhost
-    return `http://localhost:${process.env.PORT ?? 3000}`
+    return process.env.NEXTAUTH_URL
 }
 
 export const trpc = createTRPCNext<AppRouter>({

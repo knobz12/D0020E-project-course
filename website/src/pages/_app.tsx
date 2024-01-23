@@ -17,8 +17,9 @@ function LlamaApp({
     return (
         <>
             <Head>
-                <title>Llama-GPT</title>
-                <link rel="icon" href="/lama.png" />
+                <title>AI Studybuddy</title>
+                <link rel="icon" href="/logo.png" />
+                <meta name="robots" content="none" />
             </Head>
             <SessionProvider session={pageProps.session}>
                 {process.env.NODE_ENV === "development" && (
