@@ -320,9 +320,9 @@ def explanation():
         amount = int(query[0])
     custom_keywords = []
     if query[1] != None:
-        custom_keywords = query[1]
+        custom_keywords = query[1].split(",")
 
-    print(f"Creating {amount} keywords and explaining additional ones that are: {query[1]}")
+    print(f"Creating {amount} keywords and explaining additional ones that are: {custom_keywords}")
 
     try:
         explanation = create_explaination(file_hash, amount, custom_keywords)
