@@ -1,5 +1,6 @@
 import { Page } from "@/components/Page"
 import { PromptItem } from "@/components/PromptItem"
+import searchbar from "@/components/Searchbar"
 import { trpc } from "@/lib/trpc"
 import { AnimatePresence, motion } from "framer-motion"
 import { GetServerSideProps } from "next"
@@ -18,6 +19,7 @@ export default function MyPromptsPage({}: MyPromptsPageProps) {
             <Container w="100%" size="sm">
                 <Stack>
                     <Title>Your prompts</Title>
+                    {searchbar(promptsQuery.data)}
                     <AnimatePresence>
                         {promptsQuery.data?.map((prompt) => {
                             return (
