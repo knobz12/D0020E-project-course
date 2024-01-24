@@ -20,6 +20,12 @@ export default function ProfilePage({}: ProfilePageProps) {
             audioRef.current!.volume = 0
             return
         }
+        const cl = document.documentElement.classList
+
+        if (cl.contains("stop")) {
+            cl.remove("stop")
+        }
+
         const interval = setInterval(function () {
             audioRef.current?.play()
         }, 1000)
