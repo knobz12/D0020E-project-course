@@ -22,7 +22,10 @@ from werkzeug.datastructures import FileStorage
 from chromadb import GetResult
 import psycopg2
 import jwt
+from threading import Semaphore
 
+# To assure the LLM only works on one prompt at a time
+sem = Semaphore()
 
 cache = Cache(app,config={"CACHE_TYPE":"SimpleCache"})
 
@@ -135,7 +138,9 @@ def quiz():
         questions = int(query)
 
     conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+    sem.acquire(timeout=1000)
     quiz = create_quiz(file_hash, questions)
+    sem.release()
 
     print(quiz)
     print("Inserting quiz")
@@ -172,7 +177,9 @@ def flashcards():
     print(f"Creating {flashcards_count} flashcards")
 
     conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+    sem.acquire(timeout=1000)
     flashcards = create_flashcards(file_hash, flashcards_count)
+    sem.release()
 
     print(flashcards)
     print("Inserting flashcards")
@@ -201,9 +208,11 @@ def summary():
 
     def stream():
         summary = ""
+        sem.acquire(timeout=1000)
         for chunk in summarize_doc_stream(file_hash):
             yield chunk
             summary += chunk
+        sem.release()
 
         if user_id == None:
             return
@@ -230,9 +239,11 @@ def assignment():
 
     def stream():
         assignment = ""
+        sem.acquire(timeout=1000)
         for chunk in assignment_doc_stream(file_hash):
             yield chunk
             assignment += chunk
+        sem.release()
 
         if user_id == None:
             return
@@ -324,8 +335,11 @@ def explanation():
 
     print(f"Creating {amount} keywords and explaining additional ones that are: {custom_keywords}")
 
+
     try:
+        sem.acquire(timeout=1000)
         explanation = create_explaination(file_hash, amount, custom_keywords)
+        sem.release()
     except:
         explanation = ""
     
