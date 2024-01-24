@@ -49,13 +49,19 @@ def create_quiz_old(id: str, questions: int) -> str:
 def create_title(context: str) -> str:
     llm = create_llm()
 
-    result = llm.predict(f"Generate a short concise title based on the context. Context: {context}. Title:", stop=["\n\n"])
+    result = llm.predict(f"Generate a short concise title based on the context nothing more nothing less. Context: {context}. Title:", stop=["\n\n"])
 
+    result = result.strip()
+
+    if result.startswith("\"") and result.endswith("\""):
+        return result[1:-1]
+
+    # print(result)
     return result
 
 
 
 
 def title_test():
-    print(create_title("design patterns")) 
+    print(create_title("What is the Layered Architecture Pattern, and how does it promote maintainability and scalability in software design?")) 
 
