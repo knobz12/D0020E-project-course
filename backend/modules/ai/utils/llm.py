@@ -1,8 +1,9 @@
 import os
+"""
 with open("/home/knobz/Documents/D0020E/D0020E-project-course/backendV2/secret.txt", "r") as file:
     api_key = file.read()
     print(api_key)
-os.environ["OPENAI_API_KEY"] = api_key
+os.environ["OPENAI_API_KEY"] = api_key"""
 
 from llama_index.llms import LlamaCPP, OpenAI
 from llama_index.llms.llama_utils import messages_to_prompt, completion_to_prompt
