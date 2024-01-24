@@ -18,6 +18,7 @@ from llama_index import (
     LLMPredictor,
     ServiceContext,
     StorageContext,
+    PromptTemplate,
     set_global_service_context,
     SimpleDirectoryReader,
     VectorStoreIndex,
@@ -32,6 +33,7 @@ from llama_index.extractors import BaseExtractor
 from llama_index.prompts import PromptTemplate
 
 from typing import Generator
+import gc
 
 def summarize_doc_old(id: str) -> str:
     llm = create_llm()
@@ -169,7 +171,7 @@ def summarize_doc_stream(id: str) -> Generator[str, str, None]:
     llm = create_llm_index()
 
     service_context = ServiceContext.from_defaults(
-    chunk_size=512,
+    chunk_size=1024,
     llm=llm,
     embed_model='local:sentence-transformers/all-MiniLM-L6-v2',
     )
@@ -178,7 +180,8 @@ def summarize_doc_stream(id: str) -> Generator[str, str, None]:
     ChromaReader = download_loader("ChromaReader")
     remote_db = chromadb.HttpClient(settings=Settings(allow_reset=True))
     collection = remote_db.get_or_create_collection("llama-2-papers")
-    query_vector = collection.get(where={"id":id}, limit=10, include=['embeddings'])
+    query_vector = collection.get(where={"id":id}, limit=100, include=['embeddings'])
+    
     
     reader = ChromaReader(
     collection_name="llama-2-papers",
@@ -191,23 +194,26 @@ def summarize_doc_stream(id: str) -> Generator[str, str, None]:
     The summary has to be at least two paragraphs long and no longer than four paragraphs long
     Dont Ever talk about improving the summary
     Don't directly refer to the context text, pretend like you already knew the context information.
-    Don't write the user prompt or the system prompt"""
+    Don't write the user prompt or the system prompt.
+    """
 
-    prompt = """Summarize the given context without refering to it, act like you already know it. Creat at least two paragraphs."""
+    extra_prompt="Write the answer in Swedish."
+
     documents = reader.load_data(query_vector=query_vector["embeddings"])
-    print("############################################")
-    print("This is the context\n")
-    print(documents)
-    print("############################################")
-    index = SummaryIndex.from_documents(documents)
+    node_parser = service_context.node_parser
 
-    query_engine = index.as_query_engine(streaming=True, similarity_top_k=10, response_mode="compact")
+    nodes = node_parser.get_nodes_from_documents(documents)
+    storage_context = StorageContext.from_defaults()
+    storage_context.docstore.add_documents(nodes)
+
+    index = VectorStoreIndex(nodes, storage_context=storage_context)
+    query_engine = index.as_query_engine(streaming=True, similarity_top_k=3)
     streaming_response = query_engine.query(prompt)
 
     for textchunk in streaming_response.response_gen:
         print(textchunk)
         yield textchunk
+    gc.collect()
 
 if __name__ == "__main__":
-    print()
-    #summarize_doc()
+    summarize_doc_stream()

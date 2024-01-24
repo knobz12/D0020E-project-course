@@ -100,13 +100,10 @@ def create_llm_index(api_key=None, openai=False) -> LlamaCPP | OpenAI:
     args = get_args()
     llm = LlamaCPP(
         model_path=args.model_path,
-        max_new_tokens=500,
+        max_new_tokens=1024,
         context_window=10000,
         generate_kwargs={},
         model_kwargs={"n_gpu_layers": args.gpu_layers, "use_mmap": True, "f16_kv": True},
-
-        messages_to_prompt=messages_to_prompt,
-        completion_to_prompt=completion_to_prompt,
         verbose=False
     )
     return llm
