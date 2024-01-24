@@ -5,6 +5,7 @@ from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
 from modules.ai.flashcards import create_flashcards
 from modules.ai.explainerV2 import create_explaination
+from modules.ai.title import create_title
 from webserver.app import app
 import os
 from uuid import uuid4
@@ -259,9 +260,6 @@ def assignment():
         
 
     return app.response_class(stream(), mimetype='text/plain')
-
-def create_title(content: str):
-    return "AI_GENERATED_TITLE"
 
 @app.route("/api/generate_title", methods=["POST"])
 def generate_title():
