@@ -29,6 +29,7 @@ from llama_index.retrievers import (
 )
 from llama_index import download_loader
 from llama_index.extractors import BaseExtractor
+from llama_index.evaluation import ResponseEvaluator
 
 from typing import Generator
 
@@ -173,6 +174,8 @@ def summarize_doc_stream(id: str) -> Generator[str, str, None]:
     embed_model='local:sentence-transformers/all-MiniLM-L6-v2',
     )
     set_global_service_context(service_context)
+    
+    evaluator = ResponseEvaluator(service_context=service_context)
 
     ChromaReader = download_loader("ChromaReader")
     remote_db = chromadb.HttpClient(settings=Settings(allow_reset=True))
@@ -192,12 +195,17 @@ def summarize_doc_stream(id: str) -> Generator[str, str, None]:
     Don't directly refer to the context text, pretend like you already knew the context information.
     Don't write the user prompt or the system prompt"""
 
+    #prompt="""Write a summary of the given text"""
+
     documents = reader.load_data(query_vector=query_vector["embeddings"])
     index = SummaryIndex.from_documents(documents)
 
-    query_engine = index.as_query_engine(streaming=True, similarity_top_k=10)
+    query_engine = index.as_query_engine(streaming=False, similarity_top_k=10)
     streaming_response = query_engine.query(prompt)
 
+    eval_result = evaluator.evaluate(query=prompt, response=streaming_response)
+    print(str(eval_result))
+    return
     for textchunk in streaming_response.response_gen:
         print(textchunk)
         yield textchunk
