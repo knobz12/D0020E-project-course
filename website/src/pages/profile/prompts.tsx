@@ -1,25 +1,31 @@
 import { Page } from "@/components/Page"
 import { PromptItem } from "@/components/PromptItem"
-import searchbar from "@/components/Searchbar"
 import { trpc } from "@/lib/trpc"
 import { AnimatePresence, motion } from "framer-motion"
 import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth"
-import React from "react"
+import React, { useState } from "react"
 import { authOptions } from "../api/auth/[...nextauth]"
 import { Container, Stack, Title } from "@mantine/core"
+import  SearchBar  from "@/components/Searchbar"
 
 interface MyPromptsPageProps {}
 
 export default function MyPromptsPage({}: MyPromptsPageProps) {
     const promptsQuery = trpc.prompts.getMyPrompts.useQuery()
 
+    const [searchValue, setSearchValue] = useState('')
+    const handleSearch = (value: string ) =>{
+        setSearchValue(value)
+        console.log(value)
+    }
+
     return (
         <Page>
             <Container w="100%" size="sm">
                 <Stack>
                     <Title>Your prompts</Title>
-                    {searchbar(promptsQuery.data)}
+                    <SearchBar onSearch={handleSearch}/>
                     <AnimatePresence>
                         {promptsQuery.data?.map((prompt) => {
                             return (

@@ -1,27 +1,38 @@
-import { Page } from "@/components/Page"
-import { PromptItem } from "@/components/PromptItem"
-import { AnimatePresence, motion } from "framer-motion"
-import { GetServerSideProps } from "next"
-import { getServerSession } from "next-auth"
-import React from "react"
-import { Container, Stack, Title } from "@mantine/core"
 
-import { Input,
-    TextInput } from '@mantine/core';
-import SuperJSON from "superjson"
-import { PromptType } from "@prisma/client"
-import { RouterOutput, trpc } from "@/lib/trpc"
+import React, { ChangeEvent, useState } from "react"
+import { TextInput } from '@mantine/core';
 
-interface PromptItemProps {
-    prompt: RouterOutput["prompts"]["getPromptById"]
+
+
+export type SearchProp = {
+    onSearch: (value: string) => void
 }
 
-export default function searchbar({ prompt }: PromptItemProps) {
+const SearchBar = (props: SearchProp) => {
+    const {onSearch} = props;
 
+    const [value, setValue] = useState('Enter search');
+
+    const searchHandler = (event: ChangeEvent<HTMLInputElement>) => {
+        const {target} = event;
+        setValue(target.value)
+        //console.log(value)
+    }
+
+    const keyDownHandler = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if(event.key === 'Enter'){
+            onSearch(value);
+            //console.log(value)
+        }
+    }
 
     return (<div>
-        <TextInput placeholder="Search for promts" />
-    
-
+        <TextInput 
+            placeholder={value}
+            onChange={searchHandler}
+            onKeyDown={keyDownHandler}
+         />
     </div>)
 }
+
+export default SearchBar;
