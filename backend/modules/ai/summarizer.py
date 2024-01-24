@@ -164,6 +164,7 @@ Answer:""".format(summary = previous_summary,context=text)
 
 
 def summarize_doc_stream(id: str) -> Generator[str, str, None]:
+    
     ChromaReader = download_loader("ChromaReader")
     remote_db = chromadb.HttpClient(settings=Settings(allow_reset=True))
     collection = remote_db.get_or_create_collection("llama-2-papers")
