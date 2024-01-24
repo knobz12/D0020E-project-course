@@ -12,19 +12,14 @@ import  SearchBar  from "@/components/Searchbar"
 interface MyPromptsPageProps {}
 
 export default function MyPromptsPage({}: MyPromptsPageProps) {
-    const promptsQuery = trpc.prompts.getMyPrompts.useQuery()
-
     const [searchValue, setSearchValue] = useState('')
+    console.log(searchValue)
     const handleSearch = (searchValue: string ) =>{
         setSearchValue(searchValue)
         console.log(searchValue)
-
-        
-        let temp = promptsQuery.data[0]
-        promptsQuery.data[0] = promptsQuery.data[1];
-        promptsQuery.data[1] = temp;
-        console.log(promptsQuery.data[0].title)
     }
+    const promptsQuery = trpc.prompts.getMyPrompts.useQuery({search:searchValue})
+
 
     return (
         <Page>
