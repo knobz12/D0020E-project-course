@@ -88,15 +88,6 @@ def create_flashcards(id: str, questions: int):
     vectorstore = create_vectorstore()
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
-    # print(docs)
-    
-
-    context = docs["metadatas"]["text"]
-    program = GuidancePydanticProgram(Data, 
-        f"Generate questions and answers to be used as flashcards based on the provided context. Context: {context}",
-        model,
-        verbose=True
-    )
 
 
     obj = {}
