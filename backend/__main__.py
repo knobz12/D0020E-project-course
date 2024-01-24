@@ -10,6 +10,10 @@ def quiz():
     from modules.ai.quizer import quiz_test
     quiz_test()
 
+def title():
+    from modules.ai.title import title_test
+    title_test()
+
 def chunky():
     from modules.files.chunks import Chunkerizer
     Chunkerizer.text_extraction_test()
@@ -26,5 +30,6 @@ if __name__ == "__main__":
     # flashcards()
     # playground()
     # quiz()
+    # title()
     # chunky()
     # test

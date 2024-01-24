@@ -88,26 +88,42 @@ def create_llm() -> LangLlamaCpp:
 
     return llm
 
-def create_llm_index(api_key=None, openai=False) -> LlamaCPP | OpenAI:
-    global llm
-    if llm != None:
-        return llm
+service_context = None
+
+def create_service_context():
+    global service_context
+    if service_context != None:
+        return service_context
+
+def create_llm_index() -> LlamaCPP | OpenAI:
+    global llmi
+    if llmi != None:
+        return llmi
+
+    openai = False
+    api_key = None
 
     if openai:
         llmi = OpenAI(model="gpt-3.5-turbo", temperature=0, api_key=api_key)
-        return llmi
-
-    args = get_args()
-    llm = LlamaCPP(
-        model_path=args.model_path,
-        max_new_tokens=1024,
-        context_window=10000,
-        generate_kwargs={},
-        model_kwargs={"n_gpu_layers": args.gpu_layers, "use_mmap": True, "f16_kv": True},
-        verbose=False
+    else:
+        args = get_args()
+        llmi = LlamaCPP(
+            model_path=args.model_path,
+            max_new_tokens=2000,
+            context_window=10000,
+            generate_kwargs={},
+            model_kwargs={"n_gpu_layers": args.gpu_layers, "use_mmap": True, "f16_kv": True},
+            verbose=False
+        )
+    service_context = ServiceContext.from_defaults(
+        chunk_size=512,
+        llm = llmi,
+        embed_model="local:sentence-transformers/all-MiniLM-L6-v2"
     )
-    return llm
-    
+    set_global_service_context(service_context)
+
+    return llmi
+
     """Create instance of LLaMA 2 model with LlamaCpp API"""
 #service_context = ServiceContext.from_defaults(
 #    chunk_size=512,

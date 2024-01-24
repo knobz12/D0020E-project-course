@@ -444,14 +444,16 @@ export const promptRouter = router({
                 total: Math.ceil(totalPromptCount / 15),
             }
         }),
-    getMyPrompts: userProcedure.query(async function ({
+    getMyPrompts: userProcedure.input(z.object({search:z.string()})).query(async function ({
         input,
         ctx,
     }): Promise<PromptType[]> {
         const prompts = await db.prompt.findMany({
-            orderBy: { createdAt: "desc" },
+            orderBy: { _relevance: {fields:["title"],search:input.search,sort:"asc"} },
             take: 25,
-            where: { userId: ctx.user.id },
+            where: {userId: ctx.user.id, title: input.search === "" ? undefined : {search:input.search}
+
+        },
             include: { course: { select: { name: true } } },
         })
 
