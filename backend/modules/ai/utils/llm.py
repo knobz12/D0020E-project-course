@@ -114,14 +114,6 @@ def create_llm_index() -> LlamaCPP | OpenAI:
             generate_kwargs={},
             model_kwargs={"n_gpu_layers": args.gpu_layers, "use_mmap": True, "f16_kv": True},
 
-    args = get_args()
-    llm = LlamaCPP(
-        model_path=args.model_path,
-        max_new_tokens=500,
-        context_window=10000,
-        generate_kwargs={},
-        model_kwargs={"n_gpu_layers": args.gpu_layers, "use_mmap": True, "f16_kv": True},
-
     service_context = ServiceContext.from_defaults(
         chunk_size=512,
         llm = llmi,
