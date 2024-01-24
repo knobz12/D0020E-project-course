@@ -164,7 +164,16 @@ Answer:""".format(summary = previous_summary,context=text)
 
 
 def summarize_doc_stream(id: str) -> Generator[str, str, None]:
-    
+
+    llm = create_llm_index()
+
+    service_context = ServiceContext.from_defaults(
+    chunk_size=512,
+    llm=llm,
+    embed_model='local:sentence-transformers/all-MiniLM-L6-v2',
+    )
+    set_global_service_context(service_context)
+
     ChromaReader = download_loader("ChromaReader")
     remote_db = chromadb.HttpClient(settings=Settings(allow_reset=True))
     collection = remote_db.get_or_create_collection("llama-2-papers")
@@ -175,24 +184,18 @@ def summarize_doc_stream(id: str) -> Generator[str, str, None]:
     client=remote_db
     )
 
-    llm = create_llm_index()
-
-    service_context = ServiceContext.from_defaults(
-    chunk_size=512,
-    llm=llm,
-    embed_model='local:sentence-transformers/all-MiniLM-L6-v2',
-    )
     part_of_old_prompt = "The most important part is to add 'END' when ending the summary and 'START' when starting summary."
 
     prompt = """I want you to summarize the text as best as you can.
     The summary has to be at least two paragraphs long and no longer than four paragraphs long
     Dont Ever talk about improving the summary
-    Don't directly refer to the context text, pretend like you already knew the context information."""
+    Don't directly refer to the context text, pretend like you already knew the context information.
+    Don't write the user prompt or the system prompt"""
 
-    documents = reader.load_data(query_vector=query_vector["embeddings"], limit=100, where={"id":id})
+    documents = reader.load_data(query_vector=query_vector["embeddings"])
     index = SummaryIndex.from_documents(documents)
 
-    query_engine = index.as_query_engine(streaming=True)
+    query_engine = index.as_query_engine(streaming=True, similarity_top_k=10)
     streaming_response = query_engine.query(prompt)
 
     for textchunk in streaming_response.response_gen:
