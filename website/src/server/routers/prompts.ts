@@ -451,7 +451,8 @@ export const promptRouter = router({
         const prompts = await db.prompt.findMany({
             orderBy: { createdAt: "desc" },
             take: 25,
-            where: { userId: ctx.user.id ,title: input.search === "" ? undefined : {contains:input.search}
+            where: {userId: ctx.user.id, title: input.search === "" ? undefined : {search:input.search}
+
         },
             include: { course: { select: { name: true } } },
         })
