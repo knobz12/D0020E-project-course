@@ -1,8 +1,9 @@
 import os
+"""
 with open("/home/knobz/Documents/D0020E/D0020E-project-course/backendV2/secret.txt", "r") as file:
     api_key = file.read()
     print(api_key)
-os.environ["OPENAI_API_KEY"] = api_key
+os.environ["OPENAI_API_KEY"] = api_key"""
 
 from llama_index.llms import LlamaCPP, OpenAI
 from llama_index.llms.llama_utils import messages_to_prompt, completion_to_prompt
@@ -88,27 +89,27 @@ def create_llm() -> LangLlamaCpp:
     return llm
 
 def create_llm_index(api_key=None, openai=False) -> LlamaCPP | OpenAI:
-    global llmi
-    if llmi != None:
-        return llmi
+    global llm
+    if llm != None:
+        return llm
 
     if openai:
         llmi = OpenAI(model="gpt-3.5-turbo", temperature=0, api_key=api_key)
         return llmi
 
     args = get_args()
-    llmi = LlamaCPP(
+    llm = LlamaCPP(
         model_path=args.model_path,
-        max_new_tokens=2000,
+        max_new_tokens=3000,
         context_window=10000,
         generate_kwargs={},
         model_kwargs={"n_gpu_layers": args.gpu_layers, "use_mmap": True, "f16_kv": True},
 
         messages_to_prompt=messages_to_prompt,
         completion_to_prompt=completion_to_prompt,
-        verbose=True
+        verbose=False
     )
-    return llmi
+    return llm
     
     """Create instance of LLaMA 2 model with LlamaCpp API"""
 #service_context = ServiceContext.from_defaults(

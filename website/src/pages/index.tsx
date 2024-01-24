@@ -1,19 +1,7 @@
 import { Page } from "@/components/Page"
-import {
-    Container,
-    Title,
-    List,
-    ThemeIcon,
-    rem,
-    Group,
-    Button,
-    Text,
-    Box,
-} from "@mantine/core"
-import { IconCheck } from "@tabler/icons-react"
+import { Group, Button } from "@mantine/core"
 import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth"
-import Image from "next/image"
 import Link from "next/link"
 import React from "react"
 import { authOptions } from "./api/auth/[...nextauth]"

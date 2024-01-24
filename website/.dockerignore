@@ -1,14 +1,12 @@
 .git
 node_modules
 .env
-
+.env.*
 .next
 next-env.d.ts
-
-models/*
-
+.prettierrc
 .eslintrc.json
-
 Dockerfile
 .dockerignore
 .docker-compose
+README.md

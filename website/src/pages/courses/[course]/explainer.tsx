@@ -39,6 +39,10 @@ export default function Quiz({}: QuizProps) {
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     const session = await getServerSession(req, res, authOptions)
 
+    if (!session) {
+        return {redirect: {destination:"/api/auth/signin",permanent:false}}
+    }
+
     return {
         props: {
             session,
