@@ -88,16 +88,16 @@ def create_llm() -> LangLlamaCpp:
     return llm
 
 def create_llm_index(api_key=None, openai=False) -> LlamaCPP | OpenAI:
-    global llmi
-    if llmi != None:
-        return llmi
+    global llm
+    if llm != None:
+        return llm
 
     if openai:
         llmi = OpenAI(model="gpt-3.5-turbo", temperature=0, api_key=api_key)
         return llmi
 
     args = get_args()
-    llmi = LlamaCPP(
+    llm = LlamaCPP(
         model_path=args.model_path,
         max_new_tokens=2000,
         context_window=10000,
@@ -106,9 +106,9 @@ def create_llm_index(api_key=None, openai=False) -> LlamaCPP | OpenAI:
 
         messages_to_prompt=messages_to_prompt,
         completion_to_prompt=completion_to_prompt,
-        verbose=True
+        verbose=False
     )
-    return llmi
+    return llm
     
     """Create instance of LLaMA 2 model with LlamaCpp API"""
 #service_context = ServiceContext.from_defaults(
