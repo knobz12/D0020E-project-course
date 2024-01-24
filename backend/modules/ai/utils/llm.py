@@ -27,7 +27,7 @@ from guidance.models._llama_cpp import LlamaCpp
 from llama_cpp import Llama
 from langchain.llms.llamacpp import LlamaCpp as LangLlamaCpp
 
-from llama_index.llms import *
+""" from llama_index.llms import * """
 
 llm: LangLlamaCpp = None
 guid: LlamaCpp = None
