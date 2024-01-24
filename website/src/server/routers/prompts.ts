@@ -449,7 +449,7 @@ export const promptRouter = router({
         ctx,
     }): Promise<PromptType[]> {
         const prompts = await db.prompt.findMany({
-            orderBy: { createdAt: "desc" },
+            orderBy: { _relevance: {fields:["title"],search:input.search,sort:"asc"} },
             take: 25,
             where: {userId: ctx.user.id, title: input.search === "" ? undefined : {search:input.search}
 
