@@ -14,7 +14,8 @@ export function GradientBackground({
         <Box
             component="main"
             className={clsx(
-                center && "flex flex-grow justify-center items-center h-full",
+                center &&
+                    "flex flex-col flex-grow justify-start items-center h-full w-full",
             )}
         >
             <Box
@@ -26,7 +27,7 @@ export function GradientBackground({
                 })}
                 className="top-0 fixed w-screen min-h-screen -z-50"
             />
-            {children}
+            <Box className="flex-grow w-full flex flex-col">{children}</Box>
         </Box>
     )
 }

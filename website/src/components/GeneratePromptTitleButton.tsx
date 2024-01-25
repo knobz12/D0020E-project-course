@@ -14,12 +14,15 @@ export function GeneratePromptTitleButton({
     const [loading, setLoading] = useState<boolean>(false)
 
     async function onClick() {
-        const url = new URL("/api/generate_title", "http://localhost:3030")
+        const url = new URL(
+            "/api/generate_title",
+            process.env.NEXT_PUBLIC_API_URL,
+        )
         url.searchParams.set("prompt_id", promptId)
         setLoading(true)
         try {
             const response: Response | "timeout" | Error = await Promise.race([
-                fetch(url, {method:"POST"}).catch((e) => e),
+                fetch(url, { method: "POST" }).catch((e) => e),
                 await new Promise<"timeout">((res) =>
                     setTimeout(() => res("timeout"), 10000),
                 ),
