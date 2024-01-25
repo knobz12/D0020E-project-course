@@ -15,11 +15,11 @@ export default function MyPromptsPage({}: MyPromptsPageProps) {
     const [searchValue, setSearchValue] = useState('')
     console.log(searchValue)
     const handleSearch = (searchValue: string ) =>{
-        setSearchValue(searchValue)
-        console.log(searchValue)
+        console.log(searchValue.replace(/\s/g, ""))
+        setSearchValue(searchValue.replace(/\s/g, ""))
     }
     const promptsQuery = trpc.prompts.getMyPrompts.useQuery({search:searchValue})
-
+    
 
     return (
         <Page>

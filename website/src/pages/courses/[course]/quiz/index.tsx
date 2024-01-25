@@ -3,6 +3,7 @@ import FileUpload from "@/components/FileUpload"
 import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../api/auth/[...nextauth]"
+import { getApiUrl } from "@/utils/getApiUrl"
 
 interface GenerateQuizPageProps {}
 
@@ -11,7 +12,7 @@ export default function GenerateQuizPage({}: GenerateQuizPageProps) {
         <FileUpload
             type="QUIZ"
             title="Generate quiz"
-            apiUrl="http://localhost:3030/api/quiz"
+            apiUrl={getApiUrl("/api/quiz")}
             parameters={[
                 {
                     id: "questions",

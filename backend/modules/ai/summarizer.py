@@ -168,6 +168,8 @@ Answer:""".format(summary = previous_summary,context=text)
 
 
 def summarize_doc_stream(id: str) -> Generator[str, str, None]:
+    "3603efdbd280746971c65b7146a5f998"
+    print(id)
     part_of_old_prompt = "The most important part is to add 'END' when ending the summary and 'START' when starting summary."
     prompt = """I want you to summarize the text as best as you can.
     The summary has to be at least two paragraphs long and no longer than four paragraphs long
@@ -177,7 +179,11 @@ def summarize_doc_stream(id: str) -> Generator[str, str, None]:
     """
     extra_prompt="Write the answer in Swedish."
 
-
+    prompt = """I want you to create a quiz on the text as best as you can.
+    Pick out six keywords that are important to the text and create a unique question for each.
+    Each question should have only 4 answers and only one should be correct.
+    Put the answers in a random order for each question without making more than 4 answers.
+    Write the output in JSON format and mark the correct answer on each question."""
     llm = create_llm_index(api_key="", openai=False)
 
     service_context = ServiceContext.from_defaults(
@@ -197,7 +203,7 @@ def summarize_doc_stream(id: str) -> Generator[str, str, None]:
     storage_context.docstore.add_documents(nodes)
     
     index = VectorStoreIndex(nodes, storage_context=storage_context)
-    query_engine = index.as_query_engine(streaming=True, similarity_top_k=3)
+    query_engine = index.as_query_engine(streaming=True, similarity_top_k=5)
     streaming_response = query_engine.query(prompt)
 
     for textchunk in streaming_response.response_gen:

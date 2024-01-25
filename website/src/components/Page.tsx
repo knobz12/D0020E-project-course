@@ -33,9 +33,14 @@ export function Page({ children, navbar = true }: PageProps) {
     const { data, status } = useSession()
 
     return (
-        <div className={clsx(inter.className, "min-h-screen")}>
+        <div
+            className={clsx(
+                inter.className,
+                "min-h-screen flex flex-col items-start",
+            )}
+        >
             {navbar && (
-                <Container className="flex justify-between py-4">
+                <header className="flex justify-between py-4 w-full mx-auto max-w-4xl">
                     <Stack w="100%">
                         <Flex justify="space-between" w="100%" align="center">
                             <Link
@@ -167,7 +172,7 @@ export function Page({ children, navbar = true }: PageProps) {
                         </Flex>
                         <BreadcrumbsRouter />
                     </Stack>
-                </Container>
+                </header>
             )}
 
             <GradientBackground center>{children}</GradientBackground>

@@ -3,6 +3,7 @@ import FileUpload from "@/components/FileUpload"
 import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../api/auth/[...nextauth]"
+import { getApiUrl } from "@/utils/getApiUrl"
 
 interface GenerateFlashcardsPageProps {}
 
@@ -11,7 +12,7 @@ export default function GenerateFlashcardsPage({}: GenerateFlashcardsPageProps) 
         <FileUpload
             type="FLASHCARDS"
             title="Generate flashcards"
-            apiUrl="http://localhost:3030/api/flashcards"
+            apiUrl={getApiUrl("/api/flashcards")}
             parameters={[
                 {
                     id: "questions",
