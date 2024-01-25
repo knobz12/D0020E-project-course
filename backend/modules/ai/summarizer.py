@@ -22,7 +22,8 @@ from llama_index import (
     set_global_service_context,
     SimpleDirectoryReader,
     VectorStoreIndex,
-    SummaryIndex
+    SummaryIndex,
+    Document
 )
 from llama_index.retrievers import (
     BaseRetriever,
@@ -179,8 +180,11 @@ def summarize_doc_stream(id: str) -> Generator[str, str, None]:
     """
     extra_prompt="Write the answer in Swedish."
 
-    prompt = """I want you to create a quiz on the text as best as you can.
-    Pick out six keywords that are important to the text and create a unique question for each.
+    #prompt = 
+    """I want you to create a quiz on the text as best as you can.
+    Pick out nine keywords that are important to the text and create a unique question for each.
+    A question can't be the same as a previous question
+    Don't ask questions about keywords.
     Each question should have only 4 answers and only one should be correct.
     Put the answers in a random order for each question without making more than 4 answers.
     Write the output in JSON format and mark the correct answer on each question."""
@@ -203,7 +207,7 @@ def summarize_doc_stream(id: str) -> Generator[str, str, None]:
     storage_context.docstore.add_documents(nodes)
     
     index = VectorStoreIndex(nodes, storage_context=storage_context)
-    query_engine = index.as_query_engine(streaming=True, similarity_top_k=5)
+    query_engine = index.as_query_engine(streaming=True, similarity_top_k=3)
     streaming_response = query_engine.query(prompt)
 
     for textchunk in streaming_response.response_gen:
