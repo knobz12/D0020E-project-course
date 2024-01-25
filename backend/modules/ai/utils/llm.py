@@ -26,13 +26,17 @@ from modules.ai.utils.args import get_args
 from guidance.models._llama_cpp import LlamaCpp
 from llama_cpp import Llama
 from langchain.llms.llamacpp import LlamaCpp as LangLlamaCpp
+from llama_index import download_loader
+from chromadb.config import Settings
+import os, gc, sys, chromadb
+
 
 """ from llama_index.llms import * """
 
 llm: LangLlamaCpp = None
 guid: LlamaCpp = None
-
 llmi: LlamaCPP = None
+openai: str = None
 
 def create_llm_guidance() -> LlamaCpp:
     """Create instance of LLaMA 2 model for use with guidance"""
@@ -95,16 +99,25 @@ def create_service_context():
     if service_context != None:
         return service_context
 
-def create_llm_index() -> LlamaCPP | OpenAI:
+def create_llm_index(api_key=None, **kwargs) -> LlamaCPP | OpenAI:
     global llmi
+    global openai
+
+    if 'openai' in kwargs:
+        openai_kwarg = kwargs.get("openai")
+        if openai_kwarg != openai:
+            if openai is True:
+                del llmi
+                gc.collect()
+            openai = openai_kwarg
+        
+        print(openai is True)
     if llmi != None:
         return llmi
-
-    openai = False
-    api_key = None
-
-    if openai:
+    
+    if openai is True:
         llmi = OpenAI(model="gpt-3.5-turbo", temperature=0, api_key=api_key)
+        
     else:
         args = get_args()
         llmi = LlamaCPP(
@@ -115,35 +128,31 @@ def create_llm_index() -> LlamaCPP | OpenAI:
             model_kwargs={"n_gpu_layers": args.gpu_layers, "use_mmap": True, "f16_kv": True},
             verbose=False
         )
+
     service_context = ServiceContext.from_defaults(
-        chunk_size=512,
+        chunk_size=1024,
         llm = llmi,
         embed_model="local:sentence-transformers/all-MiniLM-L6-v2"
     )
     set_global_service_context(service_context)
-
     return llmi
 
-    """Create instance of LLaMA 2 model with LlamaCpp API"""
-#service_context = ServiceContext.from_defaults(
-#    chunk_size=512,
-#    llm=llm,
-#    embed_model='local'
-#    )
-#set_global_service_context(service_context)
+def retrieve_document(id):
+    ChromaReader = download_loader("ChromaReader")
+    remote_db = chromadb.HttpClient(settings=Settings(allow_reset=True))
+    collection = remote_db.get_or_create_collection("llama-2-papers")
+    query_vector = collection.get(where={"id":id}, limit=100, include=['embeddings'])
+    
+    reader = ChromaReader(
+    collection_name="llama-2-papers",
+    client=remote_db
+    )
 
-#documents = SimpleDirectoryReader("/home/knobz/Documents/D0020E/D0020E-project-course/backend/tests/sample_files/Test_htmls").load_data()
-
-
-"""data_generator = DatasetGenerator.from_documents(documents=documents, service_context=service_context)
-eval_questions = data_generator.generate_questions_from_nodes()
-print(eval_questions)"""
-
-#index = VectorStoreIndex.from_documents(documents)
-#query_engine = index.as_query_engine(streaming=True,similarity_top_k=3, service_context=service_context)
-#query_engine = index.as_query_engine(streaming=True,similarity_top_k=3)
-#response_stream = query_engine.query("Your job is to make quizzes. Make 5 quiz questions about the documents. Each question should have only 4 answer choices each and each new question can't have answers from previous questions, only new answers.Only one answer for each question should be correct. Mark which answers are correct and which answers are false. Give the output in json format.", LLMPredictor=test_llm)
-#response_stream = query_engine.query("Pick out 10 keywords that are important across the documents. For each keyword write a short explaination. Give the output in json format")
-#response_stream = query_engine.query("Vem sköt olof palme?")
-#print(response_stream)
-#response_stream.print_response_stream()
+    
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        documents = reader.load_data(query_vector=query_vector["embeddings"])
+        sys.stdout = old_stdout
+    
+    return documents
