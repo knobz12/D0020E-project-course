@@ -65,9 +65,10 @@ function ProviderButton({
         case "google":
             return (
                 <Button
-                    color="gray.7"
                     onClick={() => signIn(providerId)}
                     size="lg"
+                    variant="white"
+                    color="gray.7"
                 >
                     <Group spacing="xs">
                         <img
@@ -144,21 +145,23 @@ export default function SignInPage({ providers }: SignInPageProps) {
 
                                 <Text ta="center">Available soon</Text>
                                 <Stack>
-                                    <Button
-                                        component="a"
-                                        variant="white"
-                                        color="gray.7"
-                                        size="lg"
-                                    >
-                                        <Group spacing="xs">
-                                            <img
-                                                src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-                                                width={20}
-                                                height={20}
-                                            />
-                                            Sign in with Google
-                                        </Group>
-                                    </Button>
+                                    {!providers?.google && (
+                                        <Button
+                                            component="a"
+                                            variant="white"
+                                            color="gray.7"
+                                            size="lg"
+                                        >
+                                            <Group spacing="xs">
+                                                <img
+                                                    src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                                                    width={20}
+                                                    height={20}
+                                                />
+                                                Sign in with Google
+                                            </Group>
+                                        </Button>
+                                    )}
                                     <Button
                                         bg="#7289da"
                                         size="lg"

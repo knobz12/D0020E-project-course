@@ -3,6 +3,7 @@ import FileUpload from "@/components/FileUpload"
 import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../api/auth/[...nextauth]"
+import { getApiUrl } from "@/utils/getApiUrl"
 
 interface AssignmentPageProps {}
 
@@ -11,7 +12,7 @@ export default function AssignmentPage({}: AssignmentPageProps) {
         <FileUpload
             type="ASSIGNMENT"
             title="Generate assignment"
-            apiUrl="http://localhost:3030/api/assignment"
+            apiUrl={getApiUrl("/api/assignment")}
         />
     )
 }
