@@ -33,17 +33,17 @@ import os, gc, sys, chromadb
 
 """ from llama_index.llms import * """
 
-llm: LangLlamaCpp = None
-guid: LlamaCpp = None
-llmi: LlamaCPP = None
+# llm: LangLlamaCpp = None
+# guid: LlamaCpp = None
+# llmi: LlamaCPP = None
 openai: str = None
 
 def create_llm_guidance() -> LlamaCpp:
     """Create instance of LLaMA 2 model for use with guidance"""
 
-    global guid
-    if guid != None:
-        return guid
+    # global guid
+    # if guid != None:
+    #     return guid
 
     print("Creating llm instance")
     args = get_args()
@@ -69,10 +69,10 @@ def create_llm_guidance() -> LlamaCpp:
 
 def create_llm() -> LangLlamaCpp:
     """Create instance of LLaMA 2 model with LlamaCpp API"""
-    global llm
+    # global llm
 
-    if llm != None:
-        return llm
+    # if llm != None:
+    #     return llm
 
     args = get_args()
     llm = LangLlamaCpp(
@@ -100,7 +100,7 @@ def create_service_context():
         return service_context
 
 def create_llm_index(api_key=None, **kwargs) -> LlamaCPP | OpenAI:
-    global llmi
+    # global llmi
     global openai
 
     if 'openai' in kwargs:
@@ -112,8 +112,8 @@ def create_llm_index(api_key=None, **kwargs) -> LlamaCPP | OpenAI:
             openai = openai_kwarg
         
         print(openai is True)
-    if llmi != None:
-        return llmi
+    # if llmi != None:
+    #     return llmi
     
     if openai is True:
         llmi = OpenAI(model="gpt-3.5-turbo", temperature=0, api_key=api_key)
