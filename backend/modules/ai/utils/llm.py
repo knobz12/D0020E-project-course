@@ -19,6 +19,7 @@ from llama_index import (
     set_global_service_context,
     SimpleDirectoryReader,
     VectorStoreIndex,
+    Document
 )
 
 
@@ -138,21 +139,8 @@ def create_llm_index(api_key=None, **kwargs) -> LlamaCPP | OpenAI:
     return llmi
 
 def retrieve_document(id):
-    ChromaReader = download_loader("ChromaReader")
     remote_db = chromadb.HttpClient(settings=Settings(allow_reset=True))
     collection = remote_db.get_or_create_collection("llama-2-papers")
-    query_vector = collection.get(where={"id":id}, limit=100, include=['embeddings'])
-    
-    reader = ChromaReader(
-    collection_name="llama-2-papers",
-    client=remote_db
-    )
-
-    
-    with open(os.devnull, "w") as devnull:
-        old_stdout = sys.stdout
-        sys.stdout = devnull
-        documents = reader.load_data(query_vector=query_vector["embeddings"])
-        sys.stdout = old_stdout
-    
+    fetched_documents = collection.get(where={"id":id}, limit=100, include=['metadatas'])
+    documents = [Document(text=meta["text"]) for (idx, meta) in enumerate(fetched_documents["metadatas"])]
     return documents
