@@ -98,7 +98,7 @@ Answer:""".format(summary = previous_summary,context=text)
     return summaryTrim
 
 
-def summarize_doc_stream_old(id: str) -> Generator[str, str, None]:
+def summarize_doc_stream(id: str) -> Generator[str, str, None]:
     llm = create_llm()
     vectorstore = create_vectorstore()
 
@@ -167,7 +167,7 @@ Answer:""".format(summary = previous_summary,context=text)
 
 
 
-def summarize_doc_stream(id: str) -> Generator[str, str, None]:
+def summarize_doc_stream_old(id: str) -> Generator[str, str, None]:
     "3603efdbd280746971c65b7146a5f998"
     print(id)
     part_of_old_prompt = "The most important part is to add 'END' when ending the summary and 'START' when starting summary."
