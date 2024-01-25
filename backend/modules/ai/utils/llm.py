@@ -106,7 +106,7 @@ def create_llm_index(api_key=None, **kwargs) -> LlamaCPP | OpenAI:
     if 'openai' in kwargs:
         openai_kwarg = kwargs.get("openai")
         if openai_kwarg != openai:
-            if openai is True:
+            if openai is not None:
                 del llmi
                 gc.collect()
             openai = openai_kwarg

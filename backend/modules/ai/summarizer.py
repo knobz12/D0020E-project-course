@@ -178,7 +178,7 @@ def summarize_doc_stream(id: str) -> Generator[str, str, None]:
     extra_prompt="Write the answer in Swedish."
 
 
-    llm = create_llm_index(api_key="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", openai=False)
+    llm = create_llm_index(api_key="", openai=False)
 
     service_context = ServiceContext.from_defaults(
     chunk_size=1024,
