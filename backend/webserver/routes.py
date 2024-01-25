@@ -18,6 +18,7 @@ from modules.ai.utils.vectorstore import create_collection
 
 from flask import Response, request, make_response, send_from_directory
 from flask_caching import Cache
+from flask_cors import cross_origin
 
 from werkzeug.datastructures import FileStorage
 from chromadb import GetResult
@@ -126,6 +127,7 @@ def get_route_parameters() -> tuple[str, str] | Response:
     return (file_hash, course_id)
 
 @app.route("/api/quiz", methods=["POST"])
+@cross_origin
 def quiz():
     params = get_route_parameters()
     if not isinstance(params, tuple):
@@ -160,7 +162,9 @@ def quiz():
 
     return app.response_class(quiz, mimetype='application/json',status=200)
 
+
 @app.route("/api/flashcards", methods=["POST"])
+@cross_origin()
 def flashcards():
     params = get_route_parameters()
     if not isinstance(params, tuple):
@@ -200,6 +204,7 @@ def flashcards():
     return app.response_class(flashcards, mimetype='application/json',status=200)
 
 @app.route("/api/summary", methods=["POST"])
+@cross_origin()
 def summary():
     params = get_route_parameters()
     if not isinstance(params, tuple):
@@ -230,7 +235,9 @@ def summary():
 
     return app.response_class(stream(), mimetype='text/plain')
 
+
 @app.route("/api/assignment", methods=["POST"])
+@cross_origin()
 def assignment():
     params = get_route_parameters()
     if not isinstance(params, tuple):
@@ -262,6 +269,7 @@ def assignment():
     return app.response_class(stream(), mimetype='text/plain')
 
 @app.route("/api/generate_title", methods=["POST"])
+@cross_origin()
 def generate_title():
     prompt_id = request.args.get("prompt_id")
 
@@ -294,8 +302,8 @@ def generate_title():
 
     return make_response(title, 200)
 
-
 @app.route("/api/explainer", methods=["POST"])
+@cross_origin()
 def explanation():
     params = get_route_parameters()
     if not isinstance(params, tuple):
