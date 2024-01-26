@@ -4,8 +4,8 @@ services:
   web:
     container_name: web
     build:
-      dockerfile: ./website/Dockerfile
       context: ./website
+      dockerfile: ./Dockerfile
     image: web:latest
     restart: on-failure:5
     env_file: ./website/.env.local

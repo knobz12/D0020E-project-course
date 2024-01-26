@@ -1,0 +1,15 @@
+.git
+**/node_modules
+backend
+backendV2
+media
+**/.env
+**/.env.*
+**/.next
+**/next-env.d.ts
+.prettierrc
+.eslintrc.json
+Dockerfile
+.dockerignore
+.docker-compose
+README.md
