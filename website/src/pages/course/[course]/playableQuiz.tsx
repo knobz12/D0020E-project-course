@@ -200,8 +200,10 @@ export default function Quiz(Quizquestions:Content){
         let elements = document.getElementsByClassName("mantine-Checkbox-root ChoicesElement mantine-yxmaw9");
         let ChossenAnswer = []
 
+        
+
         for(let i = 0; i< elements.length; i++){
-            if(elements[i].children[0].children[0].children[0].checked == true){
+            if((elements[i].children[0].children[0].children[0] as HTMLInputElement).checked == true){
                 ChossenAnswer.push(elements[i].children[0].children[1].children[0].innerHTML)
             }
         }
