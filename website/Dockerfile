@@ -31,6 +31,4 @@ WORKDIR /app
 COPY --from=builder /app/.next/standalone .
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-ENV PORT=3000
-ENV HOSTNAME=127.0.0.1
 CMD ["node", "server.js", "-p", "3000"]
