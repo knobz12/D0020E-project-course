@@ -10,6 +10,10 @@ RUN npm i -g pnpm
 FROM base as builder
 WORKDIR /app
 
+ARG NEXT_PUBLIC_API_URL=https://api.aistudybuddy.se
+
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
@@ -29,4 +33,4 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 ENV PORT=3000
 ENV HOSTNAME=127.0.0.1
-CMD ["node", "server.js", "-p", "3000", "-H", "127.0.0.1"]
+CMD ["node", "server.js", "-p", "3000"]

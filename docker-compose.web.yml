@@ -7,6 +7,8 @@ services:
       context: ./website
       dockerfile: ./Dockerfile
     image: web:latest
+    networks:
+      - aisb
     restart: on-failure:5
     env_file: ./website/.env.local
     depends_on:
@@ -15,6 +17,8 @@ services:
   reverse-proxy:
     container_name: proxy
     image: nginx:1.25.3
+    networks:
+      - aisb
     restart: on-failure:5
     ports:
       - 80:80
@@ -28,6 +32,8 @@ services:
   chroma:
     container_name: vectorstore
     image: ghcr.io/chroma-core/chroma:latest
+    networks:
+      - aisb
     restart: on-failure:5
     volumes:
       - chroma_vol:/chroma
@@ -36,6 +42,8 @@ services:
   database:
     container_name: database
     image: postgres:alpine
+    networks:
+      - aisb
     ports:
       - 5432:5432
     restart: on-failure:5
@@ -45,6 +53,9 @@ services:
       - POSTGRES_DB=db
     volumes:
       - "database_data:/var/lib/postgresql/data"
+
+networks:
+  aisb:
 
 volumes:
   chroma_vol:
