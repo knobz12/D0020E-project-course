@@ -13,7 +13,7 @@ export const filesRouter = router({
         )
         .query(async function ({ input }) {
             const DOCS_PER_PAGE = 10
-            const chroma = new ChromaClient({ path: "http://127.0.0.1:8000" })
+            const chroma = new ChromaClient({ path: process.env.CHROMA_URL })
             const collection = await chroma.getOrCreateCollection({
                 name: "llama-2-papers",
             })
