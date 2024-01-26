@@ -1,28 +1,40 @@
 version: "3.9"
 
 services:
+  web:
+    container_name: web
+    build:
+      dockerfile: ./website/Dockerfile
+      context: ./website
+    image: web:latest
+    restart: on-failure:5
+    env_file: ./website/.env.local
+    depends_on:
+      - chroma
+      - database
   reverse-proxy:
     container_name: proxy
-    network_mode: host
     image: nginx:1.25.3
+    restart: on-failure:5
     ports:
       - 80:80
       - 443:443
     volumes:
-      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./aistudybuddy.se.pem:/etc/cf/aistudybuddy.se.pem:ro
-      - ./private.pem:/etc/cf/private.pem:ro
+      - ./config/web-nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/cert.pem:/etc/cf/cert.pem:ro
+      - ./config/key.pem:/etc/cf/key.pem:ro
+    depends_on:
+      - web
   chroma:
     container_name: vectorstore
-    network_mode: host
     image: ghcr.io/chroma-core/chroma:latest
+    restart: on-failure:5
     volumes:
       - chroma_vol:/chroma
     ports:
       - 8000:8000
   database:
     container_name: database
-    network_mode: host
     image: postgres:alpine
     ports:
       - 5432:5432
