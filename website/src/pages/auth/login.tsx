@@ -115,7 +115,7 @@ export default function SignInPage({ providers }: SignInPageProps) {
                     <Stack align="center" spacing={48} w="100%">
                         <Stack align="center">
                             <Image
-                                src="/logo.png"
+                                src="https://cdn.aistudybuddy.se/logo.png"
                                 width={128}
                                 height={128}
                                 loading="eager"

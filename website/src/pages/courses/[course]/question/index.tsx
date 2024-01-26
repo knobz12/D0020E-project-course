@@ -96,7 +96,7 @@ export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
                                         <Flex align="center" gap="lg">
                                             {user === "AI" ? (
                                                 <Image
-                                                    src="/logo.png"
+                                                    src="https://cdn.aistudybuddy.se/logo.png"
                                                     width={64}
                                                     height={64}
                                                     alt="AI Studybuddy"

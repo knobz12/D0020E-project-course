@@ -55,7 +55,7 @@ export function Page({ children, navbar = true }: PageProps) {
                                     loading="eager"
                                     width={64}
                                     height={64}
-                                    src="/logo.png"
+                                    src="https://cdn.aistudybuddy.se/logo.png"
                                     alt="AI Studybuddy logo"
                                 />
                                 <Title>AI Studybuddy</Title>

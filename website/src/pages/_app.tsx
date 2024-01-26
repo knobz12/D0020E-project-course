@@ -18,8 +18,43 @@ function LlamaApp({
         <>
             <Head>
                 <title>AI Studybuddy</title>
-                <link rel="icon" href="/logo.png" />
                 <meta name="robots" content="none" />
+                <link
+                    rel="apple-touch-icon"
+                    sizes="180x180"
+                    href="https://cdn.aistudybuddy.se/apple-touch-icon.png"
+                />
+                <link
+                    rel="icon"
+                    type="image/png"
+                    sizes="32x32"
+                    href="https://cdn.aistudybuddy.se/favicon-32x32.png"
+                />
+                <link
+                    rel="icon"
+                    type="image/png"
+                    sizes="16x16"
+                    href="https://cdn.aistudybuddy.se/favicon-16x16.png"
+                />
+                <link
+                    rel="manifest"
+                    href="https://cdn.aistudybuddy.se/site.webmanifest"
+                />
+                <link
+                    rel="mask-icon"
+                    href="https://cdn.aistudybuddy.se/safari-pinned-tab.svg"
+                    color="#5bbad5"
+                />
+                <link
+                    rel="shortcut icon"
+                    href="https://cdn.aistudybuddy.se/favicon.ico"
+                />
+                <meta name="msapplication-TileColor" content="#01a0da" />
+                <meta
+                    name="msapplication-config"
+                    content="https://cdn.aistudybuddy.se/browserconfig.xml"
+                />
+                <meta name="theme-color" content="#01a0da" />
             </Head>
             <SessionProvider session={pageProps.session}>
                 {process.env.NODE_ENV === "development" && (

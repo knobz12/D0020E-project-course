@@ -7,7 +7,10 @@ import { db } from "@/lib/database"
 const cookiePrefix = "aisb"
 
 export const authOptions: AuthOptions = {
-    theme: { logo: "/logo.png", brandColor: "#01a0da" },
+    theme: {
+        logo: "https://cdn.aistudybuddy.se/logo.png",
+        brandColor: "#01a0da",
+    },
     pages: {
         signIn: "/auth/login",
         signOut: "/auth/login",
