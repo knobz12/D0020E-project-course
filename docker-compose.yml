@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  chroma-dev:
+    container_name: vectorstore-dev
+    image: ghcr.io/chroma-core/chroma:latest
+    restart: on-failure:5
+    volumes:
+      - chroma_vol:/chroma
+    ports:
+      - 8000:8000
+  database-dev:
+    container_name: database-dev
+    image: postgres:alpine
+    ports:
+      - 5432:5432
+    restart: on-failure:5
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=db
+    volumes:
+      - "database_data:/var/lib/postgresql/data"
+
+volumes:
+  chroma_vol:
+  database_data:
