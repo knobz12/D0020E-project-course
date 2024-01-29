@@ -288,7 +288,7 @@ def generate_title():
 
     content: str = (str(prompt[0]))#[0:4096]
     #title: str = create_title(content)
-    title: str = create_title_index(content)
+    title: str = create_title_index(content) + " " + str(datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 
     cur.execute("UPDATE prompts SET title=%s WHERE id=%s;", (title, prompt_id))
     conn.commit()
