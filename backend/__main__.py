@@ -1,11 +1,7 @@
 def app():
     from webserver.app  import start_app
     start_app()
-
-def playground():
-    from modules.ai.playground import run_llm
-    run_llm()
-
+    
 def quiz():
     from modules.ai.quizer import quiz_test
     quiz_test()
@@ -28,7 +24,6 @@ if __name__ == "__main__":
     init_args()
     app()
     # flashcards()
-    # playground()
     # quiz()
     # title()
     # chunky()
