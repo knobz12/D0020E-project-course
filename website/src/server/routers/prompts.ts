@@ -183,7 +183,7 @@ export const promptRouter = router({
             z.object({
                 promptId: z.string().uuid(),
                 quiz: z.object({
-                    title: z.string().max(128).min(3),
+                    title: z.string().max(512).min(3),
                     content: z.object({
                         questions: z.array(
                             z.object({
@@ -252,7 +252,7 @@ export const promptRouter = router({
             z.object({
                 promptId: z.string().uuid(),
                 flashcards: z.object({
-                    title: z.string().max(128),
+                    title: z.string().max(512),
                     content: z.object({
                         questions: z.array(
                             z.object({
@@ -318,7 +318,7 @@ export const promptRouter = router({
             z.object({
                 promptId: z.string().uuid(),
                 assignment: z.object({
-                    title: z.string().max(128).min(3),
+                    title: z.string().max(512).min(3),
                     content: z.object({
                         text: z.string().max(Math.pow(2, 14)),
                     }),
@@ -347,15 +347,14 @@ export const promptRouter = router({
             }
 
             const isUserOwner = prompt.userId === ctx.user.id
-            if (ctx.user.type === "STUDENT" && !isUserOwner) {
-                throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "You can't edit assignments you haven't made.",
-                })
-            }
-
-            // In case of other types being added in future
-            if (ctx.user.type !== "TEACHER") {
+            if (ctx.user.type === "STUDENT") {
+                if (!isUserOwner) {
+                    throw new TRPCError({
+                        code: "UNAUTHORIZED",
+                        message: "You can't edit assignment you haven't made.",
+                    })
+                }
+            } else if (ctx.user.type !== "TEACHER") {
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
                     message:
@@ -370,6 +369,64 @@ export const promptRouter = router({
                 data: {
                     title: input.assignment.title,
                     content: input.assignment.content,
+                },
+            })
+        }),
+    updateSummaryPrompt: userProcedure
+        .input(
+            z.object({
+                promptId: z.string().uuid(),
+                summary: z.object({
+                    title: z.string().max(512).min(3),
+                    content: z.object({
+                        text: z.string().max(Math.pow(2, 12)),
+                    }),
+                }),
+            }),
+        )
+        .mutation(async function ({ ctx, input }): Promise<void> {
+            const prompt = await db.prompt.findUnique({
+                where: { id: input.promptId },
+                select: { userId: true, type: true },
+            })
+
+            if (!prompt) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "The summary you tried to update doesn't exist.",
+                })
+            }
+
+            if (prompt.type !== "SUMMARY") {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "The prompt you tried to edit is not a summary.",
+                })
+            }
+
+            const isUserOwner = prompt.userId === ctx.user.id
+            if (ctx.user.type === "STUDENT") {
+                if (!isUserOwner) {
+                    throw new TRPCError({
+                        code: "UNAUTHORIZED",
+                        message: "You can't edit summaries you haven't made.",
+                    })
+                }
+            } else if (ctx.user.type !== "TEACHER") {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message:
+                        "You must be a teacher to edit prompts you haven't created.",
+                })
+            }
+
+            await db.prompt.update({
+                where: {
+                    id: input.promptId,
+                },
+                data: {
+                    title: input.summary.title,
+                    content: input.summary.content,
                 },
             })
         }),
