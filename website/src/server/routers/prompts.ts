@@ -313,6 +313,66 @@ export const promptRouter = router({
                 },
             })
         }),
+    updateAssignmentPrompt: userProcedure
+        .input(
+            z.object({
+                promptId: z.string().uuid(),
+                assignment: z.object({
+                    title: z.string().max(128).min(3),
+                    content: z.object({
+                        text: z.string().max(Math.pow(2, 14)),
+                    }),
+                }),
+            }),
+        )
+        .mutation(async function ({ ctx, input }): Promise<void> {
+            const prompt = await db.prompt.findUnique({
+                where: { id: input.promptId },
+                select: { userId: true, type: true },
+            })
+
+            if (!prompt) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message:
+                        "The assignment you tried to update doesn't exist.",
+                })
+            }
+
+            if (prompt.type !== "ASSIGNMENT") {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "The prompt you tried to edit is not a quiz.",
+                })
+            }
+
+            const isUserOwner = prompt.userId === ctx.user.id
+            if (ctx.user.type === "STUDENT" && !isUserOwner) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "You can't edit assignments you haven't made.",
+                })
+            }
+
+            // In case of other types being added in future
+            if (ctx.user.type !== "TEACHER") {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message:
+                        "You must be a teacher to edit prompts you haven't created.",
+                })
+            }
+
+            await db.prompt.update({
+                where: {
+                    id: input.promptId,
+                },
+                data: {
+                    title: input.assignment.title,
+                    content: input.assignment.content,
+                },
+            })
+        }),
     deletePromptById: userProcedure
         .input(z.object({ id: z.string().uuid() }))
         .mutation(async function ({ input, ctx }) {

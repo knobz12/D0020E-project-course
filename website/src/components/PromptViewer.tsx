@@ -2,6 +2,7 @@ import { RouterOutput } from "@/lib/trpc"
 import React from "react"
 import { QuizContent } from "./QuizContent"
 import { FlashcardsContent } from "./FlashcardsContent"
+import { AssignmentContent } from "./AssignmentContent"
 
 type PromptViewerProps = {
     title?: string
@@ -52,6 +53,12 @@ export function PromptViewer({ type, ...props }: PromptViewerProps) {
             return (
                 <FlashcardsContent
                     {...(props as PromptViewerProps & { type: "FLASHCARDS" })}
+                />
+            )
+        case "ASSIGNMENT":
+            return (
+                <AssignmentContent
+                    {...(props as PromptViewerProps & { type: "ASSIGNMENT" })}
                 />
             )
         default:
