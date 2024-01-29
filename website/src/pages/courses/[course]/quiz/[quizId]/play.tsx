@@ -6,6 +6,7 @@ import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth/next"
 import { useRouter } from "next/router"
 import GenerateQuizPage from ".."
+import playableQuiz from "../../playableQuiz"
 
 export default function QuizPlay() {
     const router = useRouter()
@@ -33,8 +34,8 @@ function Player({
         type: "QUIZ"
     })["content"]
 
-    // return <div>{playableQuiz(quiz)}</div>
-    return null
+    return <div>{playableQuiz(quiz)}</div>
+   
 }
 
 export const getServerSideProps = (async ({ req, res, params }) => {
