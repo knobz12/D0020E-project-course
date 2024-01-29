@@ -1,30 +1,25 @@
 
-import json
 from modules.ai.utils.llm import *
 from modules.ai.utils.vectorstore import *
 
-import guidance
-from guidance import select, gen
+from guidance import gen
 
 from modules.files.chunks import *
 
-from typing import Any, Generator
 
 
 
 
 def create_title(context: str) -> str:
-    llm = create_llm()
+    llm = create_llm_guidance()
 
-    result = llm.predict(f"Generate a short concise title based on the context nothing more nothing less. Context: {context}. Title:", stop=["\n\n"])
+    result = llm + f"""\
+    Generate a short concise title based on the context nothing more nothing less. Context: {context}. Title: {gen("title", stop='"')}
+    """
+    title = result["title"]
 
-    result = result.strip()
-
-    if result.startswith("\"") and result.endswith("\""):
-        return result[1:-1]
-
-    # print(result)
-    return result
+    # print(title)
+    return title
 
 
 
