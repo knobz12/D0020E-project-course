@@ -7,7 +7,7 @@ from guidance import gen
 from modules.files.chunks import *
 
 
-
+from modules.ai.utils.llm import create_llm, create_llm_index, create_llm_index_query_engine
 
 
 def create_title(context: str) -> str:
@@ -21,7 +21,14 @@ def create_title(context: str) -> str:
     # print(title)
     return title
 
-
+def create_title_index(context: str) -> str:
+    llm = create_llm_index()
+    documents = [Document(text=context)]
+    index = VectorStoreIndex.from_documents(documents)
+    query_engine = index.as_query_engine()
+    response = query_engine.query("Generate a short concise title based on the context nothing more nothing less. It should be no longer than 10 words.")
+    print(response)
+    return response
 
 
 def title_test():

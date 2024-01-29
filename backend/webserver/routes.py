@@ -4,7 +4,7 @@ from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
 from modules.ai.flashcards import create_flashcards
 from modules.ai.explainerV2 import create_explaination
-from modules.ai.title import create_title
+from modules.ai.title import create_title, create_title_index
 from webserver.app import app
 import os
 from uuid import uuid4
@@ -287,7 +287,8 @@ def generate_title():
 
 
     content: str = (str(prompt[0]))[0:4096]
-    title: str = create_title(content)
+    #title: str = create_title(content)
+    title: str = create_title_index(content)
 
     cur.execute("UPDATE prompts SET title=%s WHERE id=%s;", (title, prompt_id))
     conn.commit()
