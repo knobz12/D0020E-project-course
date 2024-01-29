@@ -11,8 +11,14 @@ from uuid import uuid4
 import json
 import datetime
 
+from modules.ai.utils.llm import create_llm_index
+from modules.ai.utils.vectorstore import create_collection
+from llama_index import VectorStoreIndex, ServiceContext
+from llama_index.vector_stores import ChromaVectorStore
+from llama_index.vector_stores import ChromaVectorStore
+from llama_index.memory import ChatMemoryBuffer
 
-from flask import Response, request, make_response, send_from_directory
+from flask import Response, request, make_response
 from flask_caching import Cache
 from flask_cors import cross_origin
 
@@ -121,7 +127,6 @@ def get_route_parameters() -> tuple[str, str] | Response:
     return (file_hash, course_id)
 
 @app.route("/api/quiz", methods=["POST"])
-@cross_origin
 def quiz():
     params = get_route_parameters()
     if not isinstance(params, tuple):
@@ -158,7 +163,6 @@ def quiz():
 
 
 @app.route("/api/flashcards", methods=["POST"])
-@cross_origin()
 def flashcards():
     params = get_route_parameters()
     if not isinstance(params, tuple):
@@ -198,7 +202,6 @@ def flashcards():
     return app.response_class(flashcards, mimetype='application/json',status=200)
 
 @app.route("/api/summary", methods=["POST"])
-@cross_origin()
 def summary():
     params = get_route_parameters()
     if not isinstance(params, tuple):
@@ -231,7 +234,6 @@ def summary():
 
 
 @app.route("/api/assignment", methods=["POST"])
-@cross_origin()
 def assignment():
     params = get_route_parameters()
     if not isinstance(params, tuple):
@@ -263,7 +265,6 @@ def assignment():
     return app.response_class(stream(), mimetype='text/plain')
 
 @app.route("/api/generate_title", methods=["POST"])
-@cross_origin()
 def generate_title():
     prompt_id = request.args.get("prompt_id")
 
@@ -297,7 +298,6 @@ def generate_title():
     return make_response(title, 200)
 
 @app.route("/api/explainer", methods=["POST"])
-@cross_origin()
 def explanation():
     params = get_route_parameters()
     if not isinstance(params, tuple):
@@ -361,3 +361,44 @@ def explanation():
         
 
     return app.response_class(explanation, mimetype='application/json',status=200)
+
+@app.route("/api/chat", methods=["POST"])
+def chat():
+    # user_id = get_user_id()
+
+    # if user_id == None: return make_response(401, "You must be logged in to chat.")
+
+    print(request.args)
+    message = request.args.get("message")
+
+    if message == None or message == "":
+        return make_response(400, "Cannot send an empty message.")
+
+    print(f"Creating response message for {message}")
+    sem.acquire(timeout=1000)
+    llm = create_llm_index()
+    service_context = ServiceContext.from_defaults(
+        chunk_size=512,
+        llm=llm,
+        embed_model='local:sentence-transformers/all-MiniLM-L6-v2',
+    )
+    collection = create_collection()
+    chroma_vector_store = ChromaVectorStore.from_collection(collection=collection)
+    index = VectorStoreIndex.from_vector_store(chroma_vector_store,service_context=service_context)
+    memory = ChatMemoryBuffer.from_defaults(token_limit=1500)
+    chat = index.as_chat_engine(
+        chat_mode="best",
+        memory=memory,
+        system_prompt=(
+            "You are AI Studubuddy assistant able to have normal interactions. You help students with questions about anything."
+        )
+    )
+    print(f"Sending message to chatbot:\n{message}\n")
+    response = chat.chat(message).response
+    print(f"Answer from chatbot:\n{response}\n")
+    # response = llm.complete(message).text
+    # retriever = index.as_retriever
+    # ContextChatEngine(retriever=retriever)
+    sem.release()
+
+    return app.response_class(response, mimetype='plain/text',status=200)
