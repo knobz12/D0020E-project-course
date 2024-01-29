@@ -31,7 +31,7 @@ from llama_index.vector_stores.types import (
 
 
 from modules.ai.utils.args import get_args
-from guidance.models.llama_cpp import LlamaCpp
+from guidance.models import LlamaCpp
 from llama_cpp import Llama
 from langchain.llms.llamacpp import LlamaCpp as LangLlamaCpp
 from modules.ai.utils.vectorstore import create_chroma_client
