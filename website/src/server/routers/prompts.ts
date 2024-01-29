@@ -183,7 +183,7 @@ export const promptRouter = router({
             z.object({
                 promptId: z.string().uuid(),
                 quiz: z.object({
-                    title: z.string().max(128),
+                    title: z.string().max(128).min(3),
                     content: z.object({
                         questions: z.array(
                             z.object({
@@ -444,34 +444,39 @@ export const promptRouter = router({
                 total: Math.ceil(totalPromptCount / 15),
             }
         }),
-    getMyPrompts: userProcedure.input(z.object({search:z.string()})).query(async function ({
-        input,
-        ctx,
-    }): Promise<PromptType[]> {
-        
+    getMyPrompts: userProcedure
+        .input(z.object({ search: z.string() }))
+        .query(async function ({ input, ctx }): Promise<PromptType[]> {
             const prompts = await db.prompt.findMany({
-                orderBy: input.search === 'Enter search' ? undefined : { _relevance: {fields:["title"],search:input.search,sort:"desc"} },
+                orderBy:
+                    input.search === "Enter search"
+                        ? undefined
+                        : {
+                              _relevance: {
+                                  fields: ["title"],
+                                  search: input.search,
+                                  sort: "desc",
+                              },
+                          },
                 take: 25,
-                where: {userId: ctx.user.id, 
-                        //title: (input.search === "" || input.search === "Enter search") ? undefined : {search:input.search}
-    
-            },
+                where: {
+                    userId: ctx.user.id,
+                    //title: (input.search === "" || input.search === "Enter search") ? undefined : {search:input.search}
+                },
                 include: { course: { select: { name: true } } },
             })
-        
-        
 
-        const formatted = await Promise.all(
-            prompts.map(
-                (prompt) =>
-                    new Promise<PromptType>(async (res) => {
-                        res(formatPrompt(prompt, ctx.user.id))
-                    }),
-            ),
-        )
+            const formatted = await Promise.all(
+                prompts.map(
+                    (prompt) =>
+                        new Promise<PromptType>(async (res) => {
+                            res(formatPrompt(prompt, ctx.user.id))
+                        }),
+                ),
+            )
 
-        return formatted
-    }),
+            return formatted
+        }),
     react: userProcedure
         .input(
             z.object({
