@@ -271,13 +271,20 @@ export default function FileUpload({
                 // console.log()
                 setData((current) => (current += str))
             }
+            let timeout: NodeJS.Timeout | null = null
+
+            router.events.on("routeChangeStart", () => {
+                if (timeout !== null) {
+                    console.log("clearing redirect timeout")
+                    clearTimeout(timeout)
+                }
+            })
             // Wait 500 milliseconds before checking for prompt
             await new Promise<void>((res) => setTimeout(res, 500))
 
             const prompt = await utils.prompts.getMyLatestPrompts.fetch({
                 course: router.query.course as string,
             })
-
             if (prompt) {
                 showNotification({
                     color: "blue",
@@ -285,7 +292,7 @@ export default function FileUpload({
                     message:
                         "You will be redirected to your prompt in 2 seconds.",
                 })
-                setTimeout(
+                timeout = setTimeout(
                     () =>
                         router.push(
                             `/courses/${
