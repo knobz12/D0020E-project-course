@@ -92,7 +92,8 @@ export default function ProfilePage({}: ProfilePageProps) {
                         <Title>{auth.data?.user.name}</Title>
                         <Image
                             radius="xl"
-                            src="https://i.imgur.com/4W68gCL.jpg"
+                            alt={`${auth.data?.user.name} avatar`}
+                            src="https://cdn.aistudybuddy.se/avatar.jpg"
                             width={512}
                         />
                         <audio
