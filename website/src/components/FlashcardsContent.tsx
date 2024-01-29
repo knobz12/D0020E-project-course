@@ -40,7 +40,7 @@ export function FlashcardsContent({
     const [editing, setEditing] = useState<boolean>(false)
     // console.log("Content:", content)
 
-    if (editing === true && promptId && title) {
+    if (editing === true && promptId && title !== undefined) {
         return (
             <FlashcardsEditor
                 promptId={promptId}
