@@ -13,8 +13,10 @@ from modules.ai.utils.llm import create_llm, create_llm_index, create_llm_index_
 def create_title(context: str) -> str:
     llm = create_llm_guidance()
 
+    context = context[0:1024]
+
     result = llm + f"""\
-    Generate a short concise title based on the context nothing more nothing less. Context: {context}. Title: {gen("title", stop='"')}
+    Generate a short concise title based on the context nothing more nothing less. Context: {context}. Title: {gen("title", max_tokens=256)}
     """
     title = result["title"]
 
