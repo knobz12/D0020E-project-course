@@ -24,9 +24,9 @@ export function GeneratePromptTitleButton({
         try {
             const response: Response | "timeout" | Error = await Promise.race([
                 fetch(url, { method: "POST" }).catch((e) => e),
-                await new Promise<"timeout">((res) => {
-                    setTimeout(() => res("timeout"), 30000)
-                }),
+                new Promise<"timeout">((res) =>
+                    setTimeout(() => res("timeout"), 30000),
+                ),
             ]).catch((e) => e)
 
             if (response instanceof Error) {
