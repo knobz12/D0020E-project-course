@@ -1,12 +1,15 @@
 import { Page } from "@/components/Page"
+import { PromptViewer } from "@/components/PromptViewer"
 import { db } from "@/lib/database"
 import { trpc } from "@/lib/trpc"
 import { Container, List, Stack, Text, Title } from "@mantine/core"
 import type { Prisma } from "@prisma/client"
 import { GetServerSideProps } from "next"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/router"
 
 export default function SummaryPage() {
+    const { data: session } = useSession()
     const router = useRouter()
     const summary = trpc.prompts.getPromptById.useQuery({
         id: router.query.summaryId! as string,
@@ -16,9 +19,17 @@ export default function SummaryPage() {
     return (
         <Page>
             <Container>
-                <Title>{summary.data?.title}</Title>
                 {summary.data?.type === "SUMMARY" && (
-                    <Text>{summary.data.content.text}</Text>
+                    <PromptViewer
+                        type="SUMMARY"
+                        promptId={summary.data.id}
+                        title={summary.data.title}
+                        editable={
+                            session?.user.type === "TEACHER" ||
+                            summary.data.userId === session?.user.userId
+                        }
+                        content={summary.data.content}
+                    />
                 )}
             </Container>
         </Page>

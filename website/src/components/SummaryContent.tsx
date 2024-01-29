@@ -20,30 +20,30 @@ import { useRouter } from "next/router"
 import { useCallback, useEffect, useState } from "react"
 import { GeneratePromptTitleButton } from "./GeneratePromptTitleButton"
 
-type AssignmentContent = (RouterOutput["prompts"]["getPromptById"] & {
-    type: "ASSIGNMENT"
+type SummaryContent = (RouterOutput["prompts"]["getPromptById"] & {
+    type: "SUMMARY"
 })["content"]
 
-interface AssignmentContentProps {
-    content: AssignmentContent
+interface SummaryContentProps {
+    content: SummaryContent
     title?: string
     editable?: boolean
     promptId?: string
 }
 
-export function AssignmentContent({
+export function SummaryContent({
     promptId,
     title,
     content,
     editable = false,
-}: AssignmentContentProps) {
+}: SummaryContentProps) {
     const router = useRouter()
     const [editing, setEditing] = useState<boolean>(false)
     // console.log("Content:", content)
 
     if (editing === true && promptId && title !== undefined) {
         return (
-            <AssignmentEditor
+            <SummaryEditor
                 promptId={promptId}
                 title={title}
                 content={content}
@@ -57,7 +57,7 @@ export function AssignmentContent({
     }
 
     return (
-        <AssignmentViewer
+        <SummaryViewer
             promptId={promptId}
             title={title}
             content={content}
@@ -67,17 +67,17 @@ export function AssignmentContent({
     )
 }
 
-interface AssignmentViewerProps extends AssignmentContentProps {
+interface SummaryViewerProps extends SummaryContentProps {
     onEdit: () => void
 }
 
-function AssignmentViewer({
+function SummaryViewer({
     title,
     content,
     editable,
     onEdit,
     promptId,
-}: AssignmentViewerProps) {
+}: SummaryViewerProps) {
     const router = useRouter()
 
     const onGenerateSuccess = useCallback(
@@ -124,42 +124,42 @@ function AssignmentViewer({
     )
 }
 
-interface AssignmentEditorProps extends AssignmentContentProps {
+interface SummaryEditorProps extends SummaryContentProps {
     onCancel: () => void
     onFinish: () => void
     title: string
     promptId: string
 }
 
-function AssignmentEditor({
+function SummaryEditor({
     promptId,
     title,
     content,
     editable,
     onCancel,
     onFinish,
-}: AssignmentEditorProps) {
-    const { mutate: mutUpdateAssignment, isLoading } =
-        trpc.prompts.updateAssignmentPrompt.useMutation({
+}: SummaryEditorProps) {
+    const { mutate: mutUpdateSummary, isLoading } =
+        trpc.prompts.updateSummaryPrompt.useMutation({
             onError(data, variables, context) {
                 notifications.show({
                     color: "red",
-                    title: "Quiz failed to update",
+                    title: "Summary failed to update",
                     message: data.message,
                 })
             },
             onSuccess(data, variables, context) {
                 notifications.show({
                     color: "teal",
-                    title: "Quiz updated",
-                    message: "Your quiz has been updated with the new text.",
+                    title: "Summary updated",
+                    message: "Your summary has been updated with the new text.",
                 })
                 onFinish()
             },
         })
     const [data, setData] = useState<{
         title: string
-        content: AssignmentContent
+        content: SummaryContent
     }>({
         title,
         content,
@@ -168,9 +168,7 @@ function AssignmentEditor({
     return (
         <Stack>
             <Flex gap="lg">
-                {/* <Title style={{ flex: 1 }}>{title}</Title> */}
                 <Input
-                    id="assignmentTitle"
                     size="xl"
                     defaultValue={title}
                     style={{ flex: 1 }}
@@ -193,14 +191,14 @@ function AssignmentEditor({
                             modals.openConfirmModal({
                                 title: "Save quiz",
                                 children:
-                                    "Are you sure you want to save this assignment? The previous text will be overwritten.",
+                                    "Are you sure you want to save this summary? The previous text will be overwritten.",
                                 confirmProps: { color: "teal" },
                                 cancelProps: { color: "red" },
                                 labels: { cancel: "Cancel", confirm: "Save" },
                                 onConfirm() {
-                                    mutUpdateAssignment({
+                                    mutUpdateSummary({
                                         promptId,
-                                        assignment: data,
+                                        summary: data,
                                     })
                                 },
                                 onCancel() {},

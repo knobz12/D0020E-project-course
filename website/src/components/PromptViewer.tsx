@@ -3,6 +3,7 @@ import React from "react"
 import { QuizContent } from "./QuizContent"
 import { FlashcardsContent } from "./FlashcardsContent"
 import { AssignmentContent } from "./AssignmentContent"
+import { SummaryContent } from "./SummaryContent"
 
 type PromptViewerProps = {
     title?: string
@@ -59,6 +60,12 @@ export function PromptViewer({ type, ...props }: PromptViewerProps) {
             return (
                 <AssignmentContent
                     {...(props as PromptViewerProps & { type: "ASSIGNMENT" })}
+                />
+            )
+        case "SUMMARY":
+            return (
+                <SummaryContent
+                    {...(props as PromptViewerProps & { type: "SUMMARY" })}
                 />
             )
         default:
