@@ -1,4 +1,3 @@
-from bs4 import BeautifulSoup
 from modules.ai.summarizer import summarize_doc_stream
 from modules.ai.assignment import assignment_doc_stream
 from modules.files.chunks import Chunkerizer
@@ -12,16 +11,11 @@ from uuid import uuid4
 import json
 import datetime
 
-from modules.ai.utils.llm import create_llm_guidance
-from modules.files.hash_and_json.HashFunction import TextToHash
-from modules.ai.utils.vectorstore import create_collection
 
 from flask import Response, request, make_response, send_from_directory
 from flask_caching import Cache
 from flask_cors import cross_origin
 
-from werkzeug.datastructures import FileStorage
-from chromadb import GetResult
 import psycopg2
 import jwt
 from threading import Semaphore
