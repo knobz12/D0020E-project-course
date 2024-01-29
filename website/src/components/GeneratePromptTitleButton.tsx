@@ -1,5 +1,6 @@
 import { Button } from "@mantine/core"
 import { showNotification } from "@mantine/notifications"
+import { useRouter } from "next/router"
 import React, { useState } from "react"
 
 interface GeneratePromptTitleButtonProps {
@@ -23,9 +24,9 @@ export function GeneratePromptTitleButton({
         try {
             const response: Response | "timeout" | Error = await Promise.race([
                 fetch(url, { method: "POST" }).catch((e) => e),
-                await new Promise<"timeout">((res) =>
-                    setTimeout(() => res("timeout"), 10000),
-                ),
+                await new Promise<"timeout">((res) => {
+                    setTimeout(() => res("timeout"), 30000)
+                }),
             ]).catch((e) => e)
 
             if (response instanceof Error) {
