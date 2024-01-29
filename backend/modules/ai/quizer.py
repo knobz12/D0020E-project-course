@@ -63,7 +63,7 @@ def newQuestionJSONGenerator(lm, context: str, answer_count: int, question_count
         # print(answerKey, isAnswerKey)
         import random
         seed = random.randint(0, 1337)
-        answer: str = f"""\"{gen(name=answerKey, stop='"',seed=seed)}\": {select(["True", "False"],name=isAnswerKey)}"""
+        answer: str = f"""\"{gen(name=answerKey, stop='"')}\": {select(["True", "False"],name=isAnswerKey)}"""
         return answer
 
     def gen_question(idx: int):
