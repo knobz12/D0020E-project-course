@@ -1,7 +1,7 @@
 import chromadb
 from chromadb import Collection, ClientAPI
 from chromadb.config import Settings
-from guidance.models._llama_cpp import LlamaCpp
+from guidance.models import LlamaCpp
 from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from langchain.vectorstores.chroma import Chroma
 

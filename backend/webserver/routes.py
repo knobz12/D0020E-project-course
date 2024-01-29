@@ -1,4 +1,4 @@
-from modules.ai.summarizer import summarize_doc_stream
+from modules.ai.summarizer import summarize_doc_stream_old
 from modules.ai.assignment import assignment_doc_stream
 from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
@@ -212,7 +212,7 @@ def summary():
     def stream():
         summary = ""
         sem.acquire(timeout=1000)
-        for chunk in summarize_doc_stream(file_hash):
+        for chunk in summarize_doc_stream_old(file_hash):
             yield chunk
             summary += chunk
         sem.release()
