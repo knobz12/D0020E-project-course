@@ -10,6 +10,8 @@ from llama_index.llms.llama_utils import messages_to_prompt, completion_to_promp
 from llama_index.node_parser import SimpleNodeParser
 from llama_index.langchain_helpers.text_splitter import TokenTextSplitter
 from llama_index.evaluation import DatasetGenerator, RelevancyEvaluator
+from llama_index.vector_stores import ChromaVectorStore, VectorStoreQuery
+from llama_index.query_engine import RetrieverQueryEngine
 #import torch Only to force cuda
 #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 from llama_index import (
@@ -21,13 +23,18 @@ from llama_index import (
     VectorStoreIndex,
     Document
 )
+from llama_index.vector_stores.types import (
+    MetadataFilter,
+    MetadataFilters,
+    FilterOperator,
+)
 
 
 from modules.ai.utils.args import get_args
-from guidance.models._llama_cpp import LlamaCpp
+from guidance.models.llama_cpp import LlamaCpp
 from llama_cpp import Llama
 from langchain.llms.llamacpp import LlamaCpp as LangLlamaCpp
-from llama_index import download_loader
+from modules.ai.utils.vectorstore import create_chroma_client
 from chromadb.config import Settings
 import os, gc, sys, chromadb
 
@@ -138,9 +145,28 @@ def create_llm_index(api_key=None, **kwargs) -> LlamaCPP | OpenAI:
     set_global_service_context(service_context)
     return llmi
 
-def retrieve_document(id):
+def create_llm_index_query_engine(id, llmi):
+    service_context = ServiceContext.from_defaults(
+    chunk_size=1024,
+    llm=llmi,
+    embed_model='local:sentence-transformers/all-MiniLM-L6-v2',
+    )
+    
+    set_global_service_context(service_context)
+
+    filters = MetadataFilters(
+    filters=[
+        MetadataFilter(
+            key="id", operator=FilterOperator.EQ, value=id, limit=100
+        ),
+    ]
+)
     remote_db = chromadb.HttpClient(settings=Settings(allow_reset=True))
     collection = remote_db.get_or_create_collection("llama-2-papers")
-    fetched_documents = collection.get(where={"id":id}, limit=100, include=['metadatas'])
-    documents = [Document(text=meta["text"]) for (idx, meta) in enumerate(fetched_documents["metadatas"])]
-    return documents
+    
+    vector_store = ChromaVectorStore(chroma_collection=collection, service_context=service_context)
+    index = VectorStoreIndex.from_vector_store(vector_store=vector_store, service_context=service_context)
+    retriever = index.as_retriever(filters=filters)
+    query_engine = RetrieverQueryEngine.from_args(retriever, streaming=True, similarity_top_k=3)
+
+    return query_engine

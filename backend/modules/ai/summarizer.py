@@ -11,9 +11,14 @@ from langchain.vectorstores import Chroma
 import chromadb
 from chromadb.utils import embedding_functions
 from chromadb.config import Settings
-from modules.ai.utils.llm import create_llm, create_llm_index, retrieve_document
+from modules.ai.utils.llm import create_llm, create_llm_index, create_llm_index_query_engine
 from modules.ai.utils.vectorstore import  create_vectorstore
 from llama_index.vector_stores import ChromaVectorStore, VectorStoreQuery
+from llama_index.vector_stores.types import (
+    MetadataFilter,
+    MetadataFilters,
+    FilterOperator,
+)
 from llama_index import (
     LLMPredictor,
     ServiceContext,
@@ -25,6 +30,7 @@ from llama_index import (
     SummaryIndex,
     Document
 )
+from llama_index.query_engine import RetrieverQueryEngine
 from llama_index.retrievers import (
     BaseRetriever,
     VectorIndexRetriever,
@@ -99,7 +105,7 @@ Answer:""".format(summary = previous_summary,context=text)
     return summaryTrim
 
 
-def summarize_doc_stream(id: str) -> Generator[str, str, None]:
+def summarize_doc_stream_old(id: str) -> Generator[str, str, None]:
     llm = create_llm()
     vectorstore = create_vectorstore()
 
@@ -168,51 +174,23 @@ Answer:""".format(summary = previous_summary,context=text)
 
 
 
-def summarize_doc_stream_old(id: str) -> Generator[str, str, None]:
-    "3603efdbd280746971c65b7146a5f998"
-    print(id)
-    part_of_old_prompt = "The most important part is to add 'END' when ending the summary and 'START' when starting summary."
+def summarize_doc_stream_index(id: str) -> Generator[str, str, None]:
+    # part_of_old_prompt = "The most important part is to add 'END' when ending the summary and 'START' when starting summary."
     prompt = """I want you to summarize the text as best as you can.
     The summary has to be at least two paragraphs long and no longer than four paragraphs long
     Dont Ever talk about improving the summary
     Don't directly refer to the context text, pretend like you already knew the context information.
     Don't write the user prompt or the system prompt.
     """
-    extra_prompt="Write the answer in Swedish."
 
-    #prompt = 
-    """I want you to create a quiz on the text as best as you can.
-    Pick out nine keywords that are important to the text and create a unique question for each.
-    A question can't be the same as a previous question
-    Don't ask questions about keywords.
-    Each question should have only 4 answers and only one should be correct.
-    Put the answers in a random order for each question without making more than 4 answers.
-    Write the output in JSON format and mark the correct answer on each question."""
     llm = create_llm_index(api_key="", openai=False)
-
-    service_context = ServiceContext.from_defaults(
-    chunk_size=1024,
-    llm=llm,
-    embed_model='local:sentence-transformers/all-MiniLM-L6-v2',
-    )
-    
-    set_global_service_context(service_context)
-
-    documents = retrieve_document(id)
-
-
-    node_parser = service_context.node_parser
-    nodes = node_parser.get_nodes_from_documents(documents)
-    storage_context = StorageContext.from_defaults()
-    storage_context.docstore.add_documents(nodes)
-    
-    index = VectorStoreIndex(nodes, storage_context=storage_context)
-    query_engine = index.as_query_engine(streaming=True, similarity_top_k=3)
+    query_engine = create_llm_index_query_engine(id, llm)
     streaming_response = query_engine.query(prompt)
 
     for textchunk in streaming_response.response_gen:
         yield textchunk
     gc.collect()
+    pass
 
 if __name__ == "__main__":
     summarize_doc_stream()
