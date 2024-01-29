@@ -57,6 +57,18 @@ export function BreadcrumbsRouter() {
                             name: router.query.course as string,
                         },
                     ]
+                case "/courses/[course]/question":
+                    return [
+                        { href: "/", name: "Courses" },
+                        {
+                            href: `/courses/${router.query.course}`,
+                            name: router.query.course as string,
+                        },
+                        {
+                            href: `/courses/${router.query.course}/question`,
+                            name: "Question",
+                        },
+                    ]
                 case "/courses/[course]/quiz":
                     return [
                         { href: "/", name: "Courses" },

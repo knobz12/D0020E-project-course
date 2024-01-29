@@ -7,6 +7,7 @@ namespace NodeJS {
         NEXTAUTH_URL: string
         NEXTAUTH_SECRET: string
         CHROMA_URL: string
+        TRPC_URL: string
         DATABASE_URL: string
         GITHUB_ID: string
         GITHUB_SECRET: string

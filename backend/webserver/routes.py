@@ -304,23 +304,6 @@ def explanation():
         return params
     (file_hash, course_id) = params
 
-
-    if 'file' not in request.files:
-        return make_response("Missing file", 406)
-    
-    file = request.files["file"]
-    file_size = file.seek(0, os.SEEK_END)
-    file.seek(0)
-    print("File size:",file_size)
-
-    if file_size <= 0:
-        return make_response("Cannot send empty file! 😡", 406)
-
-    course = request.args.get("course")
-    if course == None:
-        return make_response("Missing required course parameter", 400)
-
-    course_id = get_course_id_from_name(course)
     user_id = get_user_id()
 
     query = [request.args.get("amount"), request.args.get("keywords")]
