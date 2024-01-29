@@ -28,6 +28,8 @@ from threading import Semaphore
 
 # To assure the LLM only works on one prompt at a time
 sem = Semaphore()
+import modules
+modules.sem = sem
 
 cache = Cache(app,config={"CACHE_TYPE":"SimpleCache"})
 
