@@ -190,7 +190,6 @@ def summarize_doc_stream_index(id: str) -> Generator[str, str, None]:
     for textchunk in streaming_response.response_gen:
         yield textchunk
     gc.collect()
-    pass
 
 if __name__ == "__main__":
-    summarize_doc_stream()
+    summarize_doc_stream_old()

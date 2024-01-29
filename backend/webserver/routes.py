@@ -1,4 +1,4 @@
-from modules.ai.summarizer import summarize_doc_stream
+from modules.ai.summarizer import summarize_doc_stream_old
 from modules.ai.assignment import assignment_doc_stream
 from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
