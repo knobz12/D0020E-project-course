@@ -58,4 +58,4 @@ def create_explaination(id: str, amount: int = 10, custom_keywords: list = []) -
         response_stream2 = query_engine.query(prompt1)
     else:
         response_stream2 = {}
-    return json.dumps(f"{response_stream1}\n{response_stream2}".replace("\n",""))
+    return json.dumps(f"{response_stream1}\n{response_stream2}".replace("\n","").replace("\\", ""))
