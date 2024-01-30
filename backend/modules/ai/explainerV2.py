@@ -48,16 +48,14 @@ def calculate_questions_per_doc(total_docs: int, total_questions: int, doc_index
     return questions_for_current_doc
 
 def create_explaination(id: str, amount: int = 10, custom_keywords: list = []) -> str:
-    prompt = "Pick out {str(amount)} keywords that are important across the document. For each keyword write a short explaination. Give the output in json format.""Pick out {str(amount)} keywords that are important across the document. For each keyword write a short explaination. Give the output in json format."
-    if custom_keywords != []:
-        prompt1 = "These are some keywords that needs to be explained: {custom_keywords}. For each keyword write a short explaination. Give the output in json format."
+    prompt = f"Pick out {str(amount)} keywords that are important across the document. For each keyword write a short explaination. Give the output in json format.""Pick out {str(amount)} keywords that are important across the document. For each keyword write a short explaination. Give the output in json format."
+    
     llm = create_llm_index(api_key="", openai=False)
     query_engine = create_llm_index_query_engine(id, llm)
     response_stream1 = query_engine.query(prompt)
-    response_stream2 = query_engine.query(prompt1)
-
-    print(response_stream1)
-    print(response_stream2)
-    print(json.detect_encoding(response_stream1))
-    
+    if custom_keywords != []:
+        prompt1 = f"These are some keywords that needs to be explained: {custom_keywords}. For each keyword write a short explaination. Give the output in json format."
+        response_stream2 = query_engine.query(prompt1)
+    else:
+        response_stream2 = {}
     return json.dumps(f"{response_stream1}\n{response_stream2}")
