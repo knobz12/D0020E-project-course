@@ -561,23 +561,16 @@ export const promptRouter = router({
             }
         }),
     getMyPrompts: userProcedure
-        .input(z.object({ search: z.string() }))
+        .input(z.object({ search: z.string().nullish() }))
         .query(async function ({ input, ctx }): Promise<PromptType[]> {
             const prompts = await db.prompt.findMany({
-                orderBy:
-                    input.search === "Enter search"
-                        ? undefined
-                        : {
-                              _relevance: {
-                                  fields: ["title"],
-                                  search: input.search,
-                                  sort: "desc",
-                              },
-                          },
+                orderBy: { createdAt: "desc" },
                 take: 25,
                 where: {
                     userId: ctx.user.id,
-                    //title: (input.search === "" || input.search === "Enter search") ? undefined : {search:input.search}
+                    title: !!input.search
+                        ? { contains: `${input.search}`, mode: "insensitive" }
+                        : undefined,
                 },
                 include: { course: { select: { name: true } } },
             })
