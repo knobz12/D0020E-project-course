@@ -221,15 +221,14 @@ export const promptRouter = router({
             }
 
             const isUserOwner = prompt.userId === ctx.user.id
-            if (ctx.user.type === "STUDENT" && !isUserOwner) {
+            if (ctx.user.type === "STUDENT") {
+                if (!isUserOwner) {
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
-                    message: "You can't edit quizes you haven't made.",
+                        message: "You can't edit flashcards you haven't made.",
                 })
             }
-
-            // In case of other types being added in future
-            if (ctx.user.type !== "TEACHER") {
+            } else if (ctx.user.type !== "TEACHER") {
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
                     message:
@@ -449,18 +448,18 @@ export const promptRouter = router({
 
             const isUserOwner = prompt.userId === ctx.user.id
 
-            if (ctx.user.type === "STUDENT" && !isUserOwner) {
+            if (ctx.user.type === "STUDENT") {
+                if (!isUserOwner) {
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
-                    message: "You can only delete prompt you have made.",
+                        message: "You can't edit summaries you haven't made.",
                 })
             }
-
-            if (ctx.user.type !== "TEACHER") {
+            } else if (ctx.user.type !== "TEACHER") {
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
                     message:
-                        "You can't delete others prompts unless you're a teacher.",
+                        "You must be a teacher to edit prompts you haven't created.",
                 })
             }
 
