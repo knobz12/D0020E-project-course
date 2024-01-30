@@ -290,7 +290,7 @@ def generate_title():
 
     content: str = (str(prompt[0]))#[0:4096]
     #title: str = create_title(content)
-    title: str = create_title_index(content) + " " + str(datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+    title: str = create_title_index(content) + " " + str(datetime.datetime.today().strftime('%Y-%m-%d'))
 
     cur.execute("UPDATE prompts SET title=%s WHERE id=%s;", (title, prompt_id))
     conn.commit()
@@ -336,13 +336,13 @@ def explanation():
         print("Found user:", user_id)
         print("Saving explainations")
     
-        """conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
-        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "SUMMARY", f"Summary {updated_at}", json.dumps({"text":summary}), user_id, course_id))
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "EXPLAINER", f"Explaination {updated_at}", json.dumps({"text":explanation}), user_id, course_id))
         conn.commit()
-        conn.close()"""
+        conn.close()
 
         
 
