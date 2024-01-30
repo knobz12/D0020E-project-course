@@ -284,7 +284,9 @@ export default function FileUpload({
 
             const prompt = await utils.prompts.getMyLatestPrompts.fetch({
                 course: router.query.course as string,
+                type,
             })
+
             if (prompt) {
                 showNotification({
                     color: "blue",
