@@ -55,5 +55,9 @@ def create_explaination(id: str, amount: int = 10, custom_keywords: list = []) -
     query_engine = create_llm_index_query_engine(id, llm)
     response_stream1 = query_engine.query(prompt)
     response_stream2 = query_engine.query(prompt1)
+
+    print(response_stream1)
+    print(response_stream2)
+    print(json.detect_encoding(response_stream1))
     
     return json.dumps(f"{response_stream1}\n{response_stream2}")
