@@ -4,12 +4,12 @@ Creating more detailed explanations from text documents
 from typing import Any
 from modules.ai.utils.llm import create_llm
 from modules.ai.utils.llm import create_llm_guidance
-from modules.ai.utils.vectorstore import  create_vectorstore
+from modules.ai.utils.vectorstore import  create_collection
 from summarizer import summarize_doc
 
 def summarize_doc(id: str) -> str:
     llm = create_llm()
-    vectorstore = create_vectorstore()
+    vectorstore = create_collection()
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
     print(docs)

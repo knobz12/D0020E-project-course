@@ -1,0 +1,10 @@
+.git
+models
+**/__pycache__
+node_modules
+.env
+.env.*
+Dockerfile
+.dockerignore
+.docker-compose
+README.md

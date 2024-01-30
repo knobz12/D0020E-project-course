@@ -7,12 +7,11 @@ Creating summary of document(s) in the database
 # Optional
 * Argument for document id in database to create summary for
 """
-from langchain.vectorstores import Chroma
 import chromadb
 from chromadb.utils import embedding_functions
 from chromadb.config import Settings
 from modules.ai.utils.llm import create_llm, create_llm_index, create_llm_index_query_engine
-from modules.ai.utils.vectorstore import  create_vectorstore
+from modules.ai.utils.vectorstore import  create_collection 
 from llama_index.vector_stores import ChromaVectorStore, VectorStoreQuery
 from llama_index.vector_stores.types import (
     MetadataFilter,
@@ -46,7 +45,7 @@ import sys, os
 
 def summarize_doc_old(id: str) -> str:
     llm = create_llm()
-    vectorstore = create_vectorstore()
+    vectorstore = create_collection()
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
     print(docs)
@@ -108,7 +107,7 @@ Answer:""".format(summary = previous_summary,context=text)
 
 def summarize_doc_stream_old(id: str) -> Generator[str, str, None]:
     llm = create_llm()
-    vectorstore = create_vectorstore()
+    vectorstore = create_collection()
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
     print(docs)
