@@ -1,13 +1,12 @@
 
-from langchain.vectorstores import Chroma
 from modules.ai.utils.llm import create_llm
-from modules.ai.utils.vectorstore import  create_vectorstore
+from modules.ai.utils.vectorstore import  create_collection 
 
 
 from typing import Generator
 def assignment_doc_stream(id: str) -> Generator[str, str, None]:
     llm = create_llm()
-    vectorstore = create_vectorstore()
+    vectorstore = create_collection()
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
     print(docs)
