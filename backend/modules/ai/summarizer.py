@@ -7,12 +7,11 @@ Creating summary of document(s) in the database
 # Optional
 * Argument for document id in database to create summary for
 """
-from langchain.vectorstores import Chroma
 import chromadb
 from chromadb.utils import embedding_functions
 from chromadb.config import Settings
 from modules.ai.utils.llm import create_llm, create_llm_index, create_llm_index_query_engine
-from modules.ai.utils.vectorstore import  create_vectorstore
+from modules.ai.utils.vectorstore import  create_collection 
 from llama_index.vector_stores import ChromaVectorStore, VectorStoreQuery
 from llama_index.vector_stores.types import (
     MetadataFilter,
@@ -39,13 +38,14 @@ from llama_index import download_loader
 from llama_index.extractors import BaseExtractor
 from llama_index.prompts import PromptTemplate
 
+import modules
 from typing import Generator
 import gc
 import sys, os
 
 def summarize_doc_old(id: str) -> str:
     llm = create_llm()
-    vectorstore = create_vectorstore()
+    vectorstore = create_collection()
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
     print(docs)
@@ -107,7 +107,7 @@ Answer:""".format(summary = previous_summary,context=text)
 
 def summarize_doc_stream_old(id: str) -> Generator[str, str, None]:
     llm = create_llm()
-    vectorstore = create_vectorstore()
+    vectorstore = create_collection()
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
     print(docs)
@@ -172,7 +172,11 @@ Answer:""".format(summary = previous_summary,context=text)
     print(texts)
     # return summaryTrim
 
+def get_user_canceled():
+    return modules.user_canceled
 
+def set_user_canceled(value: bool):
+    modules.user_canceled = value
 
 def summarize_doc_stream_index(id: str) -> Generator[str, str, None]:
     # part_of_old_prompt = "The most important part is to add 'END' when ending the summary and 'START' when starting summary."
@@ -182,13 +186,31 @@ def summarize_doc_stream_index(id: str) -> Generator[str, str, None]:
     Don't directly refer to the context text, pretend like you already knew the context information.
     Don't write the user prompt or the system prompt.
     """
+    if get_user_canceled() == True:
+        gc.collect()
+        set_user_canceled(False)
+        raise GeneratorExit("Lol")
 
     llm = create_llm_index(api_key="", openai=False)
     query_engine = create_llm_index_query_engine(id, llm)
     streaming_response = query_engine.query(prompt)
 
+    # chunks = 0
+    from time import sleep
     for textchunk in streaming_response.response_gen:
+        # sleep(0.1)
+        # if chunks > 10:
+        if get_user_canceled() == True:
+            print("USER CANCELED REQUEST")
+            llm = None
+            query_engine = None
+            gc.collect()
+            set_user_canceled(False)
+            raise GeneratorExit("Lol")
+        # chunks += 1
         yield textchunk
+    llm = None
+    query_engine = None
     gc.collect()
 
 if __name__ == "__main__":

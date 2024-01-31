@@ -1,3 +1,4 @@
+# from modules.ai.summarizer import summarize_doc_stream_old
 from modules.ai.summarizer import summarize_doc_stream_old
 from modules.ai.assignment import assignment_doc_stream
 from modules.files.chunks import Chunkerizer
@@ -33,40 +34,18 @@ modules.sem = sem
 
 cache = Cache(app,config={"CACHE_TYPE":"SimpleCache"})
 
-@app.route("/static/<path:path>")
-def static_serve(path: str):
-    res = app.send_static_file(path)
-    res.headers.set("cache-control","max-age: 60")
-    return res
-
-
-@app.route("/")
-def home_page():
-    return app.send_static_file("index.html")
-
-
-@app.after_request
-def add_cache_header(response: Response):
-    url = request.url
-    set_cache = url.endswith(".html") or url.endswith(".css")or url.endswith(".js") or url.endswith(".woff2")
-    if set_cache:
-        response.headers.set("cache-control","max-age: 60")
-
-    return response
-
-
-@app.route("/quiz")
-def quiz_page():
-    return app.send_static_file("quiz.html")
-
+@app.route("/api/health")
+def health():
+    return make_response("Healthy", 200)
 
 def get_user_id() -> str | None:
     token = request.cookies.get("aisb.session-token")
-    token = token.replace("'","\"")
+    print("User token:",token)
 
     if token == None:
         return None
 
+    token = token.replace("'","\"")
     token = jwt.decode(token, "123",algorithms=["HS256"])
 
     #encrypted_token = jwe.encrypt('Secret message', 'Token secret', algorithm='dir', encryption='A128GCM')
@@ -203,20 +182,54 @@ def flashcards():
 
     return app.response_class(flashcards, mimetype='application/json',status=200)
 
+modules.user_id = None
+modules.user_canceled = False
+
+@app.route("/api/cancel", methods=["POST"])
+def cancel():
+    # user_id = get_user_id()
+
+    # print("Checking user id before cancel", user_id)
+    # if user_id == None:
+    #     return make_response("Log in first", 401)
+
+    # if user_id != modules.user_id:
+    #     return make_response("You can't cancel others request", 401)
+
+    modules.user_canceled = True
+    return make_response("Great success", 200)
+    
+
 @app.route("/api/summary", methods=["POST"])
 def summary():
     params = get_route_parameters()
+
     if not isinstance(params, tuple):
         return params
+
     (file_hash, course_id) = params
     user_id = get_user_id()
+    if user_id == None:
+        return make_response("Log in first", 401)
+
+    modules.user_id = user_id
 
     def stream():
         summary = ""
         sem.acquire(timeout=1000)
-        for chunk in summarize_doc_stream_old(file_hash):
-            yield chunk
-            summary += chunk
+        # for chunk in summarize_doc_stream_old(file_hash):
+        print("CHUNKING")
+        try:
+            for chunk in summarize_doc_stream_old(file_hash):
+                yield chunk
+                summary += chunk
+        except GeneratorExit:
+            print("USER EXITED ZUCCCES")
+            # import gc
+            # torch.cuda.empty_cache()
+            # gc.collect()
+            sem.release()
+            return make_response("Canceled", 200)
         sem.release()
 
         if user_id == None:
@@ -288,9 +301,9 @@ def generate_title():
 
 
 
-    content: str = (str(prompt[0]))#[0:4096]
-    #title: str = create_title(content)
-    title: str = create_title_index(content) + " " + str(datetime.datetime.today().strftime('%Y-%m-%d'))
+    content: str = (str(prompt[0]))[0:1024]
+    title: str = create_title(content)
+    # title: str = create_title_index(content) + " " + str(datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 
     cur.execute("UPDATE prompts SET title=%s WHERE id=%s;", (title, prompt_id))
     conn.commit()

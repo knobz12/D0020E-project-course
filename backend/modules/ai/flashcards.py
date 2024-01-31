@@ -85,7 +85,7 @@ class Data(BaseModel):
 
 def create_flashcards(id: str, questions: int):
     gllm = create_llm_guidance()
-    vectorstore = create_vectorstore()
+    vectorstore = create_collection()
 
     docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
 

@@ -7,8 +7,10 @@ import {
 } from "../trpc"
 import { db } from "@/lib/database"
 import { TRPCError } from "@trpc/server"
-import { Prisma, Prompt } from "@prisma/client"
+import type { Prompt } from "@prisma/client"
+import { PromptType as PrismaPromptType } from "@prisma/client"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
+import { addMinutes, isFuture, isPast, subMinutes } from "date-fns"
 
 type PromptTypeContent = {
     SUMMARY: { text: string }
@@ -231,15 +233,14 @@ export const promptRouter = router({
             }
 
             const isUserOwner = prompt.userId === ctx.user.id
-            if (ctx.user.type === "STUDENT" && !isUserOwner) {
-                throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "You can't edit quizes you haven't made.",
-                })
-            }
-
-            // In case of other types being added in future
-            if (ctx.user.type !== "TEACHER") {
+            if (ctx.user.type === "STUDENT") {
+                if (!isUserOwner) {
+                    throw new TRPCError({
+                        code: "UNAUTHORIZED",
+                        message: "You can't edit flashcards you haven't made.",
+                    })
+                }
+            } else if (ctx.user.type !== "TEACHER") {
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
                     message:
@@ -459,18 +460,18 @@ export const promptRouter = router({
 
             const isUserOwner = prompt.userId === ctx.user.id
 
-            if (ctx.user.type === "STUDENT" && !isUserOwner) {
-                throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "You can only delete prompt you have made.",
-                })
-            }
-
-            if (ctx.user.type !== "TEACHER") {
+            if (ctx.user.type === "STUDENT") {
+                if (!isUserOwner) {
+                    throw new TRPCError({
+                        code: "UNAUTHORIZED",
+                        message: "You can't edit summaries you haven't made.",
+                    })
+                }
+            } else if (ctx.user.type !== "TEACHER") {
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
                     message:
-                        "You can't delete others prompts unless you're a teacher.",
+                        "You must be a teacher to edit prompts you haven't created.",
                 })
             }
 
@@ -572,23 +573,16 @@ export const promptRouter = router({
             }
         }),
     getMyPrompts: userProcedure
-        .input(z.object({ search: z.string() }))
+        .input(z.object({ search: z.string().nullish() }))
         .query(async function ({ input, ctx }): Promise<PromptType[]> {
             const prompts = await db.prompt.findMany({
-                orderBy:
-                    input.search === "Enter search"
-                        ? undefined
-                        : {
-                              _relevance: {
-                                  fields: ["title"],
-                                  search: input.search,
-                                  sort: "desc",
-                              },
-                          },
+                orderBy: { createdAt: "desc" },
                 take: 25,
                 where: {
                     userId: ctx.user.id,
-                    //title: (input.search === "" || input.search === "Enter search") ? undefined : {search:input.search}
+                    title: !!input.search
+                        ? { contains: `${input.search}`, mode: "insensitive" }
+                        : undefined,
                 },
                 include: { course: { select: { name: true } } },
             })
@@ -767,7 +761,12 @@ export const promptRouter = router({
             })
         }),
     getMyLatestPrompts: userProcedure
-        .input(z.object({ course: z.string() }))
+        .input(
+            z.object({
+                course: z.string(),
+                type: z.nativeEnum(PrismaPromptType),
+            }),
+        )
         .query(async function ({ ctx, input }) {
             const course = await db.course.findUnique({
                 where: { name: input.course },
@@ -784,17 +783,30 @@ export const promptRouter = router({
             const prompt = await db.prompt.findFirst({
                 where: { userId: ctx.user.id },
                 orderBy: { createdAt: "desc" },
-                include: { course: { select: { name: true } } },
+                select: {
+                    id: true,
+                    createdAt: true,
+                    type: true,
+                    course: { select: { name: true } },
+                },
             })
 
-            if (!prompt) {
+            if (!prompt || prompt.type !== input.type) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
                     message: `Could not find your latest prompt.`,
                 })
             }
 
-            return formatPrompt(prompt, ctx.user.id)
+            // Assume this prompt is the generated one if it was created within 3 minutes from now.
+            if (isPast(addMinutes(prompt.createdAt, 3))) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: `Could not find your latest prompt.`,
+                })
+            }
+
+            return prompt
         }),
 })
 
