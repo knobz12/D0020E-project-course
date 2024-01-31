@@ -19,6 +19,12 @@ type PromptTypeContent = {
             answers: { text: string; correct: boolean }[]
         }[]
     }
+    EXPLAINER: {
+        questions: {
+            Keyword: string
+            explanation: { text: string }[]
+        }[]
+    }
     FLASHCARDS: {
         questions: {
             question: string
@@ -64,6 +70,10 @@ type PromptType = {
           type: "QUIZ"
           content: PromptTypeContent["QUIZ"]
       }
+    | {
+        type: "EXPLAINER"
+        content: PromptTypeContent["EXPLAINER"]
+    }
     | {
           type: "FLASHCARDS"
           content: PromptTypeContent["FLASHCARDS"]
@@ -120,7 +130,7 @@ async function formatPrompt(
         userId: prompt.userId,
         title: prompt.title,
         reaction: !userReaction ? null : userReaction.positive,
-        type: prompt.type as "FLASHCARDS" | "QUIZ" | "SUMMARY" | "ASSIGNMENT",
+        type: prompt.type as "FLASHCARDS" | "QUIZ" | "SUMMARY" | "ASSIGNMENT"| "EXPLAINER",
         courseId: prompt.courseId,
         published: prompt.published,
         courseName: prompt.course.name,
