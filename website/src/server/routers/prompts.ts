@@ -20,8 +20,8 @@ type PromptTypeContent = {
         }[]
     }
     EXPLAINER: {
-        questions: {
-            Keyword: string
+        keywords: {
+            keyword: string
             explanation: { text: string }[]
         }[]
     }
@@ -607,7 +607,7 @@ export const promptRouter = router({
     react: userProcedure
         .input(
             z.object({
-                type: z.enum(["FLASHCARDS", "QUIZ", "SUMMARY", "ASSIGNMENT"]),
+                type: z.enum(["FLASHCARDS", "QUIZ", "SUMMARY", "ASSIGNMENT", "EXPLAINER"]),
                 positive: z.boolean(),
                 promptId: z.string().uuid(),
             }),

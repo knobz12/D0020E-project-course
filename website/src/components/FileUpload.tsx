@@ -15,6 +15,7 @@ import { Page } from "@/components/Page"
 import { useRouter } from "next/router"
 import type { PromptType } from "@prisma/client"
 import { QuizContent } from "./QuizContent"
+import { ExplainerContent } from "./ExplainerContent"
 import { LocalFilePicker } from "./LocalFilePicker"
 import { SelectFile } from "./SelectFile"
 import { trpc } from "@/lib/trpc"
@@ -504,6 +505,11 @@ export default function FileUpload({
                             typeof data === "string" &&
                             data !== "" && (
                                 <FlashcardsContent content={JSON.parse(data)} />
+                            )
+                        ) : type === "EXPLAINER" ? (
+                            typeof data === "string" &&
+                            data !== "" && (
+                                <ExplainerContent content={JSON.parse(data)} />
                             )
                         ) : (
                             <Text>
