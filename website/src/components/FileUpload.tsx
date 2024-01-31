@@ -544,8 +544,8 @@ export default function FileUpload({
                                 ))}
                             </Text>
                         ))}
-                </Stack>
+                </SimpleGrid>
             </Container>
-        </Page>
+            </Page>
     )
 }
