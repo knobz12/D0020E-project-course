@@ -42,16 +42,16 @@ import os, gc, sys, chromadb
 """ from llama_index.llms import * """
 
 # llm: LangLlamaCpp = None
-# guid: LlamaCpp = None
+guid: LlamaCpp = None
 # llmi: LlamaCPP = None
 openai: str = None
 
 def create_llm_guidance() -> LlamaCpp:
     """Create instance of LLaMA 2 model for use with guidance"""
 
-    # global guid
-    # if guid != None:
-    #     return guid
+    global guid
+    if guid != None:
+        return guid
 
     print("Creating llm instance")
     args = get_args()
@@ -69,8 +69,7 @@ def create_llm_guidance() -> LlamaCpp:
         verbose=True,
         seed=-1
     )
-    # guid = llm
-
+    guid = llm
 
     return llm
 

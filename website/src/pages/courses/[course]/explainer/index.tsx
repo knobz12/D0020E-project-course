@@ -2,13 +2,13 @@ import React from "react"
 import FileUpload from "@/components/FileUpload"
 import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth"
-import { authOptions } from "../../api/auth/[...nextauth]"
+import { authOptions } from "../../../api/auth/[...nextauth]"
 import { Multi } from "@/components/FileUpload"
 import { getApiUrl } from "@/utils/getApiUrl"
 
-interface QuizProps {}
+interface ExplainerProps {}
 
-export default function Quiz({}: QuizProps) {
+export default function Explainer({}: ExplainerProps) {
     return (
         <div>
             <FileUpload

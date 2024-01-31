@@ -162,9 +162,11 @@ export function PromptItem({ prompt }: PromptItemProps) {
                                     ? "quiz"
                                     : prompt.type === "FLASHCARDS"
                                       ? "flashcards"
-                                      : prompt.type === "SUMMARY"
-                                        ? "summary"
-                                        : "assignment"
+                                        : prompt.type === "EXPLAINER"
+                                        ? "explainer"
+                                            : prompt.type === "SUMMARY"
+                                                ? "summary"
+                                                : "assignment"
                             }/${prompt.id}`}
                         >
                             <Title order={3} size={32} lineClamp={3}>

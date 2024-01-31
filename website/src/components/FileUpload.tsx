@@ -18,6 +18,7 @@ import { Page } from "@/components/Page"
 import { useRouter } from "next/router"
 import type { PromptType } from "@prisma/client"
 import { QuizContent } from "./QuizContent"
+import { ExplainerContent } from "./ExplainerContent"
 import { LocalFilePicker } from "./LocalFilePicker"
 import { SelectFile } from "./SelectFile"
 import { trpc } from "@/lib/trpc"
@@ -519,30 +520,32 @@ export default function FileUpload({
                             </Stack>
                         </Stack>
                     </Stack>
-                    <Stack>
-                        {data !== null &&
-                            (type === "QUIZ" ? (
-                                typeof data === "string" &&
-                                data !== "" && (
-                                    <QuizContent content={JSON.parse(data)} />
-                                )
-                            ) : type === "FLASHCARDS" ? (
-                                typeof data === "string" &&
-                                data !== "" && (
-                                    <FlashcardsContent
-                                        content={JSON.parse(data)}
-                                    />
-                                )
-                            ) : (
-                                <Text>
-                                    {data.split("\n").map((val, idx) => (
-                                        <Text key={val + idx}>{val}</Text>
-                                    ))}
-                                </Text>
-                            ))}
-                    </Stack>
+                    {/* {data !== null && <Textarea h="96rem" value={data} />} */}
+                    {data !== null &&
+                        (type === "QUIZ" ? (
+                            typeof data === "string" &&
+                            data !== "" && (
+                                <QuizContent content={JSON.parse(data)} />
+                            )
+                        ) : type === "FLASHCARDS" ? (
+                            typeof data === "string" &&
+                            data !== "" && (
+                                <FlashcardsContent content={JSON.parse(data)} />
+                            )
+                        ) : type === "EXPLAINER" ? (
+                            typeof data === "string" &&
+                            data !== "" && (
+                                <ExplainerContent content={JSON.parse(data)} />
+                            )
+                        ) : (
+                            <Text>
+                                {data.split("\n").map((val, idx) => (
+                                    <Text key={val + idx}>{val}</Text>
+                                ))}
+                            </Text>
+                        ))}
                 </SimpleGrid>
             </Container>
-        </Page>
+            </Page>
     )
 }
