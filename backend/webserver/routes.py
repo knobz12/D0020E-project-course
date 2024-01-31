@@ -58,7 +58,7 @@ def get_user_id() -> str | None:
     return user_id
 
 def get_course_id_from_name(name: str) -> str:
-    conn = psycopg2.connect(database="db",user="user",password="pass",host="database",port=5432)
+    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
     cur = conn.cursor()
     cur.execute("SELECT id FROM courses WHERE name=%s",(name,))
     courses = cur.fetchall()
@@ -120,7 +120,7 @@ def quiz():
     if query != None:
         questions = int(query)
 
-    conn = psycopg2.connect(database="db",user="user",password="pass",host="database",port=5432)
+    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
     sem.acquire(timeout=1000)
     quiz = create_quiz(file_hash, questions)
     sem.release()
@@ -160,7 +160,7 @@ def flashcards():
 
     print(f"Creating {flashcards_count} flashcards")
 
-    conn = psycopg2.connect(database="db",user="user",password="pass",host="database",port=5432)
+    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
     sem.acquire(timeout=1000)
     flashcards = create_flashcards(file_hash, flashcards_count)
     sem.release()
@@ -235,7 +235,7 @@ def summary():
         if user_id == None:
             return
 
-        conn = psycopg2.connect(database="db",user="user",password="pass",host="database",port=5432)
+        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
@@ -267,7 +267,7 @@ def assignment():
         if user_id == None:
             return
 
-        conn = psycopg2.connect(database="db",user="user",password="pass",host="database",port=5432)
+        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
@@ -289,7 +289,7 @@ def generate_title():
 
 
 
-    conn = psycopg2.connect(database="db",user="user",password="pass",host="database",port=5432)
+    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
     cur = conn.cursor()
 
     cur.execute("SELECT content FROM prompts WHERE id=%s;", (prompt_id,))
@@ -349,7 +349,7 @@ def explanation():
         print("Found user:", user_id)
         print("Saving explainations")
     
-        conn = psycopg2.connect(database="db",user="user",password="pass",host="database",port=5432)
+        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)

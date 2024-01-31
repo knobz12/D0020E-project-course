@@ -20,7 +20,7 @@ def create_chroma_client() -> ClientAPI:
 
     #client = chromadb.Client(settings=Settings(allow_reset=True))
     #client = chromadb.PersistentClient("./chroma_data", settings=Settings(allow_reset=True))
-    client = chromadb.HttpClient(host="chroma",settings=Settings(allow_reset=True))
+    client = chromadb.HttpClient(host="localhost",settings=Settings(allow_reset=True))
 
     return client
 

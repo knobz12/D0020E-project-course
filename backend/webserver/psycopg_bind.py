@@ -9,7 +9,7 @@ def id():
 
 class LlamaDbFetcher():
     def __init__(self, user:str, password:str, database:str):
-        self.conn = psycopg.AsyncConnection.connect(user=user,password=password,dbname=database,host="database",port=5432)
+        self.conn = psycopg.AsyncConnection.connect(user=user,password=password,dbname=database,host="localhost",port=5432)
 
     async def FetchCoursId(self, name):
         async with await self.conn as aconn:
