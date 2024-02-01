@@ -108,15 +108,7 @@ function ExplainerViewer({
             {content.keywords.map((key, idx) => (
                 <Stack key={idx + key.keyword}>
                     <Text>{key.keyword}</Text>
-                    <List>
-                        {key.explanation.map((exp, idx) => (
-                            <List.Item key={idx + exp.text}>
-                                <Text>
-                                    {exp.text}
-                                </Text>
-                            </List.Item>
-                        ))}
-                    </List>
+                    <Text>{key.explanation}</Text>
                 </Stack>
             ))}
         </Stack>
