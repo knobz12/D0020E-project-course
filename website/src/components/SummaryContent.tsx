@@ -93,14 +93,6 @@ function SummaryViewer({
             <Stack>
                 <Title style={{ flex: 1 }}>{title}</Title>
                 <Flex gap="md" w="max-content">
-                    <Link
-                        className="w-full"
-                        href={`/courses/${router.query.course}/quiz/${router.query.quizId}/play`}
-                    >
-                        <Button w="100%" color="blue" variant="filled">
-                            Play
-                        </Button>
-                    </Link>
                     {promptId && (
                         <GeneratePromptTitleButton
                             onSuccess={onGenerateSuccess}
