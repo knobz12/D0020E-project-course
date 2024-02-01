@@ -22,7 +22,7 @@ services:
             - driver: nvidia
               device_ids:
                 - "0"
-              capabilities: [gpu, compute]
+              capabilities: [gpu, compute, utility]
   web:
     container_name: web
     build:

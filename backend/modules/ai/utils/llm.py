@@ -161,7 +161,8 @@ def create_llm_index_query_engine(id, llmi):
         ),
     ]
 )
-    remote_db = chromadb.HttpClient(host="localhost",settings=Settings(allow_reset=True))
+    args = get_args()
+    remote_db = chromadb.HttpClient(host=args.chroma_host,settings=Settings(allow_reset=True))
     collection = remote_db.get_or_create_collection("llama-2-papers")
     
     vector_store = ChromaVectorStore(chroma_collection=collection)

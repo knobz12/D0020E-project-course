@@ -3,13 +3,15 @@ import asyncio
 import datetime
 from uuid import uuid4
 import json
+from modules.ai.utils.args import get_args
 
 def id():
     return str(uuid4())
 
 class LlamaDbFetcher():
     def __init__(self, user:str, password:str, database:str):
-        self.conn = psycopg.AsyncConnection.connect(user=user,password=password,dbname=database,host="localhost",port=5432)
+        args = get_args()
+        self.conn = psycopg.AsyncConnection.connect(user=user,password=password,dbname=database,host=args.db_host,port=5432)
 
     async def FetchCoursId(self, name):
         async with await self.conn as aconn:

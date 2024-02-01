@@ -29,5 +29,4 @@ RUN CUDA_TOOLKIT_ROOT=/usr/local/cuda CMAKE_ARGS="-DLLAMA_CUBLAS=on" python3.11 
 COPY . .
 
 EXPOSE 3030
-# CMD [ "python3.11", "__main__.py", "--gpu-layers", "49", "--model-path", "/var/data/llm.gguf", "--prod", "true" ]
-CMD [ "python3.11", "__main__.py", "--gpu-layers", "49", "--model-path", "/var/data/llm.gguf"]
+CMD [ "python3.11", "__main__.py", "--gpu-layers", "49", "--model-path", "/var/data/llm.gguf", "--db-host", "database", "--chroma-host", "chroma"]
