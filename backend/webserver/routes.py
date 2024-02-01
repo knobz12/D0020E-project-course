@@ -284,13 +284,14 @@ def assignment():
 
 @app.route("/api/generate_title", methods=["POST"])
 def generate_title():
+    user_id = get_user_id()
+    if user_id == None:
+        return make_response("You must be logged in.", 401)
+
     prompt_id = request.args.get("prompt_id")
 
     if prompt_id == None:
         return make_response("Missing prompt id", 400)
-
-
-
 
     conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
     cur = conn.cursor()
