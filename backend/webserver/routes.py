@@ -1,5 +1,6 @@
 # from modules.ai.summarizer import summarize_doc_stream_old
-from modules.ai.summarizer import summarize_doc_stream_old
+from modules.ai.utils.args import get_args
+from modules.ai.summarizer import summarize_doc_stream_index, summarize_doc_stream_old
 from modules.ai.assignment import assignment_doc_stream
 from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
@@ -32,6 +33,8 @@ sem = Semaphore()
 import modules
 modules.sem = sem
 
+args = get_args()
+
 cache = Cache(app,config={"CACHE_TYPE":"SimpleCache"})
 
 @app.route("/api/health")
@@ -58,7 +61,7 @@ def get_user_id() -> str | None:
     return user_id
 
 def get_course_id_from_name(name: str) -> str:
-    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
     cur = conn.cursor()
     cur.execute("SELECT id FROM courses WHERE name=%s",(name,))
     courses = cur.fetchall()
@@ -114,10 +117,15 @@ def get_route_parameters() -> tuple[str, str] | Response:
 
 @app.route("/api/quiz", methods=["POST"])
 def quiz():
+    sem.acquire(timeout=1000)
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
     (file_hash, course_id) = params
+
+    user_id = get_user_id()
+    if user_id == None:
+        return app.response_class("Sign in", mimetype='text/plain',status=401)
 
     query = request.args.get("questions")
     questions = 3
@@ -125,26 +133,22 @@ def quiz():
     if query != None:
         questions = int(query)
 
-    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
-    sem.acquire(timeout=1000)
     quiz = create_quiz(file_hash, questions)
-    sem.release()
 
     print(quiz)
     print("Inserting quiz")
-    user_id = get_user_id()
     quiz_id = str(uuid4())
-    if user_id:
-        print("Found user:", user_id)
-        print("Saving quiz")
-        cur = conn.cursor()
-        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        print("Updated at:", updated_at)
-        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (quiz_id, updated_at, "QUIZ", f"Quiz {updated_at}", quiz, user_id, course_id))
-        conn.commit()
 
+    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
+    print("Found user:", user_id)
+    print("Saving quiz")
+    cur = conn.cursor()
+    updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+    print("Updated at:", updated_at)
+    cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (quiz_id, updated_at, "QUIZ", f"Quiz {updated_at}", quiz, user_id, course_id))
+    conn.commit()
     conn.close()
-
+    sem.release()
     return app.response_class(quiz, mimetype='application/json',status=200)
 
 
@@ -165,7 +169,7 @@ def flashcards():
 
     print(f"Creating {flashcards_count} flashcards")
 
-    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
     sem.acquire(timeout=1000)
     flashcards = create_flashcards(file_hash, flashcards_count)
     sem.release()
@@ -192,15 +196,19 @@ modules.user_canceled = False
 
 @app.route("/api/cancel", methods=["POST"])
 def cancel():
-    # user_id = get_user_id()
+    user_id = get_user_id()
 
-    # print("Checking user id before cancel", user_id)
-    # if user_id == None:
-    #     return make_response("Log in first", 401)
+    print("Checking user id before cancel", user_id)
+    if user_id == None:
+        return make_response("Log in first", 401)
 
-    # if user_id != modules.user_id:
-    #     return make_response("You can't cancel others request", 401)
+    if user_id != modules.user_id:
+        return make_response("You can't cancel others request", 401)
+    # session_token =request.cookies.get("aisb.session-token")
+    # print(session_token)
 
+    # user_id = request.args.get("user_id")
+    # print("User id:",user_id)
     modules.user_canceled = True
     return make_response("Great success", 200)
     
@@ -217,30 +225,20 @@ def summary():
     if user_id == None:
         return make_response("Log in first", 401)
 
-    modules.user_id = user_id
-
     def stream():
         summary = ""
         sem.acquire(timeout=1000)
         # for chunk in summarize_doc_stream_old(file_hash):
         print("CHUNKING")
-        try:
-            for chunk in summarize_doc_stream_old(file_hash):
-                yield chunk
-                summary += chunk
-        except GeneratorExit:
-            print("USER EXITED ZUCCCES")
-            # import gc
-            # torch.cuda.empty_cache()
-            # gc.collect()
-            sem.release()
-            return make_response("Canceled", 200)
+        for chunk in summarize_doc_stream_old(file_hash):
+            yield chunk
+            summary += chunk
         sem.release()
 
         if user_id == None:
             return
 
-        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+        conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
@@ -272,7 +270,7 @@ def assignment():
         if user_id == None:
             return
 
-        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+        conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
@@ -294,7 +292,7 @@ def generate_title():
 
 
 
-    conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
     cur = conn.cursor()
 
     cur.execute("SELECT content FROM prompts WHERE id=%s;", (prompt_id,))
@@ -354,7 +352,7 @@ def explanation():
         print("Found user:", user_id)
         print("Saving explainations")
     
-        conn = psycopg2.connect(database="db",user="user",password="pass",host="127.0.0.1",port=5432)
+        conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
