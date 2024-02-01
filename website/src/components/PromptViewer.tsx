@@ -4,6 +4,7 @@ import { QuizContent } from "./QuizContent"
 import { FlashcardsContent } from "./FlashcardsContent"
 import { AssignmentContent } from "./AssignmentContent"
 import { SummaryContent } from "./SummaryContent"
+import { ExplainerContent } from "./ExplainerContent"
 
 type PromptViewerProps = {
     title?: string
@@ -56,6 +57,12 @@ export function PromptViewer({ type, ...props }: PromptViewerProps) {
                     {...(props as PromptViewerProps & { type: "FLASHCARDS" })}
                 />
             )
+        case "EXPLAINER":
+        return (
+            <ExplainerContent
+                {...(props as PromptViewerProps & { type: "EXPLAINER" })}
+            />
+        )
         case "ASSIGNMENT":
             return (
                 <AssignmentContent

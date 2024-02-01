@@ -23,7 +23,9 @@ export function GeneratePromptTitleButton({
         setLoading(true)
         try {
             const response: Response | "timeout" | Error = await Promise.race([
-                fetch(url, { method: "POST" }).catch((e) => e),
+                fetch(url, { method: "POST", credentials: "include" }).catch(
+                    (e) => e,
+                ),
                 new Promise<"timeout">((res) =>
                     setTimeout(() => res("timeout"), 30000),
                 ),

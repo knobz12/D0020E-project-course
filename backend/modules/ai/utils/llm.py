@@ -42,16 +42,16 @@ import os, gc, sys, chromadb
 """ from llama_index.llms import * """
 
 # llm: LangLlamaCpp = None
-# guid: LlamaCpp = None
+guid: LlamaCpp = None
 # llmi: LlamaCPP = None
 openai: str = None
 
 def create_llm_guidance() -> LlamaCpp:
     """Create instance of LLaMA 2 model for use with guidance"""
 
-    # global guid
-    # if guid != None:
-    #     return guid
+    global guid
+    if guid != None:
+        return guid
 
     print("Creating llm instance")
     args = get_args()
@@ -69,7 +69,6 @@ def create_llm_guidance() -> LlamaCpp:
         verbose=True,
         seed=-1
     )
-
     guid = llm
 
     return llm
@@ -111,48 +110,49 @@ def create_llm_index(api_key=None, **kwargs) -> LlamaCPP | OpenAI:
     # global llmi
     global openai
 
-    if 'openai' in kwargs:
-        openai_kwarg = kwargs.get("openai")
-        if openai_kwarg != openai:
-            if openai is not None:
-                del llmi
-                gc.collect()
-            openai = openai_kwarg
+    # if 'openai' in kwargs:
+    #     openai_kwarg = kwargs.get("openai")
+    #     if openai_kwarg != openai:
+    #         if openai is not None:
+    #             del llmi
+    #             gc.collect()
+    #         openai = openai_kwarg
         
-        print(openai is True)
+    #     print(openai is True)
     # if llmi != None:
     #     return llmi
     
-    if openai is True:
-        llmi = OpenAI(model="gpt-3.5-turbo", temperature=0, api_key=api_key)
+    # if openai is True:
+    #     llmi = OpenAI(model="gpt-3.5-turbo", temperature=0, api_key=api_key)
         
-    else:
-        args = get_args()
-        llmi = LlamaCPP(
-            model_path=args.model_path,
-            max_new_tokens=2000,
-            context_window=10000,
-            generate_kwargs={},
-            model_kwargs={"n_gpu_layers": args.gpu_layers, "use_mmap": True, "f16_kv": True},
-            verbose=False
-        )
-
-    service_context = ServiceContext.from_defaults(
-        chunk_size=1024,
-        llm = llmi,
-        embed_model="local:sentence-transformers/all-MiniLM-L6-v2"
+    # else:
+    args = get_args()
+    print("Loading model from path:",args.model_path)
+    llmi = LlamaCPP(
+        model_path=args.model_path,
+        max_new_tokens=2000,
+        context_window=10000,
+        generate_kwargs={},
+        model_kwargs={"n_gpu_layers": args.gpu_layers, "use_mmap": True, "f16_kv": True},
+        verbose=True
     )
-    set_global_service_context(service_context)
+
+    # service_context = ServiceContext.from_defaults(
+    #     chunk_size=1024,
+    #     llm = llmi,
+    #     embed_model="local:sentence-transformers/all-MiniLM-L6-v2"
+    # )
+    # set_global_service_context(service_context)
     return llmi
 
 def create_llm_index_query_engine(id, llmi):
     service_context = ServiceContext.from_defaults(
-    chunk_size=1024,
-    llm=llmi,
-    embed_model='local:sentence-transformers/all-MiniLM-L6-v2',
+        chunk_size=1024,
+        llm=llmi,
+        embed_model='local:sentence-transformers/all-MiniLM-L6-v2',
     )
     
-    set_global_service_context(service_context)
+    # set_global_service_context(service_context)
 
     filters = MetadataFilters(
     filters=[
@@ -161,12 +161,13 @@ def create_llm_index_query_engine(id, llmi):
         ),
     ]
 )
-    remote_db = chromadb.HttpClient(settings=Settings(allow_reset=True))
+    args = get_args()
+    remote_db = chromadb.HttpClient(host=args.chroma_host,settings=Settings(allow_reset=True))
     collection = remote_db.get_or_create_collection("llama-2-papers")
     
-    vector_store = ChromaVectorStore(chroma_collection=collection, service_context=service_context)
-    index = VectorStoreIndex.from_vector_store(vector_store=vector_store, service_context=service_context)
+    vector_store = ChromaVectorStore(chroma_collection=collection)
+    index = VectorStoreIndex.from_vector_store(vector_store=vector_store,service_context=service_context)
     retriever = index.as_retriever(filters=filters)
-    query_engine = RetrieverQueryEngine.from_args(retriever, streaming=True, similarity_top_k=3)
+    query_engine = RetrieverQueryEngine.from_args(retriever, streaming=True, similarity_top_k=3,service_context=service_context)
 
     return query_engine

@@ -1,8 +1,9 @@
 import json
-from modules.ai.utils.llm import create_llm_guidance, create_llm_index
+from modules.ai.utils.llm import create_llm_guidance, create_llm_index, create_llm_index_query_engine
 from modules.ai.utils.vectorstore import *
 
 import guidance
+import gc
 from guidance import select, gen
 
 from modules.files.chunks import *
@@ -47,34 +48,16 @@ def calculate_questions_per_doc(total_docs: int, total_questions: int, doc_index
     return questions_for_current_doc
 
 def create_explaination(id: str, amount: int = 10, custom_keywords: list = []) -> str:
-    #doc_id = "b53998910b5a91c141f890fa76fbcb7f"
-    vectorstore = create_vectorstore()
-
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
-    #docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
-    qsts_cunt = calculate_questions_per_doc(len(docs["metadatas"]), amount, id)
-    documents = docs["metadatas"]
-    print(documents)
-    return
-    llm = create_llm_index()
-    if isinstance(llm, LlamaCPP):
-        service_context = ServiceContext.from_defaults(
-            chunk_size=512,
-            llm=llm,
-            embed_model='local'
-            )
-    elif isinstance(llm, OpenAI):
-        service_context = ServiceContext.from_defaults(
-            chunk_size=512,
-            llm=llm,
-            )
-        
-    set_global_service_context(service_context)
-
-    index = VectorStoreIndex.from_documents(documents)
-    query_engine = index.as_query_engine(similarity_top_k=3, service_context=service_context)
-    response_stream1 = query_engine.query(f"Pick out {str(amount)} keywords that are important across the document. For each keyword write a short explaination. Give the output in json format.")
-    if custom_keywords != []:
-        response_stream2 = query_engine.query(f"These are some keywords that needs to be explained: {custom_keywords}. For each keyword write a short explaination. Give the output in json format.")
+    prompt = f"Pick out {str(amount)} keywords that are important across the document. For each keyword write a short explaination. Give the output in json format.""Pick out {str(amount)} keywords that are important across the document. For each keyword write a short explaination. Give the output in json format."
     
-    return json.dumps(f"{response_stream1}\n{response_stream2}")
+    llm = create_llm_index(api_key="", openai=False)
+    query_engine = create_llm_index_query_engine(id, llm)
+    response_stream1 = query_engine.query(prompt)
+    if custom_keywords != []:
+        prompt1 = f"These are some keywords that needs to be explained: {custom_keywords}. For each keyword write a short explaination. Give the output in json format."
+        response_stream2 = query_engine.query(prompt1)
+    else:
+        response_stream2 = {}
+    response = f"{response_stream1}{response_stream2}"
+    response = response.replace("\n", "")
+    return response

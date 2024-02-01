@@ -7,8 +7,10 @@ import {
 } from "../trpc"
 import { db } from "@/lib/database"
 import { TRPCError } from "@trpc/server"
-import { Prisma, Prompt } from "@prisma/client"
+import type { Prompt } from "@prisma/client"
+import { PromptType as PrismaPromptType } from "@prisma/client"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
+import { addMinutes, isFuture, isPast, subMinutes } from "date-fns"
 
 type PromptTypeContent = {
     SUMMARY: { text: string }
@@ -17,6 +19,12 @@ type PromptTypeContent = {
         questions: {
             question: string
             answers: { text: string; correct: boolean }[]
+        }[]
+    }
+    EXPLAINER: {
+        keywords: {
+            keyword: string
+            explanation: string 
         }[]
     }
     FLASHCARDS: {
@@ -64,6 +72,10 @@ type PromptType = {
           type: "QUIZ"
           content: PromptTypeContent["QUIZ"]
       }
+    | {
+        type: "EXPLAINER"
+        content: PromptTypeContent["EXPLAINER"]
+    }
     | {
           type: "FLASHCARDS"
           content: PromptTypeContent["FLASHCARDS"]
@@ -120,7 +132,7 @@ async function formatPrompt(
         userId: prompt.userId,
         title: prompt.title,
         reaction: !userReaction ? null : userReaction.positive,
-        type: prompt.type as "FLASHCARDS" | "QUIZ" | "SUMMARY" | "ASSIGNMENT",
+        type: prompt.type as "FLASHCARDS" | "QUIZ" | "SUMMARY" | "ASSIGNMENT"| "EXPLAINER",
         courseId: prompt.courseId,
         published: prompt.published,
         courseName: prompt.course.name,
@@ -221,15 +233,14 @@ export const promptRouter = router({
             }
 
             const isUserOwner = prompt.userId === ctx.user.id
-            if (ctx.user.type === "STUDENT" && !isUserOwner) {
-                throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "You can't edit quizes you haven't made.",
-                })
-            }
-
-            // In case of other types being added in future
-            if (ctx.user.type !== "TEACHER") {
+            if (ctx.user.type === "STUDENT") {
+                if (!isUserOwner) {
+                    throw new TRPCError({
+                        code: "UNAUTHORIZED",
+                        message: "You can't edit flashcards you haven't made.",
+                    })
+                }
+            } else if (ctx.user.type !== "TEACHER") {
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
                     message:
@@ -449,18 +460,18 @@ export const promptRouter = router({
 
             const isUserOwner = prompt.userId === ctx.user.id
 
-            if (ctx.user.type === "STUDENT" && !isUserOwner) {
-                throw new TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "You can only delete prompt you have made.",
-                })
-            }
-
-            if (ctx.user.type !== "TEACHER") {
+            if (ctx.user.type === "STUDENT") {
+                if (!isUserOwner) {
+                    throw new TRPCError({
+                        code: "UNAUTHORIZED",
+                        message: "You can't edit summaries you haven't made.",
+                    })
+                }
+            } else if (ctx.user.type !== "TEACHER") {
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
                     message:
-                        "You can't delete others prompts unless you're a teacher.",
+                        "You must be a teacher to edit prompts you haven't created.",
                 })
             }
 
@@ -468,7 +479,7 @@ export const promptRouter = router({
                 where: { id: input.id },
             })
         }),
-    getPromptById: userProcedure
+    getPromptById: publicProcedure
         .input(z.object({ id: z.string().uuid() }))
         .query(async function ({ input, ctx }): Promise<PromptType> {
             const summary = await db.prompt.findUnique({
@@ -481,7 +492,7 @@ export const promptRouter = router({
                     message: "Couldn't find the prompt you requested.",
                 })
             }
-            return formatPrompt(summary, ctx.user.id)
+            return formatPrompt(summary, ctx.user?.id)
         }),
     getNonAndPinnedPrompts: publicProcedure
         .input(
@@ -562,23 +573,16 @@ export const promptRouter = router({
             }
         }),
     getMyPrompts: userProcedure
-        .input(z.object({ search: z.string() }))
+        .input(z.object({ search: z.string().nullish() }))
         .query(async function ({ input, ctx }): Promise<PromptType[]> {
             const prompts = await db.prompt.findMany({
-                orderBy:
-                    input.search === "Enter search"
-                        ? undefined
-                        : {
-                              _relevance: {
-                                  fields: ["title"],
-                                  search: input.search,
-                                  sort: "desc",
-                              },
-                          },
+                orderBy: { createdAt: "desc" },
                 take: 25,
                 where: {
                     userId: ctx.user.id,
-                    //title: (input.search === "" || input.search === "Enter search") ? undefined : {search:input.search}
+                    title: !!input.search
+                        ? { contains: `${input.search}`, mode: "insensitive" }
+                        : undefined,
                 },
                 include: { course: { select: { name: true } } },
             })
@@ -597,7 +601,7 @@ export const promptRouter = router({
     react: userProcedure
         .input(
             z.object({
-                type: z.enum(["FLASHCARDS", "QUIZ", "SUMMARY", "ASSIGNMENT"]),
+                type: z.enum(["FLASHCARDS", "QUIZ", "SUMMARY", "ASSIGNMENT", "EXPLAINER"]),
                 positive: z.boolean(),
                 promptId: z.string().uuid(),
             }),
@@ -757,7 +761,12 @@ export const promptRouter = router({
             })
         }),
     getMyLatestPrompts: userProcedure
-        .input(z.object({ course: z.string() }))
+        .input(
+            z.object({
+                course: z.string(),
+                type: z.nativeEnum(PrismaPromptType),
+            }),
+        )
         .query(async function ({ ctx, input }) {
             const course = await db.course.findUnique({
                 where: { name: input.course },
@@ -774,17 +783,30 @@ export const promptRouter = router({
             const prompt = await db.prompt.findFirst({
                 where: { userId: ctx.user.id },
                 orderBy: { createdAt: "desc" },
-                include: { course: { select: { name: true } } },
+                select: {
+                    id: true,
+                    createdAt: true,
+                    type: true,
+                    course: { select: { name: true } },
+                },
             })
 
-            if (!prompt) {
+            if (!prompt || prompt.type !== input.type) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
                     message: `Could not find your latest prompt.`,
                 })
             }
 
-            return formatPrompt(prompt, ctx.user.id)
+            // Assume this prompt is the generated one if it was created within 3 minutes from now.
+            if (isPast(addMinutes(prompt.createdAt, 3))) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: `Could not find your latest prompt.`,
+                })
+            }
+
+            return prompt
         }),
 })
 

@@ -30,7 +30,7 @@ Generate a short concise title based on the context nothing more nothing less.\n
 
 def create_title_index(context: str) -> str:
     llm = create_llm_index()
-    documents = [Document(text=context)]
+    documents = [Document(text=context[:1024])]
     index = VectorStoreIndex.from_documents(documents)
     query_engine = index.as_query_engine()
     response = query_engine.query("Generate a short concise title based on the context nothing more nothing less. It should be no longer than 10 words.")

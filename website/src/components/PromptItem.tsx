@@ -80,7 +80,7 @@ export function PromptItem({ prompt }: PromptItemProps) {
         <Paper key={prompt.id} className="overflow-hidden" radius="lg" p="lg">
             <Flex gap="md">
                 <Stack>
-                    {router.route.startsWith("/courses/[courseId]") &&
+                    {router.route.startsWith("/courses/[course]") &&
                         (session.data?.user.type === "TEACHER" ? (
                             <ActionIcon
                                 color="indigo"
@@ -162,9 +162,11 @@ export function PromptItem({ prompt }: PromptItemProps) {
                                     ? "quiz"
                                     : prompt.type === "FLASHCARDS"
                                       ? "flashcards"
-                                      : prompt.type === "SUMMARY"
-                                        ? "summary"
-                                        : "assignment"
+                                      : prompt.type === "EXPLAINER"
+                                        ? "explainer"
+                                        : prompt.type === "SUMMARY"
+                                          ? "summary"
+                                          : "assignment"
                             }/${prompt.id}`}
                         >
                             <Title order={3} size={32} lineClamp={3}>
