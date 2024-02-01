@@ -505,18 +505,6 @@ export default function FileUpload({
                                 >
                                     Generate
                                 </Button>
-                                <Button
-                                    disabled={!isLoading}
-                                    onClick={() =>
-                                        fetch(
-                                            "http://localhost:3030/api/cancel",
-                                            { method: "POST" },
-                                        )
-                                    }
-                                    color="red"
-                                >
-                                    Cancel
-                                </Button>
                             </Stack>
                         </Stack>
                     </Stack>
@@ -546,6 +534,6 @@ export default function FileUpload({
                         ))}
                 </SimpleGrid>
             </Container>
-            </Page>
+        </Page>
     )
 }
