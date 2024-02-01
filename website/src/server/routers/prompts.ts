@@ -479,7 +479,7 @@ export const promptRouter = router({
                 where: { id: input.id },
             })
         }),
-    getPromptById: userProcedure
+    getPromptById: publicProcedure
         .input(z.object({ id: z.string().uuid() }))
         .query(async function ({ input, ctx }): Promise<PromptType> {
             const summary = await db.prompt.findUnique({
@@ -492,7 +492,7 @@ export const promptRouter = router({
                     message: "Couldn't find the prompt you requested.",
                 })
             }
-            return formatPrompt(summary, ctx.user.id)
+            return formatPrompt(summary, ctx.user?.id)
         }),
     getNonAndPinnedPrompts: publicProcedure
         .input(
