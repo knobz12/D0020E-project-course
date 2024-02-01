@@ -337,46 +337,29 @@ export default function FileUpload({
                 <Stack>
                     <Title>{title}</Title>
                 </Stack>
-                <SimpleGrid cols={2} w="100%">
+                <Stack>
                     <Stack>
-                        <Stack>
-                            {parameters && (
-                                <Stack>
-                                    {parameters.map((parameter) => {
-                                        switch (parameter.type) {
-                                            case "number":
-                                                return (
-                                                    <NumberInput
-                                                        label={parameter.name}
-                                                        key={parameter.id}
-                                                        id={parameter.id}
-                                                        name={parameter.id}
-                                                        min={1}
-                                                        onChange={(e) => {
-                                                            if (e === "") {
-                                                                return setParams(
-                                                                    (curr) => {
-                                                                        const newParams =
-                                                                            {
-                                                                                ...curr,
-                                                                                [parameter.id]:
-                                                                                    undefined,
-                                                                            }
-                                                                        console.log(
-                                                                            newParams,
-                                                                        )
-                                                                        return newParams
-                                                                    },
-                                                                )
-                                                            }
-
-                                                            setParams(
+                        {parameters && (
+                            <Stack>
+                                {parameters.map((parameter) => {
+                                    switch (parameter.type) {
+                                        case "number":
+                                            return (
+                                                <NumberInput
+                                                    label={parameter.name}
+                                                    key={parameter.id}
+                                                    id={parameter.id}
+                                                    name={parameter.id}
+                                                    min={1}
+                                                    onChange={(e) => {
+                                                        if (e === "") {
+                                                            return setParams(
                                                                 (curr) => {
                                                                     const newParams =
                                                                         {
                                                                             ...curr,
                                                                             [parameter.id]:
-                                                                                e,
+                                                                                undefined,
                                                                         }
                                                                     console.log(
                                                                         newParams,
@@ -384,48 +367,43 @@ export default function FileUpload({
                                                                     return newParams
                                                                 },
                                                             )
-                                                        }}
-                                                        placeholder={
-                                                            parameter.placeholder
                                                         }
-                                                    />
-                                                )
-                                            case "string":
-                                                return (
-                                                    <TextInput
-                                                        key={parameter.id}
-                                                        label={parameter.name}
-                                                        id={parameter.id}
-                                                        name={parameter.id}
-                                                        onChange={(e) => {
-                                                            var myString =
-                                                                e.target.value
-                                                            if (
-                                                                myString === ""
-                                                            ) {
-                                                                return setParams(
-                                                                    (curr) => {
-                                                                        const newParams =
-                                                                            {
-                                                                                ...curr,
-                                                                                [parameter.id]:
-                                                                                    undefined,
-                                                                            }
-                                                                        console.log(
-                                                                            newParams,
-                                                                        )
-                                                                        return newParams
-                                                                    },
-                                                                )
-                                                            }
 
-                                                            setParams(
+                                                        setParams((curr) => {
+                                                            const newParams = {
+                                                                ...curr,
+                                                                [parameter.id]:
+                                                                    e,
+                                                            }
+                                                            console.log(
+                                                                newParams,
+                                                            )
+                                                            return newParams
+                                                        })
+                                                    }}
+                                                    placeholder={
+                                                        parameter.placeholder
+                                                    }
+                                                />
+                                            )
+                                        case "string":
+                                            return (
+                                                <TextInput
+                                                    key={parameter.id}
+                                                    label={parameter.name}
+                                                    id={parameter.id}
+                                                    name={parameter.id}
+                                                    onChange={(e) => {
+                                                        var myString =
+                                                            e.target.value
+                                                        if (myString === "") {
+                                                            return setParams(
                                                                 (curr) => {
                                                                     const newParams =
                                                                         {
                                                                             ...curr,
                                                                             [parameter.id]:
-                                                                                myString,
+                                                                                undefined,
                                                                         }
                                                                     console.log(
                                                                         newParams,
@@ -433,51 +411,64 @@ export default function FileUpload({
                                                                     return newParams
                                                                 },
                                                             )
-                                                        }}
-                                                        placeholder={
-                                                            parameter.placeholder
                                                         }
-                                                    />
-                                                )
-                                            case "Multi":
-                                                return (
-                                                    <Multi
-                                                        id={parameter.id}
-                                                        key={parameter.id}
-                                                        name={parameter.id}
-                                                        onChange={(values) =>
-                                                            setParams(
-                                                                (current) => ({
-                                                                    ...current,
-                                                                    [parameter.id]:
-                                                                        values,
-                                                                }),
+
+                                                        setParams((curr) => {
+                                                            const newParams = {
+                                                                ...curr,
+                                                                [parameter.id]:
+                                                                    myString,
+                                                            }
+                                                            console.log(
+                                                                newParams,
                                                             )
-                                                        }
-                                                    />
-                                                )
-                                        }
-                                    })}
-                                </Stack>
-                            )}
-                            <SegmentedControl
-                                disabled={selectedFile !== null}
-                                color="primary"
-                                data={[
-                                    {
-                                        label: "Upload file",
-                                        value: "upload",
-                                    },
-                                    {
-                                        label: "Select file",
-                                        value: "select",
-                                    },
-                                ]}
-                                onChange={(value) =>
-                                    setFileChoice(value as "select" | "upload")
-                                }
-                            />
-                            {/* </HoverCard.Target>
+                                                            return newParams
+                                                        })
+                                                    }}
+                                                    placeholder={
+                                                        parameter.placeholder
+                                                    }
+                                                />
+                                            )
+                                        case "Multi":
+                                            return (
+                                                <Multi
+                                                    id={parameter.id}
+                                                    key={parameter.id}
+                                                    name={parameter.id}
+                                                    onChange={(values) =>
+                                                        setParams(
+                                                            (current) => ({
+                                                                ...current,
+                                                                [parameter.id]:
+                                                                    values,
+                                                            }),
+                                                        )
+                                                    }
+                                                />
+                                            )
+                                    }
+                                })}
+                            </Stack>
+                        )}
+                        <SegmentedControl
+                            disabled={selectedFile !== null}
+                            color="primary"
+                            data={[
+                                {
+                                    label: "Upload file",
+                                    value: "upload",
+                                },
+                                {
+                                    label: "Select file",
+                                    value: "select",
+                                },
+                            ]}
+                            onChange={(value) =>
+                                setFileChoice(value as "select" | "upload")
+                            }
+                        />
+                        {/* </HoverCard.Target>
                             {selectedFile !== null ? (
                                 <HoverCard.Dropdown color="teal">
                                     You must remove the selected file if you
@@ -486,53 +477,52 @@ export default function FileUpload({
                             ) : null}
                         </HoverCard>
                     </NoSsr> */}
-                            {fileChoice === "select" ? (
-                                <SelectFile
-                                    isLoading={isLoading}
-                                    onSelect={onFileSelect}
-                                />
-                            ) : (
-                                <LocalFilePicker
-                                    isLoading={isLoading}
-                                    onSelect={onFileSelect}
-                                />
-                            )}
-                            <Stack w="100%">
-                                <Button
-                                    loading={isLoading}
-                                    disabled={isLoading}
-                                    onClick={onClick}
-                                >
-                                    Generate
-                                </Button>
-                            </Stack>
+                        {fileChoice === "select" ? (
+                            <SelectFile
+                                isLoading={isLoading}
+                                onSelect={onFileSelect}
+                            />
+                        ) : (
+                            <LocalFilePicker
+                                isLoading={isLoading}
+                                onSelect={onFileSelect}
+                            />
+                        )}
+                        <Stack w="100%">
+                            <Button
+                                loading={isLoading}
+                                disabled={isLoading}
+                                onClick={onClick}
+                            >
+                                Generate
+                            </Button>
                         </Stack>
                     </Stack>
-                    {/* {data !== null && <Textarea h="96rem" value={data} />} */}
-                    {data !== null &&
-                        (type === "QUIZ" ? (
-                            typeof data === "string" &&
-                            data !== "" && (
-                                <QuizContent content={JSON.parse(data)} />
-                            )
-                        ) : type === "FLASHCARDS" ? (
-                            typeof data === "string" &&
-                            data !== "" && (
-                                <FlashcardsContent content={JSON.parse(data)} />
-                            )
-                        ) : type === "EXPLAINER" ? (
-                            typeof data === "string" &&
-                            data !== "" && (
-                                <ExplainerContent content={JSON.parse(data)} />
-                            )
-                        ) : (
-                            <Text>
-                                {data.split("\n").map((val, idx) => (
-                                    <Text key={val + idx}>{val}</Text>
-                                ))}
-                            </Text>
-                        ))}
-                </SimpleGrid>
+                </Stack>
+                {/* {data !== null && <Textarea h="96rem" value={data} />} */}
+                {data !== null &&
+                    (type === "QUIZ" ? (
+                        typeof data === "string" &&
+                        data !== "" && (
+                            <QuizContent content={JSON.parse(data)} />
+                        )
+                    ) : type === "FLASHCARDS" ? (
+                        typeof data === "string" &&
+                        data !== "" && (
+                            <FlashcardsContent content={JSON.parse(data)} />
+                        )
+                    ) : type === "EXPLAINER" ? (
+                        typeof data === "string" &&
+                        data !== "" && (
+                            <ExplainerContent content={JSON.parse(data)} />
+                        )
+                    ) : (
+                        <Text>
+                            {data.split("\n").map((val, idx) => (
+                                <Text key={val + idx}>{val}</Text>
+                            ))}
+                        </Text>
+                    ))}
             </Container>
         </Page>
     )
