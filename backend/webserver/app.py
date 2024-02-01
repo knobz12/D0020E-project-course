@@ -13,6 +13,7 @@ CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
 def start_app():
     print("Starting app")
 
+    args = get_args()
     if args.prod != None:
         import torch
         cuda = torch.cuda.is_available()
@@ -25,7 +26,6 @@ def start_app():
         torch.cuda.memory.empty_cache()
         alloc2 = torch.cuda.memory.memory_allocated()
         print("After:",alloc2)
-        args = get_args()
         import socket
         hostname = socket.gethostname()
         import bjoern
