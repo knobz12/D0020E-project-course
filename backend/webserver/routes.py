@@ -83,7 +83,7 @@ def get_route_parameters() -> tuple[str, str] | Response:
     if 'file' not in request.files and file_id == None:
         return make_response("Missing file and file id.", 406)
 
-    def get_file_hash():
+    def get_file_hash() -> str | Response:
         if file_id != None:
             return file_id
 
@@ -102,8 +102,13 @@ def get_route_parameters() -> tuple[str, str] | Response:
         if file_hash == None:
             return make_response("Bad file format", 406)
         return file_hash
+
     
     file_hash = get_file_hash()
+
+    if not isinstance(file_hash, str):
+        return file_hash
+
     course_id = get_course_id_from_name(course)
     return (file_hash, course_id)
 
