@@ -64,26 +64,26 @@ const Question: React.FC<Props> = ({
                         flex-column"
         >
             <h2 className="">{question}</h2>
-            <div className="">
-                 <button
-                onClick={() =>
-                    onSubmit()} 
-                >
-                    {"submit"}
-                </button>
+            <Container w="70%">
+                <Container w="70%">
+                     <button
+                    onClick={() =>
+                        onSubmit()} 
+                    >
+                        {"submit"}
+                    </button>
 
-                {choices.map((choice) => (
-                    <Checkbox 
-                    key={choice}
-                    id={choice}
-                    className={"ChoicesElement"}
-                    size={30}
-                    radius={5}
-                    label={choice}
-                    
-                    />
-                ))} 
-            
+                    {choices.map((choice) => (
+                        <Checkbox  
+                        key={choice}
+                        id={choice}
+                        className={"ChoicesElement"}
+                        size={30}
+                        radius={5}
+                        label={choice}
+                        />
+                    ))} 
+                </Container>
 
 
                 {choices.map((choice) => (
@@ -95,7 +95,7 @@ const Question: React.FC<Props> = ({
                         {choice}
                     </button>
                 ))}
-            </div>
+            </Container>
         </div>
     )
 }
@@ -199,9 +199,6 @@ export default function Quiz(Quizquestions:Content){
         
         let elements = document.getElementsByClassName("mantine-Checkbox-root ChoicesElement mantine-yxmaw9");
         let ChossenAnswer = []
-
-        
-
         for(let i = 0; i< elements.length; i++){
             if((elements[i].children[0].children[0].children[0] as HTMLInputElement).checked == true){
                 ChossenAnswer.push(elements[i].children[0].children[1].children[0].innerHTML)
@@ -248,7 +245,7 @@ export default function Quiz(Quizquestions:Content){
         
     
     return (
-        <div>
+        <Container w="100%" >
             <h1 className="text-center">Quiz</h1>
             <div className="grid place-items-center h-full">
             {currentQuestion < Quizquestions.questions.length ? (
@@ -263,7 +260,7 @@ export default function Quiz(Quizquestions:Content){
                 "null"
             )}
             </div>
-        </div>
+        </Container>
     )
 }
 
