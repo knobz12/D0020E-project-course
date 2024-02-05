@@ -64,7 +64,7 @@ const Question: React.FC<Props> = ({
                         flex-column"
         >
             <h2 className="">{question}</h2>
-            <Container w="70%">
+            <Container w="100%">
                 <Container w="70%">
                      <button
                     onClick={() =>
