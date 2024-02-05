@@ -57,14 +57,14 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 text: "Assignment",
                 link: "/assignment",
             },
-            {
+            /* {
                 icon: IconClipboardList,
                 text: "Explainer",
                 link: "/explainer",
-            },
+            }, */
         ],
     },
-    {
+    /* {
         name: "Question",
         prompts: [
             {
@@ -73,7 +73,7 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 link: "/question",
             },
         ],
-    },
+    }, */
 ]
 
 export const PaginationContext = createContext<number>(1)
