@@ -86,7 +86,7 @@ const Question: React.FC<Props> = ({
                 </Container>
 
 
-                {choices.map((choice) => (
+                {/* {choices.map((choice) => (
                     <button
                         key={choice}
                         className="btn btn-success m-2"
@@ -94,7 +94,7 @@ const Question: React.FC<Props> = ({
                     >
                         {choice}
                     </button>
-                ))}
+                ))} */}
             </Container>
         </div>
     )
