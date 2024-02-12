@@ -24,7 +24,7 @@ from flask import Response, request, make_response
 from flask_caching import Cache
 from flask_cors import cross_origin
 
-import psycopg2
+import psycopg_pool
 import jwt
 from threading import Semaphore
 
@@ -36,6 +36,11 @@ modules.sem = sem
 args = get_args()
 
 cache = Cache(app,config={"CACHE_TYPE":"SimpleCache"})
+
+
+conninfo = f'dbname=db user=user password=pass host={args.db_host} port=5432'
+connection_pool: psycopg_pool.ConnectionPool = psycopg_pool.ConnectionPool(conninfo, open=True)
+
 
 @app.route("/api/health")
 def health():
@@ -61,12 +66,12 @@ def get_user_id() -> str | None:
     return user_id
 
 def get_course_id_from_name(name: str) -> str:
-    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
-    cur = conn.cursor()
-    cur.execute("SELECT id FROM courses WHERE name=%s",(name,))
-    courses = cur.fetchall()
-    course_id = courses[0][0]
-    conn.close()
+    
+    with connection_pool.connection() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT id FROM courses WHERE name=%s",(name,))
+        courses = cur.fetchall()
+        course_id = courses[0][0]
     return course_id
 
 from flask import Response
@@ -139,15 +144,14 @@ def quiz():
     print("Inserting quiz")
     quiz_id = str(uuid4())
 
-    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
-    print("Found user:", user_id)
-    print("Saving quiz")
-    cur = conn.cursor()
-    updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-    print("Updated at:", updated_at)
-    cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (quiz_id, updated_at, "QUIZ", f"Quiz {updated_at}", quiz, user_id, course_id))
-    conn.commit()
-    conn.close()
+
+    with connection_pool.connection() as conn:
+        print("Found user:", user_id)
+        print("Saving quiz")
+        cur = conn.cursor()
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (quiz_id, updated_at, "QUIZ", f"Quiz {updated_at}", quiz, user_id, course_id))
     sem.release()
     return app.response_class(quiz, mimetype='application/json',status=200)
 
@@ -167,27 +171,23 @@ def flashcards():
     if query != None:
         flashcards_count = int(query)
 
-    print(f"Creating {flashcards_count} flashcards")
+    with connection_pool.connection() as conn:
+        sem.acquire(timeout=1000)
+        flashcards = create_flashcards(file_hash, flashcards_count)
+        sem.release()
 
-    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
-    sem.acquire(timeout=1000)
-    flashcards = create_flashcards(file_hash, flashcards_count)
-    sem.release()
+        print(flashcards)
+        print("Inserting flashcards")
+        user_id = get_user_id()
+        content_id = str(uuid4())
+        if user_id:
+            print("Found user:", user_id)
+            print("Saving flashcards")
+            cur = conn.cursor()
+            updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+            print("Updated at:", updated_at)
+            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (content_id, updated_at, "FLASHCARDS", f"Flashcards {updated_at}", flashcards, user_id, course_id))
 
-    print(flashcards)
-    print("Inserting flashcards")
-    user_id = get_user_id()
-    content_id = str(uuid4())
-    if user_id:
-        print("Found user:", user_id)
-        print("Saving flashcards")
-        cur = conn.cursor()
-        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        print("Updated at:", updated_at)
-        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (content_id, updated_at, "FLASHCARDS", f"Flashcards {updated_at}", flashcards, user_id, course_id))
-        conn.commit()
-
-    conn.close()
 
     return app.response_class(flashcards, mimetype='application/json',status=200)
 
@@ -238,13 +238,11 @@ def summary():
         if user_id == None:
             return
 
-        conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
+    with connection_pool.connection() as conn:
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
         cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "SUMMARY", f"Summary {updated_at}", json.dumps({"text":summary}), user_id, course_id))
-        conn.commit()
-        conn.close()
 
         
 
@@ -270,13 +268,11 @@ def assignment():
         if user_id == None:
             return
 
-        conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
+    with connection_pool.connection() as conn:
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
         cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "ASSIGNMENT", f"Assignment {updated_at}", json.dumps({"text":assignment}), user_id, course_id))
-        conn.commit()
-        conn.close()
 
         
 
@@ -293,25 +289,22 @@ def generate_title():
     if prompt_id == None:
         return make_response("Missing prompt id", 400)
 
-    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
-    cur = conn.cursor()
+    with connection_pool.connection() as conn:
+        cur = conn.cursor()
 
-    cur.execute("SELECT content FROM prompts WHERE id=%s;", (prompt_id,))
+        cur.execute("SELECT content FROM prompts WHERE id=%s;", (prompt_id,))
 
-    prompt = cur.fetchone()
-    if prompt == None:
-        conn.close()
-        return make_response(f"Could not find prompt with id {prompt_id}", 400)
-
+        prompt = cur.fetchone()
+        if prompt == None:
+            return make_response(f"Could not find prompt with id {prompt_id}", 400)
 
 
-    content: str = (str(prompt[0]))[0:1024]
-    title: str = create_title(content)
-    # title: str = create_title_index(content) + " " + str(datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 
-    cur.execute("UPDATE prompts SET title=%s WHERE id=%s;", (title, prompt_id))
-    conn.commit()
-    conn.close()
+        content: str = (str(prompt[0]))[0:1024]
+        title: str = create_title(content)
+        # title: str = create_title_index(content) + " " + str(datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+
+        cur.execute("UPDATE prompts SET title=%s WHERE id=%s;", (title, prompt_id))
 
         
 
@@ -353,13 +346,11 @@ def explanation():
         print("Found user:", user_id)
         print("Saving explainations")
     
-        conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
-        cur = conn.cursor()
-        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        print("Updated at:", updated_at)
-        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "EXPLAINER", f"Explaination {updated_at}", json.dumps({"text":explanation}), user_id, course_id))
-        conn.commit()
-        conn.close()
+        with connection_pool.connection() as conn:
+            cur = conn.cursor()
+            updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+            print("Updated at:", updated_at)
+            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "EXPLAINER", f"Explaination {updated_at}", json.dumps({"text":explanation}), user_id, course_id))
 
         
 
