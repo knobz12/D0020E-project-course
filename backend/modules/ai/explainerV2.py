@@ -48,27 +48,23 @@ def calculate_questions_per_doc(total_docs: int, total_questions: int, doc_index
     return questions_for_current_doc
 
 def create_explaination(id: str, amount: int = 10, custom_keywords: list = []) -> str:
+    return json.dumps('{"keywords": [{"keyword": "SOLID", "explanation": [{"The SOLID Principles are a set of design principles that help to create software that is more resilient, maintainable, and scalable. They stand for Single Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion."}, {"keyword": "object-oriented", "explanation": "Object-oriented programming is a programming paradigm that focuses on objects rather than functions or logic. It allows for more complex and modular software designs by encapsulating data and functionality within objects, which can interact with each other through messaging."}]}]}')
+    print(id)
     prompt = f"Pick out {str(amount)} keywords that are important across the documents. For each keyword write a short explaination. Give the output in json format."""
     
     llm = create_llm_index(api_key="", openai=False)
     query_engine = create_llm_index_query_engine(id, llm)
     response_stream1 = query_engine.query(prompt)
+    "print(response_stream1)"
     if custom_keywords != []:
         prompt1 = f"These are some keywords that needs to be explained: {custom_keywords}. For each keyword write a short explaination. Give the output in json format."
         response_stream2 = f"{query_engine.query(prompt1)}"
     else:
         response_stream2 = {}
     print("###########################################")
-    """#response = response_stream1, response_stream2
-    a = json.loads(response_stream1)
-    b = json.loads(response_stream2)
-    print(a)
-    print(b)"""
-    #print(response_stream1)
-    #print(response_stream2)
-    response = dict(response_stream1.items() + response_stream2.items())
-    response = response.replace("\n", "")
+    response1 = json.loads(response_stream1.response)
+    response2 = json.loads(response_stream1.response)
+    print("###########################################")
+    response = {**response1, **response2}
     print(response)
-    #print(json.dumps(response))
-    return
-    return response
+    return json.dumps(response)

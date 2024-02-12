@@ -145,6 +145,7 @@ def create_quiz(id: str, questions: int) -> str:
                 obj["questions"][i]["answers"].append({"text": answer, "correct" : False if correct == "False" else True})
     
     result: str = json.dumps(obj)
+    print(result)
     return result
 
 

@@ -105,14 +105,15 @@ function ExplainerViewer({
                     )}
                 </Flex>
             </Stack>
+            console.log(content.keywords);
             {content.keywords.map((key, idx) => (
                 <Stack key={idx + key.keyword}>
                     <Text>{key.keyword}</Text>
                     <List>
                         {key.explanation.map((exp, idx) => (
-                            <List.Item key={idx + exp.text}>
+                            <List.Item key={idx + exp.explanation}>
                                 <Text>
-                                    {exp.text}
+                                    {exp.explanation}
                                 </Text>
                             </List.Item>
                         ))}

@@ -167,6 +167,6 @@ def create_llm_index_query_engine(id, llmi):
     vector_store = ChromaVectorStore(chroma_collection=collection)
     index = VectorStoreIndex.from_vector_store(vector_store=vector_store,service_context=service_context)
     retriever = index.as_retriever(filters=filters)
-    query_engine = RetrieverQueryEngine.from_args(retriever, streaming=True, similarity_top_k=3,service_context=service_context)
+    query_engine = RetrieverQueryEngine.from_args(retriever, streaming=False, similarity_top_k=3,service_context=service_context)
 
     return query_engine
