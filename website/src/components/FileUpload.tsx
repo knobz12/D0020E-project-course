@@ -186,6 +186,22 @@ export default function FileUpload({
         })
     }, [])
 
+    async function redirectToView() {
+        const prompt = await utils.prompts.getMyLatestPrompts.fetch({
+            course: router.query.course as string,
+            type
+        })
+
+        router.push(
+            `/courses/${
+                router.query.course
+            }/${prompt.type.toLowerCase()}/${
+                prompt.id
+            }`,
+        )
+        
+    }
+
     async function onClick() {
         setIsLoading(true)
         try {
@@ -500,6 +516,18 @@ export default function FileUpload({
                     </Stack>
                 </Stack>
                 {/* {data !== null && <Textarea h="96rem" value={data} />} */}
+                {data !== null && (                    
+
+                    <Flex gap="md" w="max-content">
+                        <Button w="100%" color="blue" variant="filled"
+                            disabled={isLoading}
+                            onClick={redirectToView}
+                        >
+                            View
+                        </Button>
+                    </Flex>
+                    )
+                }
                 {data !== null &&
                     (type === "QUIZ" ? (
                         typeof data === "string" &&

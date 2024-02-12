@@ -107,32 +107,6 @@ function FlashcardsViewer({
 
     return (
         <Stack>
-            <Stack>
-                <Title style={{ flex: 1 }}>{title}</Title>
-                <Flex gap="md" w="max-content">
-                    <Button w="100%" color="blue" variant="filled"
-                        onClick={redirectToView}
-                    >
-                        View
-                    </Button>
-                    {promptId && (
-                        <GeneratePromptTitleButton
-                            onSuccess={onGenerateSuccess}
-                            promptId={promptId}
-                        />
-                    )}
-                    {editable && (
-                        <Button
-                            w="100%"
-                            onClick={onEdit}
-                            color="teal"
-                            variant="filled"
-                        >
-                            Edit
-                        </Button>
-                    )}
-                </Flex>
-            </Stack>
             {content.questions.map((qst, idx) => (
                 <Stack key={idx + qst.question}>
                     <Text>{qst.question}</Text>
