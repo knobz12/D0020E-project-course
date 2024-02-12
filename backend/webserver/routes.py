@@ -296,6 +296,7 @@ def generate_title():
 
         prompt = cur.fetchone()
         if prompt == None:
+            #TODO(Johan) might fuck everything because the connection is not released or something maybe
             return make_response(f"Could not find prompt with id {prompt_id}", 400)
 
 
