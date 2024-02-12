@@ -301,31 +301,31 @@ export default function FileUpload({
             })
 
             if (prompt) {
-                showNotification({
-                    color: "blue",
-                    icon: <IconInfoCircle />,
-                    message: (
-                        <Group spacing="md">
-                            <Text>
-                                Your generated prompt has been saved. Do you
-                                want to view it?
-                            </Text>
-                            <Button
-                                onClick={() =>
-                                    router.push(
-                                        `/courses/${
-                                            router.query.course
-                                        }/${prompt.type.toLowerCase()}/${
-                                            prompt.id
-                                        }`,
-                                    )
-                                }
-                            >
-                                View
-                            </Button>
-                        </Group>
-                    ),
-                })
+                // showNotification({
+                //     color: "blue",
+                //     icon: <IconInfoCircle />,
+                //     message: (
+                //         <Group spacing="md">
+                //             <Text>
+                //                 Your generated prompt has been saved. Do you
+                //                 want to view it?
+                //             </Text>
+                //             <Button
+                //                 onClick={() =>
+                //                     router.push(
+                //                         `/courses/${
+                //                             router.query.course
+                //                         }/${prompt.type.toLowerCase()}/${
+                //                             prompt.id
+                //                         }`,
+                //                     )
+                //                 }
+                //             >
+                //                 View
+                //             </Button>
+                //         </Group>
+                //     ),
+                // })
             }
         } catch (e) {
             if (e instanceof Error) {
@@ -517,8 +517,7 @@ export default function FileUpload({
                 </Stack>
                 {/* {data !== null && <Textarea h="96rem" value={data} />} */}
                 {data !== null && (                    
-
-                    <Flex gap="md" w="max-content">
+                    <Flex my="md" gap="md" w="max-content">
                         <Button w="100%" color="blue" variant="filled"
                             disabled={isLoading}
                             onClick={redirectToView}
