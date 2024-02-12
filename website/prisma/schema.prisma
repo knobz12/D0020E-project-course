@@ -143,6 +143,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  openAI        OpenAI?
   accounts      Account[]
   sessions      Session[]
 
@@ -151,6 +152,22 @@ model User {
   TeacherNote     TeacherNote[]
 
   @@map("users")
+}
+
+model OpenAI {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// If the user has enabled to use OpenAI for AI generation.
+  enabled Boolean @default(false) @map("enabled")
+  /// Encrypted JWT of the user OpenAI api key.
+  apiKey  String? @map("api_key") @db.VarChar(512)
+  /// The user this OpenAI setting is for.
+  user    User    @relation(fields: [userId], references: [id])
+  userId  String  @unique @map("user_id") @db.Uuid
+
+  @@map("open_ai")
 }
 
 model VerificationToken {
