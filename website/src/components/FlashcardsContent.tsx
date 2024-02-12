@@ -88,7 +88,7 @@ function FlashcardsViewer({
 
     return (
         <Stack>
-                <Stack>
+            <Stack>
                 <Title style={{ flex: 1 }}>{title}</Title>
                 <Flex gap="md" w="max-content">
                     {promptId && (

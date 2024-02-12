@@ -389,7 +389,7 @@ def explanation():
             cur = conn.cursor()
             updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
             print("Updated at:", updated_at)
-            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "EXPLAINER", f"Explaination {updated_at}", json.dumps({"text":explanation}), user_id, course_id))
+            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "EXPLAINER", f"Explaination {updated_at}", explanation, user_id, course_id))
 
         
 
