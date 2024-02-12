@@ -86,25 +86,6 @@ function FlashcardsViewer({
         [router],
     )
 
-    const utils = trpc.useUtils()
-
-    
-    async function redirectToView() {
-        const prompt = await utils.prompts.getMyLatestPrompts.fetch({
-            course: router.query.course as string,
-            type: "FLASHCARDS"
-        })
-
-        router.push(
-            `/courses/${
-                router.query.course
-            }/${prompt.type.toLowerCase()}/${
-                prompt.id
-            }`,
-        )
-        
-    }
-
     return (
         <Stack>
                 <Stack>
