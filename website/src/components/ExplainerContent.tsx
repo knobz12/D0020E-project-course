@@ -73,7 +73,7 @@ function ExplainerViewer({
         },
         [router],
     )
-
+    console.log(content)
     return (
         <Stack>
             <Stack>
