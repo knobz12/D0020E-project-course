@@ -32,6 +32,7 @@ interface QuizContentProps {
 
 export function QuizContent({
     promptId,
+    type,
     title,
     content,
     editable = false,
@@ -87,19 +88,34 @@ function QuizViewer({
         [router],
     )
 
+    const utils = trpc.useUtils()
+
+    async function redirectToView() {
+        const prompt = await utils.prompts.getMyLatestPrompts.fetch({
+            course: router.query.course as string,
+            type: "QUIZ"
+        })
+
+        router.push(
+            `/courses/${
+                router.query.course
+            }/${prompt.type.toLowerCase()}/${
+                prompt.id
+            }`,
+        )
+        
+    }
+
     return (
         <Stack>
             <Stack>
                 <Title style={{ flex: 1 }}>{title}</Title>
                 <Flex gap="md" w="max-content">
-                    <Link
-                        className="w-full"
-                        href={`/courses/${router.query.course}/quiz/${router.query.quizId}/play`}
+                    <Button w="100%" color="blue" variant="filled"
+                        onClick={redirectToView}
                     >
-                        <Button w="100%" color="blue" variant="filled">
-                            Play
-                        </Button>
-                    </Link>
+                        View
+                    </Button>
                     {promptId && (
                         <GeneratePromptTitleButton
                             onSuccess={onGenerateSuccess}
