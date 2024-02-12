@@ -21,6 +21,8 @@ def flashcards():
 
 if __name__ == "__main__":
     from modules.ai.utils.args import init_args
+    from dotenv import load_dotenv
+    load_dotenv()
     init_args()
     app()
     # flashcards()
