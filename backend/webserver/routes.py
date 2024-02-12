@@ -12,6 +12,7 @@ import os
 from uuid import uuid4
 import json
 import datetime
+from jose.jwe import decrypt
 
 from modules.ai.utils.llm import create_llm_index
 from modules.ai.utils.vectorstore import create_collection
@@ -73,6 +74,44 @@ def get_course_id_from_name(name: str) -> str:
         courses = cur.fetchall()
         course_id = courses[0][0]
     return course_id
+
+def get_user_openai_enabled(user_id: str) -> tuple[bool, str] | None:
+    """
+    Returns tuple where first element is if OpenAI is enabled and second argument is their OpenAI API key.
+    Returns null if user not found or invalid API key.
+    """
+    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
+    cur = conn.cursor()
+    cur.execute("SELECT enabled, api_key FROM open_ai WHERE user_id=%s",(user_id,))
+    users = cur.fetchall()
+
+    print(users)
+    if len(users) != 1:
+        return None
+
+    val: tuple[bool, str | None] = users[0]
+
+    if val[1] == None:
+        return val
+
+    SECRET = os.getenv("JWE_SECRET")
+    PEPPER = os.getenv("JWE_PEPPER")
+    print("SECRET:",SECRET)
+    print("PEPPER:",PEPPER)
+
+    if SECRET == None or PEPPER == None:
+        raise Exception("Missing JWE_SECRET or JWE_PEPPER env")
+
+    key = ""
+    try: 
+        plain = str(decrypt(val[1],SECRET))
+        key = plain.replace(PEPPER, "")
+    except:
+        return None
+    result = (val[0], key)
+    print(result)
+
+    return result
 
 from flask import Response
 

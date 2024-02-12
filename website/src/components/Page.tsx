@@ -14,7 +14,12 @@ import clsx from "clsx"
 import { Inter } from "next/font/google"
 import React from "react"
 import { useSession, signOut } from "next-auth/react"
-import { IconList, IconLogout, IconUser } from "@tabler/icons-react"
+import {
+    IconList,
+    IconLogout,
+    IconSettings,
+    IconUser,
+} from "@tabler/icons-react"
 import Link from "next/link"
 import Image from "next/image"
 import { BreadcrumbsRouter } from "./BreadcrumbsRouter"
@@ -135,6 +140,18 @@ export function Page({ children, navbar = true }: PageProps) {
                                                     icon={<IconList />}
                                                 >
                                                     Your prompts
+                                                </Menu.Item>
+                                            </Link>
+                                            <Link
+                                                href="/profile/settings"
+                                                passHref
+                                                legacyBehavior
+                                            >
+                                                <Menu.Item
+                                                    component="a"
+                                                    icon={<IconSettings />}
+                                                >
+                                                    Settings
                                                 </Menu.Item>
                                             </Link>
                                             <Menu.Divider />
