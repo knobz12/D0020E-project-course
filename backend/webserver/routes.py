@@ -238,11 +238,11 @@ def summary():
         if user_id == None:
             return
 
-    with connection_pool.connection() as conn:
-        cur = conn.cursor()
-        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        print("Updated at:", updated_at)
-        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "SUMMARY", f"Summary {updated_at}", json.dumps({"text":summary}), user_id, course_id))
+        with connection_pool.connection() as conn:
+            cur = conn.cursor()
+            updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+            print("Updated at:", updated_at)
+            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "SUMMARY", f"Summary {updated_at}", json.dumps({"text":summary}), user_id, course_id))
 
         
 
@@ -268,11 +268,11 @@ def assignment():
         if user_id == None:
             return
 
-    with connection_pool.connection() as conn:
-        cur = conn.cursor()
-        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        print("Updated at:", updated_at)
-        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "ASSIGNMENT", f"Assignment {updated_at}", json.dumps({"text":assignment}), user_id, course_id))
+        with connection_pool.connection() as conn:
+            cur = conn.cursor()
+            updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+            print("Updated at:", updated_at)
+            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "ASSIGNMENT", f"Assignment {updated_at}", json.dumps({"text":assignment}), user_id, course_id))
 
         
 
