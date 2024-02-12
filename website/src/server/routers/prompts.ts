@@ -24,7 +24,7 @@ type PromptTypeContent = {
     EXPLAINER: {
         keywords: {
             keyword: string
-            explanation: { text: string }[]
+            explanation: string 
         }[]
     }
     FLASHCARDS: {

@@ -73,7 +73,8 @@ function ExplainerViewer({
         },
         [router],
     )
-
+    console.log(content)
+    console.log(typeof content)
     return (
         <Stack>
             <Stack>
@@ -105,19 +106,11 @@ function ExplainerViewer({
                     )}
                 </Flex>
             </Stack>
-            console.log(content.keywords);
+            
             {content.keywords.map((key, idx) => (
                 <Stack key={idx + key.keyword}>
                     <Text>{key.keyword}</Text>
-                    <List>
-                        {key.explanation.map((exp, idx) => (
-                            <List.Item key={idx + exp.explanation}>
-                                <Text>
-                                    {exp.explanation}
-                                </Text>
-                            </List.Item>
-                        ))}
-                    </List>
+                    <Text>{key.explanation}</Text>
                 </Stack>
             ))}
         </Stack>
