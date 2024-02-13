@@ -80,6 +80,7 @@ def get_user_openai_enabled(user_id: str) -> tuple[bool, str] | None:
     Returns tuple where first element is if OpenAI is enabled and second argument is their OpenAI API key.
     Returns null if user not found or invalid API key.
     """
+    users = None
     with connection_pool.connection() as conn:
         cur = conn.cursor()
         cur.execute("SELECT enabled, api_key FROM open_ai WHERE user_id=%s",(user_id,))
