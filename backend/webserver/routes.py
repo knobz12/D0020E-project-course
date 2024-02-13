@@ -68,6 +68,7 @@ def get_user_id() -> str | None:
 
 def get_course_id_from_name(name: str) -> str:
     
+    course_id = None
     with connection_pool.connection() as conn:
         cur = conn.cursor()
         cur.execute("SELECT id FROM courses WHERE name=%s",(name,))
