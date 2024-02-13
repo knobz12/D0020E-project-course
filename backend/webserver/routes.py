@@ -5,7 +5,7 @@ from modules.ai.assignment import assignment_doc_stream
 from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
 from modules.ai.flashcards import create_flashcards
-from modules.ai.explainerV2 import create_explaination
+from modules.ai.explainer import create_explaination
 from modules.ai.title import create_title, create_title_index
 from webserver.app import app
 import os
