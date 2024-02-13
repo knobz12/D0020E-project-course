@@ -29,6 +29,8 @@ import psycopg_pool
 import jwt
 from threading import Semaphore
 
+import time
+
 # To assure the LLM only works on one prompt at a time
 sem = Semaphore()
 import modules
@@ -179,8 +181,9 @@ def quiz():
     if query != None:
         questions = int(query)
 
+    before = time.time()
     quiz = create_quiz(file_hash, questions)
-
+    duration = time.time() - before
     print(quiz)
     print("Inserting quiz")
     quiz_id = str(uuid4())
@@ -192,7 +195,7 @@ def quiz():
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
-        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (quiz_id, updated_at, "QUIZ", f"Quiz {updated_at}", quiz, user_id, course_id))
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (quiz_id, updated_at, "QUIZ", f"Quiz {updated_at}", quiz, user_id, course_id, duration))
     sem.release()
     return app.response_class(quiz, mimetype='application/json',status=200)
 
@@ -214,7 +217,10 @@ def flashcards():
 
     with connection_pool.connection() as conn:
         sem.acquire(timeout=1000)
+        before = time.time()
         flashcards = create_flashcards(file_hash, flashcards_count)
+        duration = time.time() - before
+        print(duration)
         sem.release()
 
         print(flashcards)
@@ -227,7 +233,7 @@ def flashcards():
             cur = conn.cursor()
             updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
             print("Updated at:", updated_at)
-            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (content_id, updated_at, "FLASHCARDS", f"Flashcards {updated_at}", flashcards, user_id, course_id))
+            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (content_id, updated_at, "FLASHCARDS", f"Flashcards {updated_at}", flashcards, user_id, course_id, duration))
 
 
     return app.response_class(flashcards, mimetype='application/json',status=200)
@@ -271,9 +277,11 @@ def summary():
         sem.acquire(timeout=1000)
         # for chunk in summarize_doc_stream_old(file_hash):
         print("CHUNKING")
+        before = time.time()
         for chunk in summarize_doc_stream_old(file_hash):
             yield chunk
             summary += chunk
+        duration = time.time() - before
         sem.release()
 
         if user_id == None:
@@ -283,7 +291,7 @@ def summary():
             cur = conn.cursor()
             updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
             print("Updated at:", updated_at)
-            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "SUMMARY", f"Summary {updated_at}", json.dumps({"text":summary}), user_id, course_id))
+            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "SUMMARY", f"Summary {updated_at}", json.dumps({"text":summary}), user_id, course_id, duration))
 
         
 
@@ -301,9 +309,11 @@ def assignment():
     def stream():
         assignment = ""
         sem.acquire(timeout=1000)
+        before = time.time()
         for chunk in assignment_doc_stream(file_hash):
             yield chunk
             assignment += chunk
+        duration = time.time() - before
         sem.release()
 
         if user_id == None:
@@ -313,7 +323,7 @@ def assignment():
             cur = conn.cursor()
             updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
             print("Updated at:", updated_at)
-            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "ASSIGNMENT", f"Assignment {updated_at}", json.dumps({"text":assignment}), user_id, course_id))
+            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "ASSIGNMENT", f"Assignment {updated_at}", json.dumps({"text":assignment}), user_id, course_id, duration))
 
         
 
@@ -372,10 +382,12 @@ def explanation():
 
     print(f"Creating {amount} keywords and explaining additional ones that are: {custom_keywords}")
 
-
+    duration = None
     try:
         sem.acquire(timeout=1000)
+        before = time.time()
         explanation = create_explaination(file_hash, amount, custom_keywords)
+        duration = time.time() - before
         sem.release()
     except:
         explanation = ""
@@ -391,7 +403,7 @@ def explanation():
             cur = conn.cursor()
             updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
             print("Updated at:", updated_at)
-            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "EXPLAINER", f"Explaination {updated_at}", explanation, user_id, course_id))
+            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "EXPLAINER", f"Explaination {updated_at}", explanation, user_id, course_id, duration))
 
         
 
