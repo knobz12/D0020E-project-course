@@ -203,44 +203,48 @@ def calculate_questions_per_doc(total_docs: int, total_questions: int, doc_index
 
 
 @guidance()
-def generate_keywords(lm, context: str, keyword_count: int):
-
+def generate_keywords(lm, context: str, explanation_count: int):
+    string_test = "frog"
     def gen_keyword(idx: int):
         Keyword: str = f"""\
 keyword: "{gen(f"keyword{idx}",stop='"')}"
-explaination: "{gen(f"explanation{idx}", stop='"')}"
+explanation: "{gen(f"explanation{idx}", stop='"')}"
 """
         return Keyword
 
     KeywordsStr: str = ""
-    for i in range(0, keyword_count):
+    for i in range(0, explanation_count):
         KeywordsStr += gen_keyword(i) + "\n"
+
+    
 
         
 
 
 
     res = f"""\
-The following is a keyword.
-Generate an explanation based on the provided context. the explanation for each corresponding question must be true. keep the explanation concise.
 
 Context: {context}
 
-Keywords:
+The following is a keyword.
+Generate an explanation based on the provided context but you are allowed to use othe infromation. the explanation for each corresponding keyword must be true. keep the explanation concise.
+
+Keyword: 
 
 {KeywordsStr}
+
     """
 
-    # print(res)
+    print("this is important   "+res)
     lm += res 
     return lm
-
 
 class Data(BaseModel):
     data: list[tuple[str, str]]
 
 
-def create_explaination(id: str, amount: int = 10, custom_keywords: list = []) -> str:
+
+def create_explaination(id: str, amount: int, custom_keywords: list = []) -> str:
     gllm = create_llm_guidance()
     vectorstore = create_collection()
 
@@ -251,16 +255,21 @@ def create_explaination(id: str, amount: int = 10, custom_keywords: list = []) -
     obj["keywords"] = []
 
     for (i, doc) in enumerate(docs["metadatas"]):
-        #qsts_count = calculate_questions_per_doc(len(docs["metadatas"]), questions, i)
-        result = gllm + generate_keywords(doc["text"], 2)
+        qsts_count = calculate_questions_per_doc(len(docs["metadatas"]), amount, i)
+        print("-------------------------------------------"+doc["text"])
+        result = gllm + generate_keywords(doc["text"], qsts_count)
         # print(result)
 
-        for j in range(0, 2):
-            keyword: str = result[f"question{j}"]
-            explanation: str = result[f"answer{j}"]
+        for j in range(0, amount):
+            keyword: str = result[f"keyword{j}"]
+            explanation: str = result[f"explanation{j}"]
             obj["keywords"].append({"keyword" : keyword, "explanation": explanation})
 
 
+   
 
     json_result: str = json.dumps(obj)
+    print(json_result)
     return json_result
+
+
