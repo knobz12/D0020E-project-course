@@ -32,6 +32,7 @@ from llama_index.vector_stores.types import (
 
 from modules.ai.utils.args import get_args
 from guidance.models import LlamaCpp
+from guidance.models.llama_cpp import LlamaCppChat
 from llama_cpp import Llama
 from langchain.llms.llamacpp import LlamaCpp as LangLlamaCpp
 from modules.ai.utils.vectorstore import create_chroma_client
@@ -43,10 +44,10 @@ import os, gc, sys, chromadb
 
 # llm: LangLlamaCpp = None
 guid: LlamaCpp = None
-# llmi: LlamaCPP = None
+llmi: LlamaCPP | None = None
 openai: str = None
 
-def create_llm_guidance() -> LlamaCpp:
+def create_llm_guidance() -> LlamaCppChat:
     """Create instance of LLaMA 2 model for use with guidance"""
 
     global guid
@@ -55,7 +56,7 @@ def create_llm_guidance() -> LlamaCpp:
 
     print("Creating llm instance")
     args = get_args()
-    llm = LlamaCpp(
+    llm = LlamaCppChat(
         model=args.model_path,
         n_gpu_layers=args.gpu_layers,
         n_batch=512,
@@ -107,7 +108,7 @@ def create_service_context():
         return service_context
 
 def create_llm_index(api_key=None, **kwargs) -> LlamaCPP | OpenAI:
-    # global llmi
+    global llmi
     global openai
 
     # if 'openai' in kwargs:
@@ -128,14 +129,15 @@ def create_llm_index(api_key=None, **kwargs) -> LlamaCPP | OpenAI:
     # else:
     args = get_args()
     print("Loading model from path:",args.model_path)
-    llmi = LlamaCPP(
+    llm = LlamaCPP(
         model_path=args.model_path,
-        max_new_tokens=2000,
-        context_window=10000,
+        max_new_tokens=500,
+        context_window=1000,
         generate_kwargs={},
         model_kwargs={"n_gpu_layers": args.gpu_layers, "use_mmap": True, "f16_kv": True},
         verbose=True
     )
+    # llmi = llm
 
     # service_context = ServiceContext.from_defaults(
     #     chunk_size=1024,
@@ -143,7 +145,7 @@ def create_llm_index(api_key=None, **kwargs) -> LlamaCPP | OpenAI:
     #     embed_model="local:sentence-transformers/all-MiniLM-L6-v2"
     # )
     # set_global_service_context(service_context)
-    return llmi
+    return llm
 
 def create_llm_index_query_engine(id, llmi):
     service_context = ServiceContext.from_defaults(

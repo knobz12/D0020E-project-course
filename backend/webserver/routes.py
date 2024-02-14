@@ -14,12 +14,14 @@ import json
 import datetime
 from jose.jwe import decrypt
 
-from modules.ai.utils.llm import create_llm_index
+from modules.ai.utils.llm import create_llm_guidance, create_llm_index
 from modules.ai.utils.vectorstore import create_collection
 from llama_index import VectorStoreIndex, ServiceContext
 from llama_index.vector_stores import ChromaVectorStore
 from llama_index.vector_stores import ChromaVectorStore
 from llama_index.memory import ChatMemoryBuffer
+from llama_index.agent.react import ReActAgent
+from llama_index.tools import QueryEngineTool, ToolMetadata
 
 from flask import Response, request, make_response
 from flask_caching import Cache
@@ -409,14 +411,30 @@ def explanation():
 
     return app.response_class(explanation, mimetype='application/json',status=200)
 
-@app.route("/api/chat", methods=["POST"])
-def chat():
+@app.route("/api/chat-old", methods=["GET", "POST"])
+def chat_old():
     # user_id = get_user_id()
 
     # if user_id == None: return make_response(401, "You must be logged in to chat.")
 
     print(request.args)
     message = request.args.get("message")
+    history = request.args.get("history")
+    import json
+    from typing import List
+    from llama_index.core.llms.types import ChatMessage,MessageRole
+
+    from typing import TypedDict
+
+    class UserHistory(TypedDict):
+        user: str
+        message: str
+
+    j: List[UserHistory] = json.loads(history)
+    hist: List[ChatMessage] = []
+    for m in j:
+        role = MessageRole.USER if m["user"] == "user" else MessageRole.ASSISTANT
+        hist.append(ChatMessage(role=role,content=m["message"]))
 
     if message == None or message == "":
         return make_response(400, "Cannot send an empty message.")
@@ -426,26 +444,163 @@ def chat():
     llm = create_llm_index()
     service_context = ServiceContext.from_defaults(
         chunk_size=512,
+        chunk_overlap=5,
+        callback_manager=None,
+        context_window=2048,
         llm=llm,
         embed_model='local:sentence-transformers/all-MiniLM-L6-v2',
     )
     collection = create_collection()
     chroma_vector_store = ChromaVectorStore.from_collection(collection=collection)
-    index = VectorStoreIndex.from_vector_store(chroma_vector_store,service_context=service_context)
+    index = VectorStoreIndex.from_vector_store(vector_store=chroma_vector_store,service_context=service_context)
     memory = ChatMemoryBuffer.from_defaults(token_limit=1500)
+    memory.set(hist)
     chat = index.as_chat_engine(
-        chat_mode="best",
+        chat_mode="react",
         memory=memory,
+        hist=hist,
         system_prompt=(
-            "You are AI Studubuddy assistant able to have normal interactions. You help students with questions about anything."
+            "You are AI Studybuddy assistant able to have normal interactions."
+            "You help students with questions about the course D7032E."
         )
     )
     print(f"Sending message to chatbot:\n{message}\n")
-    response = chat.chat(message).response
-    print(f"Answer from chatbot:\n{response}\n")
-    # response = llm.complete(message).text
-    # retriever = index.as_retriever
-    # ContextChatEngine(retriever=retriever)
-    sem.release()
 
-    return app.response_class(response, mimetype='plain/text',status=200)
+
+
+    print("HISTORY:",hist)
+    def stream():
+        response = chat.stream_chat(message,hist)
+
+        stri = ""
+        for s in response.response_gen:
+            yield s
+            print(s)
+            stri += s
+
+        print(response.source_nodes)
+        # for _ in range(0, 4): print("")
+        # print(response)
+        # for _ in range(0, 4): print("")
+        # print(s)
+
+        sem.release()
+
+        
+
+    return app.response_class(stream(), mimetype='text/plain',headers={"transfer-encoding":"chunked"})
+    # return app.response_class(response.response, mimetype='plain/text',status=200)
+
+@app.route("/api/chat", methods=["GET", "POST"])
+def chat():
+    # user_id = get_user_id()
+
+    # if user_id == None: return make_response(401, "You must be logged in to chat.")
+
+    print(request.args)
+    message = request.args.get("message")
+    from typing import List
+    from llama_index.core.llms.types import ChatMessage,MessageRole
+
+    def get_history() -> List[ChatMessage]:
+        history = request.args.get("history")
+        if history == None:
+            return []
+        import json
+
+        from typing import TypedDict
+
+        class UserHistory(TypedDict):
+            user: str
+            message: str
+
+        j: List[UserHistory] = json.loads(history)
+        hist: List[ChatMessage] | None = get_history()
+        for m in j:
+            role = MessageRole.USER if m["user"] == "user" else MessageRole.ASSISTANT
+            hist.append(ChatMessage(role=role,content=m["message"]))
+        return hist
+    
+    hist = get_history()
+
+    if message == None or message == "":
+        return make_response(400, "Cannot send an empty message.")
+
+    print(f"Creating response message for {message}")
+    sem.acquire(timeout=1000)
+    llm = create_llm_index()
+    service_context = ServiceContext.from_defaults(
+        # chunk_size=256,
+        # chunk_overlap=5,
+        callback_manager=None,
+        # context_window=1024,
+        llm=llm,
+        embed_model='local:sentence-transformers/all-MiniLM-L6-v2',
+    )
+    collection = create_collection()
+    chroma_vector_store = ChromaVectorStore.from_collection(collection=collection)
+    index = VectorStoreIndex.from_vector_store(vector_store=chroma_vector_store,service_context=service_context)
+    course_files_engine = index.as_query_engine(similarity_top_k=1)
+
+    # query_engine_tools = [
+    #     QueryEngineTool(
+    #         query_engine=course_files_engine,
+    #         metadata=ToolMetadata(
+    #             name="d7032e_course_files",
+    #             description=(
+    #                 "Provides course files for the course D7032E which can be used."
+    #                 "Use a detailed plain text question as input to the tool."
+    #             ),
+    #         ),
+    #     ),
+    # ]
+    # agent = ReActAgent.from_tools(
+    #     tools=query_engine_tools,
+    #     llm=llm,
+    #     verbose=True,
+    #     # context=service_context,
+    #     context=(
+    #         "You are AI Studybuddy assistant able to have normal interactions."
+    #         "You help students with questions about the course D7032E."
+    #     ),
+    #     chat_history=hist,
+    # )
+    memory = ChatMemoryBuffer.from_defaults(chat_history=hist, token_limit=1500)
+    memory.set(hist)
+    chat = index.as_chat_engine(
+        chat_mode="simple",
+        memory=memory,
+        hist=hist,
+        system_prompt=(
+            "You are AI Studybuddy assistant able to have normal interactions."
+            "You help students with questions about the course D7032E."
+        )
+    )
+    print(f"Sending message to chatbot:\n{message}\n")
+
+
+
+    print("HISTORY:",hist)
+    def stream():
+        response = chat.stream_chat(message,hist)
+
+        stri = ""
+        for s in response.response_gen:
+            yield s
+            print(s)
+            stri += s
+
+        # response.
+        print(response)
+        # llm = None
+        # service_context = None
+        # agent = None
+        # import gc
+        # gc.collect()
+
+        sem.release()
+
+        
+
+    return app.response_class(stream(), mimetype='text/plain')
+    # return app.response_class(response.response, mimetype='plain/text',status=200)
