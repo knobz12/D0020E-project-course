@@ -237,18 +237,16 @@ Keyword:
 
 
 
-def explain_word(id: str,keyword:str) -> str:
+def explain_word(id: str,keyword:str, docs: str) -> str:
     llm = create_llm()
-    vectorstore = create_collection()
-
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
+    
     results: list[str] = []
     for (idx, meta) in enumerate(docs["metadatas"]):
         text =meta["text"]
-        previous_summary: str | None = results[idx - 1] if idx > 1 else None
+        previous_explanation: str | None = results[idx - 1] if idx > 1 else None
 
         prompt = """Human: You are an assistant explaining a keyword
-I want you to explain the word as best as you can in less than three paragraphs but atleast one paragraphs using the given context:
+I want you to explain the word as best as you can and keep it short and concise using the given context:
 
 Context: {text}
 
@@ -259,16 +257,16 @@ Answer:""".format(text = text,keyword = keyword)
         prompt_with_previous=  """Human: You are an assistant explaning a keyword.
 Use the following pieces of retrieved context to improve the explanation. 
 If you can't improve it simply return the old.
-The new explanation may only be up to four paragraphs but at least two paragraphs.
+keep it short and concise.
 Don't directly refer to the context text, pretend like you already knew the context information.
 
 Explanation: {explanation}
 
 Context: {context}
 
-Answer:""".format(explanation = previous_summary,context=text)
+Answer:""".format(explanation = previous_explanation,context=text)
 
-        use_prompt = prompt if previous_summary == None else prompt_with_previous
+        use_prompt = prompt if previous_explanation == None else prompt_with_previous
         result = llm(use_prompt)
         results.append(result)
 
@@ -278,8 +276,8 @@ Answer:""".format(explanation = previous_summary,context=text)
         print(result + "\n\n\n")
 
     print("################################\n")
-    summary = results[-1].splitlines()[2:]
-    return summary
+    explanation = results[-1].splitlines()[2:]
+    return results
 
 def create_explaination(id: str, amount: int, custom_keywords: list = []) -> str:
     gllm = create_llm_guidance()
@@ -302,11 +300,8 @@ def create_explaination(id: str, amount: int, custom_keywords: list = []) -> str
     
 
     for i in range(0, len(custom_keywords)):
-        print("--------------------------------------------------------")
-        print(type(custom_keywords[i]))
-        print(custom_keywords)
         #print(explain_word(id,custom_keywords[i]))
-        obj["keywords"].append({"keyword" : custom_keywords[i], "explanation": explain_word(id, custom_keywords[i])})
+        obj["keywords"].append({"keyword" : custom_keywords[i], "explanation": explain_word(id, custom_keywords[i], docs)})
         
     print("__________________________________________________________________________")
    
