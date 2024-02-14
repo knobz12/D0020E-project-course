@@ -157,7 +157,8 @@ def get_route_parameters() -> tuple[list[str], str] | Response:
 
         if len(file_hashes) == 0:
             result = make_response("All files Invalid or empty", 406)
-        result = (file_hashes, course_id)
+        else:
+            result = (file_hashes, course_id)
     else:
         result = make_response("Missing files or file ids.", 406)
 
