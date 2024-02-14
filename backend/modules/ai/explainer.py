@@ -279,11 +279,11 @@ Answer:""".format(explanation = previous_explanation,context=text)
     explanation = results[-1].splitlines()[2:]
     return results
 
-def create_explaination(id: str, amount: int, custom_keywords: list = []) -> str:
+def create_explaination(id: list[str], amount: int, custom_keywords: list = []) -> str:
     gllm = create_llm_guidance()
     vectorstore = create_collection()
 
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
+    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[0]})
 
 
     obj = {}

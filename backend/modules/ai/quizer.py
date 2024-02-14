@@ -117,11 +117,11 @@ Questions:
 
 
 
-def create_quiz(id: str, questions: int) -> str:
+def create_quiz(id: list[str], questions: int) -> str:
     glmm = create_llm_guidance()
     vectorstore = create_collection()
 
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
+    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[0]})
     # print(docs)
 
 

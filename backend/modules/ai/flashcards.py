@@ -83,11 +83,11 @@ class Data(BaseModel):
     data: list[tuple[str, str]]
 
 
-def create_flashcards(id: str, questions: int):
+def create_flashcards(id: list[str], questions: int):
     gllm = create_llm_guidance()
     vectorstore = create_collection()
 
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
+    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[0]})
 
 
     obj = {}

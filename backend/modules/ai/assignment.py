@@ -4,11 +4,11 @@ from modules.ai.utils.vectorstore import  create_collection
 
 
 from typing import Generator
-def assignment_doc_stream(id: str) -> Generator[str, str, None]:
+def assignment_doc_stream(id: list[str]) -> Generator[str, str, None]:
     llm = create_llm()
     vectorstore = create_collection()
 
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
+    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[0]})
     print(docs)
     print("doc count:",len(docs['ids']))
     results: list[str] = []
