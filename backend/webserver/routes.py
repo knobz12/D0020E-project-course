@@ -389,7 +389,8 @@ def explanation():
         explanation = create_explaination(file_hash, amount, custom_keywords)
         duration = time.time() - before
         sem.release()
-    except:
+    except Exception as e:
+        print(e)
         explanation = ""
     
     print(explanation)
