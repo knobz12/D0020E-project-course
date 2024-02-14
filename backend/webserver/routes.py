@@ -119,9 +119,9 @@ def get_user_openai_enabled(user_id: str) -> tuple[bool, str] | None:
 
 from flask import Response
 
-def get_route_parameters() -> tuple[str, str] | Response:
+def get_route_parameters() -> tuple[list[str], str] | Response:
     """
-    Returns tuple where first element is file_hash (file id) and course id.
+    Returns tuple where first element is file_hashes list (file id) and course id.
     Otherwise returns a response error which in return can be returned from a route return.
     """
     course_query = request.args.get("course")
@@ -129,39 +129,44 @@ def get_route_parameters() -> tuple[str, str] | Response:
         return make_response("Missing required course parameter", 400)
 
     course = course_query
-    file_id = request.form.get("file_id")
+    file_ids = request.form.get("file_ids")
 
-    if 'file' not in request.files and file_id == None:
-        return make_response("Missing file and file id.", 406)
+    file_list = request.files.getlist("files")
 
-    def get_file_hash() -> str | Response:
-        if file_id != None:
-            return file_id
-
-        if 'file' not in request.files:
-            return make_response("Missing file", 406)
+    result = None
+    if file_ids != None:
+        file_ids_list = file_ids.split(',')
+        course_id = get_course_id_from_name(course)
+        result = (file_ids_list, course_id)
+    elif len(file_list) > 0:
+        file_hashes = []
+        course_id = get_course_id_from_name(course)
         
-        file = request.files["file"]
-        file_size = file.seek(0, os.SEEK_END)
-        file.seek(0)
-        print("File size:",file_size)
+        for file in file_list:
+            file_size = file.seek(0, os.SEEK_END)
+            file.seek(0)
+            if (file_size == 0):
+                print("skipping empty file %d", file.filename)
+                continue
+            hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
+            if hash == None:
+                print("skipping invalid file %d", file.filename)
+                continue
 
-        if file_size <= 0:
-            return make_response("Cannot send empty file! 😡", 406)
+            file_hashes.append(hash)
 
-        file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
-        if file_hash == None:
-            return make_response("Bad file format", 406)
-        return file_hash
+        if len(file_hashes) == 0:
+            result = make_response("All files Invalid or empty", 406)
+        result = (file_hashes, course_id)
+    else:
+        result = make_response("Missing files or file ids.", 406)
+
 
     
-    file_hash = get_file_hash()
+    # print("get_route_parameters")
+    # print(result)
+    return result
 
-    if not isinstance(file_hash, str):
-        return file_hash
-
-    course_id = get_course_id_from_name(course)
-    return (file_hash, course_id)
 
 @app.route("/api/quiz", methods=["POST"])
 def quiz():
@@ -169,7 +174,7 @@ def quiz():
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hash, course_id) = params
+    (file_hashes, course_id) = params
 
     user_id = get_user_id()
     if user_id == None:
@@ -182,7 +187,7 @@ def quiz():
         questions = int(query)
 
     before = time.time()
-    quiz = create_quiz(file_hash, questions)
+    quiz = create_quiz(file_hashes, questions)
     duration = time.time() - before
     print(quiz)
     print("Inserting quiz")
@@ -205,7 +210,7 @@ def flashcards():
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hash, course_id) = params
+    (file_hashes, course_id) = params
     
     user_id = get_user_id()
     
@@ -218,7 +223,7 @@ def flashcards():
     with connection_pool.connection() as conn:
         sem.acquire(timeout=1000)
         before = time.time()
-        flashcards = create_flashcards(file_hash, flashcards_count)
+        flashcards = create_flashcards(file_hashes, flashcards_count)
         duration = time.time() - before
         print(duration)
         sem.release()
@@ -267,7 +272,7 @@ def summary():
     if not isinstance(params, tuple):
         return params
 
-    (file_hash, course_id) = params
+    (file_hashes, course_id) = params
     user_id = get_user_id()
     if user_id == None:
         return make_response("Log in first", 401)
@@ -275,10 +280,9 @@ def summary():
     def stream():
         summary = ""
         sem.acquire(timeout=1000)
-        # for chunk in summarize_doc_stream_old(file_hash):
         print("CHUNKING")
         before = time.time()
-        for chunk in summarize_doc_stream_old(file_hash):
+        for chunk in summarize_doc_stream_old(file_hashes):
             yield chunk
             summary += chunk
         duration = time.time() - before
@@ -303,14 +307,14 @@ def assignment():
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hash, course_id) = params
+    (file_hashes, course_id) = params
     user_id = get_user_id()
 
     def stream():
         assignment = ""
         sem.acquire(timeout=1000)
         before = time.time()
-        for chunk in assignment_doc_stream(file_hash):
+        for chunk in assignment_doc_stream(file_hashes):
             yield chunk
             assignment += chunk
         duration = time.time() - before
@@ -366,7 +370,7 @@ def explanation():
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hash, course_id) = params
+    (file_hashes, course_id) = params
 
     user_id = get_user_id()
 
@@ -386,7 +390,7 @@ def explanation():
     try:
         sem.acquire(timeout=1000)
         before = time.time()
-        explanation = create_explaination(file_hash, amount, custom_keywords)
+        explanation = create_explaination(file_hashes, amount, custom_keywords)
         duration = time.time() - before
         sem.release()
     except Exception as e:
