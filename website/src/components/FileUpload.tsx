@@ -175,7 +175,7 @@ export default function FileUpload({
     >({})
     const [isLoading, setIsLoading] = useState<boolean>(false)
     // String is database file ID and File is local user file.
-    const [selectedFile, setSelectedFile] = useState<string | File | null>(null)
+    const [selectedFile, setSelectedFile] = useState<string[] | File[] | null>(null)
     const [fileChoice, setFileChoice] = useState<"select" | "upload">("upload")
     const utils = trpc.useUtils()
 
@@ -207,23 +207,27 @@ export default function FileUpload({
         try {
             const data = new FormData()
 
-            if (selectedFile === null) {
+            const file = selectedFile
+            
+
+            if (Array.isArray(file)) {
+                if (typeof file[0] === "string") {
+                    let file_ids: string = file.join(",");
+                    data.set("file_ids", file_ids);
+
+                } else {
+                    for (let i = 0; i < file.length; ++i) {
+                        data.append("files", file[i])
+                    }
+                }
+            }
+            else if (file === null) {
                 return showNotification({
                     color: "blue",
                     message: "You must select a file.",
                 })
             }
 
-            const file = selectedFile
-
-            if (!file) {
-                return showNotification({
-                    color: "blue",
-                    message: "You must select a file first",
-                })
-            }
-
-            data.set(typeof file === "string" ? "file_id" : "file", file)
             const url = new URL(apiUrl)
 
             for (const [key, value] of Object.entries(params)) {
@@ -341,7 +345,7 @@ export default function FileUpload({
         }
     }
     const onFileSelect = useCallback(
-        function (file: string | File | null) {
+        function (file: string[] | File[] | null) {
             setSelectedFile(file)
         },
         [setSelectedFile],
@@ -468,7 +472,6 @@ export default function FileUpload({
                             </Stack>
                         )}
                         <SegmentedControl
-                            disabled={selectedFile !== null}
                             color="primary"
                             data={[
                                 {

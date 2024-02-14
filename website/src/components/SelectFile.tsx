@@ -6,7 +6,7 @@ import { useRouter } from "next/router"
 
 interface SelectFileProps {
     isLoading: boolean
-    onSelect: (id: string | null) => void
+    onSelect: (id: string[]) => void
 }
 
 export function SelectFile({ isLoading, onSelect }: SelectFileProps) {
@@ -22,13 +22,18 @@ export function SelectFile({ isLoading, onSelect }: SelectFileProps) {
 
     useEffect(
         function () {
-            if (selected.length === 0) {
-                return onSelect(null)
+            let ids: string[] = [];
+            for (let i = 0; i < selected.length; ++i)
+            {
+                ids[i] = selected.at(i)!.id;
             }
-            onSelect(String(selected.at(0)!.id))
+
+
+            onSelect(ids)
         },
         [onSelect, selected],
     )
+    const max_selected = 5;
 
     return (
         <Box bg="dark.8">
@@ -36,20 +41,19 @@ export function SelectFile({ isLoading, onSelect }: SelectFileProps) {
             <DataTable
                 // records={files.data?.files}
                 records={
-                    selected.length === 0
-                        ? files.data?.files
-                        : files.data?.files.filter(
-                              (file) => file.id === selected.at(0)!.id,
-                          )
+                        files.data?.files
                 }
                 fetching={files.isFetching}
                 selectedRecords={selected}
                 onSelectedRecordsChange={(records) => {
-                    if (records.length > 1) {
-                        return setSelected([records.at(0)!])
+                    if (records.length > max_selected)
+                    {
+                        setSelected(records.slice(0, 5));
                     }
-
-                    setSelected(records)
+                    else
+                    {
+                        setSelected(records);
+                    }
                 }}
                 loadingText="Loading documents"
                 noRecordsText="Found no documents"
@@ -58,9 +62,22 @@ export function SelectFile({ isLoading, onSelect }: SelectFileProps) {
                 minHeight={256}
                 onPageChange={(page) => setPage(page)}
                 page={page}
-                isRecordSelectable={(record) =>
-                    selected.length === 0 || record.id === selected.at(0)?.id
-                }
+                isRecordSelectable={(record) => {
+                    if (selected.length >= max_selected) {
+                        for (let i = 0; i < selected.length; ++i)
+                        {
+                            if (selected.at(i)!.id === record.id)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                    return false;
+                }}
                 columns={[
                     { accessor: "filename" },
                     {
