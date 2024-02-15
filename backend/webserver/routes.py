@@ -195,8 +195,6 @@ def quiz():
 
 
     with connection_pool.connection() as conn:
-        print("Found user:", user_id)
-        print("Saving quiz")
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
@@ -229,13 +227,11 @@ def flashcards():
         print(flashcards)
         print("Inserting flashcards")
         content_id = str(uuid4())
-        if user_id:
-            print("Found user:", user_id)
-            print("Saving flashcards")
-            cur = conn.cursor()
-            updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-            print("Updated at:", updated_at)
-            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (content_id, updated_at, "FLASHCARDS", f"Flashcards {updated_at}", flashcards, user_id, course_id, duration))
+
+        cur = conn.cursor()
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (content_id, updated_at, "FLASHCARDS", f"Flashcards {updated_at}", flashcards, user_id, course_id, duration))
 
 
     return app.response_class(flashcards, mimetype='application/json',status=200)
@@ -282,9 +278,6 @@ def summary():
         duration = time.time() - before
         sem.release()
 
-        if user_id == None:
-            return
-
         with connection_pool.connection() as conn:
             cur = conn.cursor()
             updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -312,9 +305,6 @@ def assignment():
             assignment += chunk
         duration = time.time() - before
         sem.release()
-
-        if user_id == None:
-            return
 
         with connection_pool.connection() as conn:
             cur = conn.cursor()
@@ -390,16 +380,12 @@ def explanation():
     
     print(explanation)
     print("Inserting explaination")
-    user_id = get_user_id()
-    if user_id:
-        print("Found user:", user_id)
-        print("Saving explainations")
     
-        with connection_pool.connection() as conn:
-            cur = conn.cursor()
-            updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-            print("Updated at:", updated_at)
-            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "EXPLAINER", f"Explaination {updated_at}", explanation, user_id, course_id, duration))
+    with connection_pool.connection() as conn:
+        cur = conn.cursor()
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "EXPLAINER", f"Explaination {updated_at}", explanation, user_id, course_id, duration))
 
         
 
