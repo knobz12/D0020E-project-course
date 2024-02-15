@@ -119,7 +119,7 @@ def get_user_openai_enabled(user_id: str) -> tuple[bool, str] | None:
 
 from flask import Response
 
-def get_route_parameters() -> tuple[list[str], str] | Response:
+def get_route_parameters() -> tuple[list[str], str, str] | Response:
     """
     Returns tuple where first element is file_hashes list (file id) and course id.
     Otherwise returns a response error which in return can be returned from a route return.
@@ -133,11 +133,15 @@ def get_route_parameters() -> tuple[list[str], str] | Response:
 
     file_list = request.files.getlist("files")
 
+    user_id = get_user_id()
+    if user_id == None:
+        return make_response("You need to be logged in to use this service", 406)
+
     result = None
     if file_ids != None:
         file_ids_list = file_ids.split(',')
         course_id = get_course_id_from_name(course)
-        result = (file_ids_list, course_id)
+        result = (file_ids_list, course_id, user_id)
     elif len(file_list) > 0:
         file_hashes = []
         course_id = get_course_id_from_name(course)
@@ -158,10 +162,9 @@ def get_route_parameters() -> tuple[list[str], str] | Response:
         if len(file_hashes) == 0:
             result = make_response("All files Invalid or empty", 406)
         else:
-            result = (file_hashes, course_id)
+            result = (file_hashes, course_id, user_id)
     else:
         result = make_response("Missing files or file ids.", 406)
-
 
     
     # print("get_route_parameters")
@@ -175,11 +178,7 @@ def quiz():
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hashes, course_id) = params
-
-    user_id = get_user_id()
-    if user_id == None:
-        return app.response_class("Sign in", mimetype='text/plain',status=401)
+    (file_hashes, course_id, user_id) = params
 
     query = request.args.get("questions")
     questions = 3
@@ -211,9 +210,7 @@ def flashcards():
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hashes, course_id) = params
-    
-    user_id = get_user_id()
+    (file_hashes, course_id, user_id) = params
     
     query = request.args.get("questions")
     flashcards_count = 3
@@ -231,7 +228,6 @@ def flashcards():
 
         print(flashcards)
         print("Inserting flashcards")
-        user_id = get_user_id()
         content_id = str(uuid4())
         if user_id:
             print("Found user:", user_id)
@@ -273,10 +269,7 @@ def summary():
     if not isinstance(params, tuple):
         return params
 
-    (file_hashes, course_id) = params
-    user_id = get_user_id()
-    if user_id == None:
-        return make_response("Log in first", 401)
+    (file_hashes, course_id, user_id) = params
 
     def stream():
         summary = ""
@@ -308,8 +301,7 @@ def assignment():
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hashes, course_id) = params
-    user_id = get_user_id()
+    (file_hashes, course_id, user_id) = params
 
     def stream():
         assignment = ""
@@ -371,9 +363,7 @@ def explanation():
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hashes, course_id) = params
-
-    user_id = get_user_id()
+    (file_hashes, course_id, user_id) = params
 
     query = [request.args.get("amount"), request.args.get("keywords")]
     print(request.args)
