@@ -98,17 +98,83 @@ cd D0020E-project-course
         ```
 
 - #### For users
+	- On Mac
+
+  Requries Python 3.11. Tested specifically on 3.11.6.
+
+  Can be installed by running
+
+  ```bash
+  brew install python@3.11
+  ```
+
+  #### Download an LLM model of your choice
+  Download any one of the .gguf files in one of the links below. The bigger the model the better AI responses.
+  Choose a model size which fits the amount of RAM on your system. We recommend the size of the model you choose to be at most 
+  1/2 of your available RAM. So if you have 8GB of RAM download a <= 4GB size gguf model.
+
+  #### Models ordered by (our opinion) performance/size ratio
+  [zephyr-7b-beta](https://huggingface.co/TheBloke/zephyr-7B-beta-GGUF/tree/main) (3.08 - 7.7 GB)
+
+  [zephyr-3b](https://huggingface.co/TheBloke/stablelm-zephyr-3b-GGUF/tree/main) (1.2 - 2.97 GB)
+
+  [Llama-2-13B-Chat](https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/tree/main) (5.43 - 13.8 GB)
+
+  [Llama-2-7B-Chat](https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/tree/main) (2.83 - 7.16 GB) 
+
+
+  ### Python
+  #### Installation 
+  ```bash
+  brew install libffi libmagic postgresql
+
+  # Create virtual environment for storing all project depencencies
+  python -m venv ./venv
+
+  # Activate virtual environment
+  source ./venv/bin/activate # Bash shell
+  # or
+  . ./venv/bin/activate.fish # Fish shell
+
+
+  # You can verify that you are in the virtual environment by running:
+  which python
+  # Output should end in:
+  D0020E-project-course/venv/bin/python
+
+
+  # Install llama-cpp with Metal GPU support
+  CMAKE_ARGS="-DLLAMA_METAL=on" pip install llama-cpp-python
+
+  # Install remaining dependencies in the virtual environment
+  pip install -r backend/requirements.macos.txt
+	```
+
+  #### Running
+  ``` bash
+  # Run the python server
+  # * = required
+  #
+  # * --model-path - The path to the gguf model you downloaded earlier
+  #
+  #
+  # --gpu-layers - How much GPU acceleration you want, if any
+  #   0 or unset = no GPU acceleration
+  #   > 0 = Amount of LLM layers to run on GPU. LLM models have different total layers.
+  #
+  #   For example Zephyr 7b has 33 layers so a value of 33 or higher will use max GPU acceleration. 
+  #
+  python ./backend/__main__.py --gpu-layers (number here) --model-path (path to model)
+
+  # Example
+  python ./backend/__main__.py --gpu-layers 33 --model-path ~/Downloads/zephyr-7b-beta.Q6_K.gguf
+	```
 	- On Windows
 	```
 	make install
 	```
   
 	- On Linux
-	```
-	make install
-	```
-
-	- On Mac
 	```
 	make install
 	```
