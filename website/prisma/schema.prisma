@@ -53,20 +53,18 @@ model Prompt {
   /// The user who made this prompt
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  
   courseId String @map("course_id") @db.Uuid
 
   /// Time to create
-  promptCreationTime String @map("prompt_creation_time")
+  promptCreationTime Float @map("prompt_creation_time") @db.Real
 
   /// The course this prompt belongs to
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   /// Teacher note for this prompt.
   teacherNote TeacherNote?
 
   reactions PromptReaction[]
-
 
   @@index([type])
   @@index([courseId])
