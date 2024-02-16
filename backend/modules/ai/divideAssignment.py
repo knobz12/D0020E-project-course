@@ -1,43 +1,10 @@
-import chromadb
-from chromadb.utils import embedding_functions
-from chromadb.config import Settings
-from modules.ai.utils.llm import create_llm, create_llm_index, create_llm_index_query_engine
+
+from modules.ai.utils.llm import create_llm
 from modules.ai.utils.vectorstore import  create_collection 
-from llama_index.vector_stores import ChromaVectorStore, VectorStoreQuery
-from llama_index.vector_stores.types import (
-    MetadataFilter,
-    MetadataFilters,
-    FilterOperator,
-)
-from llama_index import (
-    LLMPredictor,
-    ServiceContext,
-    StorageContext,
-    PromptTemplate,
-    set_global_service_context,
-    SimpleDirectoryReader,
-    VectorStoreIndex,
-    SummaryIndex,
-    Document
-)
-from llama_index.query_engine import RetrieverQueryEngine
-from llama_index.retrievers import (
-    BaseRetriever,
-    VectorIndexRetriever,
-)
-from llama_index import download_loader
-from llama_index.extractors import BaseExtractor
-from llama_index.prompts import PromptTemplate
 
-import modules
+
 from typing import Generator
-import gc
-import sys, os
-
-
-
-
-def divide_assignment(id: str) -> Generator[str, str, None]:
+def divide_assignment(id: list[str]) -> Generator[str, str, None]:
     llm = create_llm()
     vectorstore = create_collection()
 
@@ -48,36 +15,30 @@ def divide_assignment(id: str) -> Generator[str, str, None]:
     texts = ""
     for (idx, meta) in enumerate(docs["metadatas"]):
         text =meta["text"]
-        previous_summary: str | None = results[idx - 1] if idx > 1 else None
+        previous_assignment: str | None = results[idx - 1] if idx > 1 else None
 
-        prompt = """Human: You are an assistant summarizing document text.
-I want you to summarize the text as best as you can in less than four paragraphs but atleast two paragraphs and when only include the summaraztion and nothing else:
+        prompt = """ create2 an completely original assignment using the given context and add small bit of text att the end saying the amount of hours the assignment will take. Make it an assignment tha someone could do in one day of work
 
 Text: {text}
 
 Answer:""".format(text = text)
 
-        prompt_with_previous=  """Human: You are an assistant summarizing document text.
-Use the following pieces of retrieved context to add to the summary text. 
-If you can't add to it simply return the old.
-The new summary has to be at least two paragraphs long but never longer than three paragraphs of text.
-Dont Ever talk about improving the summary.
-Don't directly refer to the context text, pretend like you already knew the context information.
+        prompt_with_previous=  """ improve the assignment using the information given. If its not possible to improve then repeat the assignment word for word
 
 
-Summary: {summary}
+assignment: {assignment}
 
 Context: {context}
 
-Answer:""".format(summary = previous_summary,context=text)
+Answer:""".format(assignment = previous_assignment,context=text)
 
-        use_prompt = prompt if previous_summary == None else prompt_with_previous
-        print(f"Summarizing doc {idx + 1}...")
+        use_prompt = prompt if previous_assignment == None else prompt_with_previous
+        print(f" doc {idx + 1}...")
         print(f"Full prompt:")
         print(use_prompt + "\n")
         result: str = ""
 
-        # Start streaming the final summary only
+        # Start streaming the final assignment only
         if idx == len(docs['metadatas']) - 1:
             for chunk in llm.stream(use_prompt):
                 result += chunk
@@ -94,12 +55,14 @@ Answer:""".format(summary = previous_summary,context=text)
         print(result + "\n\n\n")
 
     print("################################\n")
-    print("Summary:")
-    summary = results[-1]
+    print("assignment:")
+    assignment = results[-1]
     print("\n")
-    summaryTrim = summary[results[-1].find(start:='START')+len(start):summary.find('END')]
-    print(summaryTrim)
+    assignmentTrim = assignment[results[-1].find(start:='START')+len(start):assignment.find('END')]
+    print(assignmentTrim)
     print("\n")
     print("Original text:")
     print(texts)
-    # return summaryTrim
+    # return assignmentTrim
+
+
