@@ -1,4 +1,5 @@
 # from modules.ai.summarizer import summarize_doc_stream_old
+from modules.ai.utils.vectorstore import create_collection
 from modules.ai.utils.args import get_args
 from modules.ai.summarizer import summarize_doc_stream_old
 from modules.ai.assignment import assignment_doc_stream
@@ -398,11 +399,30 @@ def chat():
         return make_response(400, "Cannot send an empty message.")
 
     print(f"Creating response message for {message}")
+    col = create_collection()
+    # docs = col.query(query_texts=message,n_results=2,where={'course':'D7032E'},include=["metadatas"])
+    docs = col.query(query_texts=message,n_results=2,include=["metadatas"])
+    print(docs)
+    context = ""
+
+    for doc in docs["metadatas"][0]:
+        context += doc["text"]
 
     def stream():
         sem.acquire(timeout=1000)
+        prompt = f"""\
+System: You are AI Studybuddy a helpful AI assistant helping students in the course D70O2E. NEVER write more than 300 words.
+
+Context you should use ONLY IF IT IS HELPFUL TO THE STUDENT PROMPT: {context}
+
+Student prompt: {message}
+
+Context about the user prompt which you only should use if helpful: {context}
+
+AI:"""
+        print(prompt)
         llm = create_llm()
-        stream = llm.stream(message)
+        stream = llm.stream(prompt)
         for string in stream:
             yield string
             print(string, end="")
