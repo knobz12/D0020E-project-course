@@ -1,12 +1,12 @@
 # from modules.ai.summarizer import summarize_doc_stream_old
 from modules.ai.utils.args import get_args
-from modules.ai.summarizer import summarize_doc_stream_index, summarize_doc_stream_old
+from modules.ai.summarizer import summarize_doc_stream_old
 from modules.ai.assignment import assignment_doc_stream
 from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
 from modules.ai.flashcards import create_flashcards
 from modules.ai.explainer import create_explaination
-from modules.ai.title import create_title, create_title_index
+from modules.ai.title import create_title
 from webserver.app import app
 import os
 from uuid import uuid4
@@ -14,16 +14,10 @@ import json
 import datetime
 from jose.jwe import decrypt
 
-from modules.ai.utils.llm import create_llm_index
-from modules.ai.utils.vectorstore import create_collection
-from llama_index import VectorStoreIndex, ServiceContext
-from llama_index.vector_stores import ChromaVectorStore
-from llama_index.vector_stores import ChromaVectorStore
-from llama_index.memory import ChatMemoryBuffer
+from modules.ai.utils.llm import create_llm
 
 from flask import Response, request, make_response
 from flask_caching import Cache
-from flask_cors import cross_origin
 
 import psycopg_pool
 import jwt
@@ -404,30 +398,38 @@ def chat():
         return make_response(400, "Cannot send an empty message.")
 
     print(f"Creating response message for {message}")
-    sem.acquire(timeout=1000)
-    llm = create_llm_index()
-    service_context = ServiceContext.from_defaults(
-        chunk_size=512,
-        llm=llm,
-        embed_model='local:sentence-transformers/all-MiniLM-L6-v2',
-    )
-    collection = create_collection()
-    chroma_vector_store = ChromaVectorStore.from_collection(collection=collection)
-    index = VectorStoreIndex.from_vector_store(chroma_vector_store,service_context=service_context)
-    memory = ChatMemoryBuffer.from_defaults(token_limit=1500)
-    chat = index.as_chat_engine(
-        chat_mode="best",
-        memory=memory,
-        system_prompt=(
-            "You are AI Studubuddy assistant able to have normal interactions. You help students with questions about anything."
-        )
-    )
-    print(f"Sending message to chatbot:\n{message}\n")
-    response = chat.chat(message).response
-    print(f"Answer from chatbot:\n{response}\n")
+
+    def stream():
+        sem.acquire(timeout=1000)
+        llm = create_llm()
+        stream = llm.stream(message)
+        for string in stream:
+            yield string
+            print(string, end="")
+        sem.release()
+
+    # llm = create_llm_index()
+    # service_context = ServiceContext.from_defaults(
+    #     chunk_size=512,
+    #     llm=llm,
+    #     embed_model='local:sentence-transformers/all-MiniLM-L6-v2',
+    # )
+    # collection = create_collection()
+    # chroma_vector_store = ChromaVectorStore.from_collection(collection=collection)
+    # index = VectorStoreIndex.from_vector_store(chroma_vector_store,service_context=service_context)
+    # memory = ChatMemoryBuffer.from_defaults(token_limit=1500)
+    # chat = index.as_chat_engine(
+    #     chat_mode="best",
+    #     memory=memory,
+    #     system_prompt=(
+    #         "You are AI Studubuddy assistant able to have normal interactions. You help students with questions about anything."
+    #     )
+    # )
+    # print(f"Sending message to chatbot:\n{message}\n")
+    # response = chat.chat(message)
+    # print(f"Answer from chatbot:\n{str(response)}\n")
     # response = llm.complete(message).text
     # retriever = index.as_retriever
     # ContextChatEngine(retriever=retriever)
-    sem.release()
 
-    return app.response_class(response, mimetype='plain/text',status=200)
+    return app.response_class(stream(), mimetype='plain/text',status=200)
