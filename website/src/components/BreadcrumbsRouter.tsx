@@ -209,6 +209,34 @@ export function BreadcrumbsRouter() {
                             name: router.query.explainerId as string,
                         },
                     ]
+                case "/courses/[course]/divideAssignment":
+                    return [
+                        { href: "/", name: "Courses" },
+                        {
+                            href: `/courses/${router.query.course}`,
+                            name: router.query.course as string,
+                        },
+                        {
+                            href: `/courses/${router.query.course}/divideAssignment`,
+                            name: "DivideAssignment",
+                        },
+                    ]
+                case "/courses/[course]/divideAssignment/[divideAssignmentId]":
+                    return [
+                        { href: "/", name: "Courses" },
+                        {
+                            href: `/courses/${router.query.course}`,
+                            name: router.query.course as string,
+                        },
+                        {
+                            href: `/courses/${router.query.course}/divideAssignment`,
+                            name: "DivideAssignment",
+                        },
+                        {
+                            href: `/courses/${router.query.course}/divideAssignment/${router.query.divideAssignmentId}`,
+                            name: router.query.divideAssignmentId as string,
+                        },
+                    ]
                 default:
                     return null
             }

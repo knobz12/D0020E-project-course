@@ -32,6 +32,7 @@ enum PromptType {
   ASSIGNMENT
   FLASHCARDS
   EXPLAINER
+  DIVIDEASSIGNMENT
 }
 
 model Prompt {

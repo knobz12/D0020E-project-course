@@ -15,6 +15,7 @@ import { addMinutes, isFuture, isPast, subMinutes } from "date-fns"
 type PromptTypeContent = {
     SUMMARY: { text: string }
     ASSIGNMENT: { text: string }
+    DIVIDEASSIGNMENT: { text: string }
     QUIZ: {
         questions: {
             question: string
@@ -68,6 +69,10 @@ type PromptType = {
           type: "ASSIGNMENT"
           content: PromptTypeContent["ASSIGNMENT"]
       }
+    | {
+        type: "DIVIDEASSIGNMENT"
+        content: PromptTypeContent["DIVIDEASSIGNMENT"]
+    }
     | {
           type: "QUIZ"
           content: PromptTypeContent["QUIZ"]
@@ -132,7 +137,7 @@ async function formatPrompt(
         userId: prompt.userId,
         title: prompt.title,
         reaction: !userReaction ? null : userReaction.positive,
-        type: prompt.type as "FLASHCARDS" | "QUIZ" | "SUMMARY" | "ASSIGNMENT"| "EXPLAINER",
+        type: prompt.type as "FLASHCARDS" | "QUIZ" | "SUMMARY" | "ASSIGNMENT" | "DIVIDEASSIGNMENT" | "EXPLAINER",
         courseId: prompt.courseId,
         published: prompt.published,
         courseName: prompt.course.name,
@@ -380,6 +385,65 @@ export const promptRouter = router({
                 data: {
                     title: input.assignment.title,
                     content: input.assignment.content,
+                },
+            })
+        }),
+    updateDivideAssignmentPrompt: userProcedure
+        .input(
+            z.object({
+                promptId: z.string().uuid(),
+                divideAssignment: z.object({
+                    title: z.string().max(512).min(3),
+                    content: z.object({
+                        text: z.string().max(Math.pow(2, 14)),
+                    }),
+                }),
+            }),
+        )
+        .mutation(async function ({ ctx, input }): Promise<void> {
+            const prompt = await db.prompt.findUnique({
+                where: { id: input.promptId },
+                select: { userId: true, type: true },
+            })
+
+            if (!prompt) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message:
+                        "The assignment you tried to update doesn't exist.",
+                })
+            }
+
+            if (prompt.type !== "DIVIDEASSIGNMENT") {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "The prompt you tried to edit is not a quiz.",
+                })
+            }
+
+            const isUserOwner = prompt.userId === ctx.user.id
+            if (ctx.user.type === "STUDENT") {
+                if (!isUserOwner) {
+                    throw new TRPCError({
+                        code: "UNAUTHORIZED",
+                        message: "You can't edit assignment you haven't made.",
+                    })
+                }
+            } else if (ctx.user.type !== "TEACHER") {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message:
+                        "You must be a teacher to edit prompts you haven't created.",
+                })
+            }
+
+            await db.prompt.update({
+                where: {
+                    id: input.promptId,
+                },
+                data: {
+                    title: input.divideAssignment.title,
+                    content: input.divideAssignment.content,
                 },
             })
         }),
