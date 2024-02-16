@@ -161,6 +161,7 @@ function DivideAssignmentEditor({
         <Stack>
             <Flex gap="lg">
                 <Input
+                    id="divideAssignmentTitle"
                     size="xl"
                     defaultValue={title}
                     style={{ flex: 1 }}
