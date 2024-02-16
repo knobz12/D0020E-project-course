@@ -175,7 +175,7 @@ export default function FileUpload({
     >({})
     const [isLoading, setIsLoading] = useState<boolean>(false)
     // String is database file ID and File is local user file.
-    const [selectedFile, setSelectedFile] = useState<string | File | null>(null)
+    const [selectedFile, setSelectedFile] = useState<string[] | File[] | null>(null)
     const [fileChoice, setFileChoice] = useState<"select" | "upload">("upload")
     const utils = trpc.useUtils()
 
@@ -186,28 +186,48 @@ export default function FileUpload({
         })
     }, [])
 
+    async function redirectToView() {
+        const prompt = await utils.prompts.getMyLatestPrompts.fetch({
+            course: router.query.course as string,
+            type
+        })
+
+        router.push(
+            `/courses/${
+                router.query.course
+            }/${prompt.type.toLowerCase()}/${
+                prompt.id
+            }`,
+        )
+        
+    }
+
     async function onClick() {
         setIsLoading(true)
         try {
             const data = new FormData()
 
-            if (selectedFile === null) {
+            const file = selectedFile
+            
+
+            if (Array.isArray(file)) {
+                if (typeof file[0] === "string") {
+                    let file_ids: string = file.join(",");
+                    data.set("file_ids", file_ids);
+
+                } else {
+                    for (let i = 0; i < file.length; ++i) {
+                        data.append("files", file[i])
+                    }
+                }
+            }
+            else if (file === null) {
                 return showNotification({
                     color: "blue",
                     message: "You must select a file.",
                 })
             }
 
-            const file = selectedFile
-
-            if (!file) {
-                return showNotification({
-                    color: "blue",
-                    message: "You must select a file first",
-                })
-            }
-
-            data.set(typeof file === "string" ? "file_id" : "file", file)
             const url = new URL(apiUrl)
 
             for (const [key, value] of Object.entries(params)) {
@@ -285,31 +305,31 @@ export default function FileUpload({
             })
 
             if (prompt) {
-                showNotification({
-                    color: "blue",
-                    icon: <IconInfoCircle />,
-                    message: (
-                        <Group spacing="md">
-                            <Text>
-                                Your generated prompt has been saved. Do you
-                                want to view it?
-                            </Text>
-                            <Button
-                                onClick={() =>
-                                    router.push(
-                                        `/courses/${
-                                            router.query.course
-                                        }/${prompt.type.toLowerCase()}/${
-                                            prompt.id
-                                        }`,
-                                    )
-                                }
-                            >
-                                View
-                            </Button>
-                        </Group>
-                    ),
-                })
+                // showNotification({
+                //     color: "blue",
+                //     icon: <IconInfoCircle />,
+                //     message: (
+                //         <Group spacing="md">
+                //             <Text>
+                //                 Your generated prompt has been saved. Do you
+                //                 want to view it?
+                //             </Text>
+                //             <Button
+                //                 onClick={() =>
+                //                     router.push(
+                //                         `/courses/${
+                //                             router.query.course
+                //                         }/${prompt.type.toLowerCase()}/${
+                //                             prompt.id
+                //                         }`,
+                //                     )
+                //                 }
+                //             >
+                //                 View
+                //             </Button>
+                //         </Group>
+                //     ),
+                // })
             }
         } catch (e) {
             if (e instanceof Error) {
@@ -325,7 +345,7 @@ export default function FileUpload({
         }
     }
     const onFileSelect = useCallback(
-        function (file: string | File | null) {
+        function (file: string[] | File[] | null) {
             setSelectedFile(file)
         },
         [setSelectedFile],
@@ -452,7 +472,6 @@ export default function FileUpload({
                             </Stack>
                         )}
                         <SegmentedControl
-                            disabled={selectedFile !== null}
                             color="primary"
                             data={[
                                 {
@@ -500,6 +519,17 @@ export default function FileUpload({
                     </Stack>
                 </Stack>
                 {/* {data !== null && <Textarea h="96rem" value={data} />} */}
+                {data !== null && (                    
+                    <Flex my="md" gap="md" w="max-content">
+                        <Button w="100%" color="blue" variant="filled"
+                            disabled={isLoading}
+                            onClick={redirectToView}
+                        >
+                            View
+                        </Button>
+                    </Flex>
+                    )
+                }
                 {data !== null &&
                     (type === "QUIZ" ? (
                         typeof data === "string" &&

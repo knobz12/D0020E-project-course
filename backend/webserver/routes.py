@@ -5,7 +5,7 @@ from modules.ai.assignment import assignment_doc_stream
 from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
 from modules.ai.flashcards import create_flashcards
-from modules.ai.explainerV2 import create_explaination
+from modules.ai.explainer import create_explaination
 from modules.ai.title import create_title, create_title_index
 from webserver.app import app
 import os
@@ -25,9 +25,11 @@ from flask import Response, request, make_response
 from flask_caching import Cache
 from flask_cors import cross_origin
 
-import psycopg2
+import psycopg_pool
 import jwt
 from threading import Semaphore
+
+import time
 
 # To assure the LLM only works on one prompt at a time
 sem = Semaphore()
@@ -37,6 +39,11 @@ modules.sem = sem
 args = get_args()
 
 cache = Cache(app,config={"CACHE_TYPE":"SimpleCache"})
+
+
+conninfo = f'dbname=db user=user password=pass host={args.db_host} port=5432'
+connection_pool: psycopg_pool.ConnectionPool = psycopg_pool.ConnectionPool(conninfo, open=True)
+
 
 @app.route("/api/health")
 def health():
@@ -62,12 +69,13 @@ def get_user_id() -> str | None:
     return user_id
 
 def get_course_id_from_name(name: str) -> str:
-    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
-    cur = conn.cursor()
-    cur.execute("SELECT id FROM courses WHERE name=%s",(name,))
-    courses = cur.fetchall()
-    course_id = courses[0][0]
-    conn.close()
+    
+    course_id = None
+    with connection_pool.connection() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT id FROM courses WHERE name=%s",(name,))
+        courses = cur.fetchall()
+        course_id = courses[0][0]
     return course_id
 
 def get_user_openai_enabled(user_id: str) -> tuple[bool, str] | None:
@@ -75,10 +83,11 @@ def get_user_openai_enabled(user_id: str) -> tuple[bool, str] | None:
     Returns tuple where first element is if OpenAI is enabled and second argument is their OpenAI API key.
     Returns null if user not found or invalid API key.
     """
-    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
-    cur = conn.cursor()
-    cur.execute("SELECT enabled, api_key FROM open_ai WHERE user_id=%s",(user_id,))
-    users = cur.fetchall()
+    users = None
+    with connection_pool.connection() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT enabled, api_key FROM open_ai WHERE user_id=%s",(user_id,))
+        users = cur.fetchall()
 
     print(users)
     if len(users) != 1:
@@ -110,9 +119,9 @@ def get_user_openai_enabled(user_id: str) -> tuple[bool, str] | None:
 
 from flask import Response
 
-def get_route_parameters() -> tuple[str, str] | Response:
+def get_route_parameters() -> tuple[list[str], str, str] | Response:
     """
-    Returns tuple where first element is file_hash (file id) and course id.
+    Returns tuple where first element is file_hashes list (file id) and course id.
     Otherwise returns a response error which in return can be returned from a route return.
     """
     course_query = request.args.get("course")
@@ -120,39 +129,48 @@ def get_route_parameters() -> tuple[str, str] | Response:
         return make_response("Missing required course parameter", 400)
 
     course = course_query
-    file_id = request.form.get("file_id")
+    file_ids = request.form.get("file_ids")
 
-    if 'file' not in request.files and file_id == None:
-        return make_response("Missing file and file id.", 406)
+    file_list = request.files.getlist("files")
 
-    def get_file_hash() -> str | Response:
-        if file_id != None:
-            return file_id
+    user_id = get_user_id()
+    if user_id == None:
+        return make_response("You need to be logged in to use this service", 406)
 
-        if 'file' not in request.files:
-            return make_response("Missing file", 406)
+    result = None
+    if file_ids != None:
+        file_ids_list = file_ids.split(',')
+        course_id = get_course_id_from_name(course)
+        result = (file_ids_list, course_id, user_id)
+    elif len(file_list) > 0:
+        file_hashes = []
+        course_id = get_course_id_from_name(course)
         
-        file = request.files["file"]
-        file_size = file.seek(0, os.SEEK_END)
-        file.seek(0)
-        print("File size:",file_size)
+        for file in file_list:
+            file_size = file.seek(0, os.SEEK_END)
+            file.seek(0)
+            if (file_size == 0):
+                print("skipping empty file %d", file.filename)
+                continue
+            hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
+            if hash == None:
+                print("skipping invalid file %d", file.filename)
+                continue
 
-        if file_size <= 0:
-            return make_response("Cannot send empty file! 😡", 406)
+            file_hashes.append(hash)
 
-        file_hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
-        if file_hash == None:
-            return make_response("Bad file format", 406)
-        return file_hash
+        if len(file_hashes) == 0:
+            result = make_response("All files Invalid or empty", 406)
+        else:
+            result = (file_hashes, course_id, user_id)
+    else:
+        result = make_response("Missing files or file ids.", 406)
 
     
-    file_hash = get_file_hash()
+    # print("get_route_parameters")
+    # print(result)
+    return result
 
-    if not isinstance(file_hash, str):
-        return file_hash
-
-    course_id = get_course_id_from_name(course)
-    return (file_hash, course_id)
 
 @app.route("/api/quiz", methods=["POST"])
 def quiz():
@@ -160,11 +178,7 @@ def quiz():
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hash, course_id) = params
-
-    user_id = get_user_id()
-    if user_id == None:
-        return app.response_class("Sign in", mimetype='text/plain',status=401)
+    (file_hashes, course_id, user_id) = params
 
     query = request.args.get("questions")
     questions = 3
@@ -172,21 +186,19 @@ def quiz():
     if query != None:
         questions = int(query)
 
-    quiz = create_quiz(file_hash, questions)
-
+    before = time.time()
+    quiz = create_quiz(file_hashes, questions)
+    duration = time.time() - before
     print(quiz)
     print("Inserting quiz")
     quiz_id = str(uuid4())
 
-    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
-    print("Found user:", user_id)
-    print("Saving quiz")
-    cur = conn.cursor()
-    updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-    print("Updated at:", updated_at)
-    cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (quiz_id, updated_at, "QUIZ", f"Quiz {updated_at}", quiz, user_id, course_id))
-    conn.commit()
-    conn.close()
+
+    with connection_pool.connection() as conn:
+        cur = conn.cursor()
+        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        print("Updated at:", updated_at)
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (quiz_id, updated_at, "QUIZ", f"Quiz {updated_at}", quiz, user_id, course_id, duration))
     sem.release()
     return app.response_class(quiz, mimetype='application/json',status=200)
 
@@ -196,9 +208,7 @@ def flashcards():
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hash, course_id) = params
-    
-    user_id = get_user_id()
+    (file_hashes, course_id, user_id) = params
     
     query = request.args.get("questions")
     flashcards_count = 3
@@ -206,27 +216,23 @@ def flashcards():
     if query != None:
         flashcards_count = int(query)
 
-    print(f"Creating {flashcards_count} flashcards")
+    with connection_pool.connection() as conn:
+        sem.acquire(timeout=1000)
+        before = time.time()
+        flashcards = create_flashcards(file_hashes, flashcards_count)
+        duration = time.time() - before
+        print(duration)
+        sem.release()
 
-    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
-    sem.acquire(timeout=1000)
-    flashcards = create_flashcards(file_hash, flashcards_count)
-    sem.release()
+        print(flashcards)
+        print("Inserting flashcards")
+        content_id = str(uuid4())
 
-    print(flashcards)
-    print("Inserting flashcards")
-    user_id = get_user_id()
-    content_id = str(uuid4())
-    if user_id:
-        print("Found user:", user_id)
-        print("Saving flashcards")
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
-        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (content_id, updated_at, "FLASHCARDS", f"Flashcards {updated_at}", flashcards, user_id, course_id))
-        conn.commit()
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (content_id, updated_at, "FLASHCARDS", f"Flashcards {updated_at}", flashcards, user_id, course_id, duration))
 
-    conn.close()
 
     return app.response_class(flashcards, mimetype='application/json',status=200)
 
@@ -259,31 +265,24 @@ def summary():
     if not isinstance(params, tuple):
         return params
 
-    (file_hash, course_id) = params
-    user_id = get_user_id()
-    if user_id == None:
-        return make_response("Log in first", 401)
+    (file_hashes, course_id, user_id) = params
 
     def stream():
         summary = ""
         sem.acquire(timeout=1000)
-        # for chunk in summarize_doc_stream_old(file_hash):
         print("CHUNKING")
-        for chunk in summarize_doc_stream_old(file_hash):
+        before = time.time()
+        for chunk in summarize_doc_stream_old(file_hashes):
             yield chunk
             summary += chunk
+        duration = time.time() - before
         sem.release()
 
-        if user_id == None:
-            return
-
-        conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
-        cur = conn.cursor()
-        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        print("Updated at:", updated_at)
-        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "SUMMARY", f"Summary {updated_at}", json.dumps({"text":summary}), user_id, course_id))
-        conn.commit()
-        conn.close()
+        with connection_pool.connection() as conn:
+            cur = conn.cursor()
+            updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+            print("Updated at:", updated_at)
+            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "SUMMARY", f"Summary {updated_at}", json.dumps({"text":summary}), user_id, course_id, duration))
 
         
 
@@ -295,27 +294,23 @@ def assignment():
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hash, course_id) = params
-    user_id = get_user_id()
+    (file_hashes, course_id, user_id) = params
 
     def stream():
         assignment = ""
         sem.acquire(timeout=1000)
-        for chunk in assignment_doc_stream(file_hash):
+        before = time.time()
+        for chunk in assignment_doc_stream(file_hashes):
             yield chunk
             assignment += chunk
+        duration = time.time() - before
         sem.release()
 
-        if user_id == None:
-            return
-
-        conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
-        cur = conn.cursor()
-        updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        print("Updated at:", updated_at)
-        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "ASSIGNMENT", f"Assignment {updated_at}", json.dumps({"text":assignment}), user_id, course_id))
-        conn.commit()
-        conn.close()
+        with connection_pool.connection() as conn:
+            cur = conn.cursor()
+            updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+            print("Updated at:", updated_at)
+            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "ASSIGNMENT", f"Assignment {updated_at}", json.dumps({"text":assignment}), user_id, course_id, duration))
 
         
 
@@ -332,25 +327,22 @@ def generate_title():
     if prompt_id == None:
         return make_response("Missing prompt id", 400)
 
-    conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
-    cur = conn.cursor()
+    with connection_pool.connection() as conn:
+        cur = conn.cursor()
 
-    cur.execute("SELECT content FROM prompts WHERE id=%s;", (prompt_id,))
+        cur.execute("SELECT content FROM prompts WHERE id=%s;", (prompt_id,))
 
-    prompt = cur.fetchone()
-    if prompt == None:
-        conn.close()
-        return make_response(f"Could not find prompt with id {prompt_id}", 400)
-
+        prompt = cur.fetchone()
+        if prompt == None:
+            return make_response(f"Could not find prompt with id {prompt_id}", 400)
 
 
-    content: str = (str(prompt[0]))[0:1024]
-    title: str = create_title(content)
-    # title: str = create_title_index(content) + " " + str(datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 
-    cur.execute("UPDATE prompts SET title=%s WHERE id=%s;", (title, prompt_id))
-    conn.commit()
-    conn.close()
+        content: str = (str(prompt[0]))[0:1024]
+        title: str = create_title(content)
+        # title: str = create_title_index(content) + " " + str(datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+
+        cur.execute("UPDATE prompts SET title=%s WHERE id=%s;", (title, prompt_id))
 
         
 
@@ -361,9 +353,7 @@ def explanation():
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hash, course_id) = params
-
-    user_id = get_user_id()
+    (file_hashes, course_id, user_id) = params
 
     query = [request.args.get("amount"), request.args.get("keywords")]
     print(request.args)
@@ -377,28 +367,25 @@ def explanation():
 
     print(f"Creating {amount} keywords and explaining additional ones that are: {custom_keywords}")
 
-
+    duration = None
     try:
         sem.acquire(timeout=1000)
-        explanation = create_explaination(file_hash, amount, custom_keywords)
+        before = time.time()
+        explanation = create_explaination(file_hashes, amount, custom_keywords)
+        duration = time.time() - before
         sem.release()
-    except:
+    except Exception as e:
+        print(e)
         explanation = ""
     
     print(explanation)
     print("Inserting explaination")
-    user_id = get_user_id()
-    if user_id:
-        print("Found user:", user_id)
-        print("Saving explainations")
     
-        conn = psycopg2.connect(database="db",user="user",password="pass",host=args.db_host,port=5432)
+    with connection_pool.connection() as conn:
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
-        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id) VALUES (%s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "EXPLAINER", f"Explaination {updated_at}", json.dumps({"text":explanation}), user_id, course_id))
-        conn.commit()
-        conn.close()
+        cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "EXPLAINER", f"Explaination {updated_at}", explanation, user_id, course_id, duration))
 
         
 

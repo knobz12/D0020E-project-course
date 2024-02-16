@@ -73,7 +73,6 @@ function ExplainerViewer({
         },
         [router],
     )
-
     return (
         <Stack>
             <Stack>
@@ -85,7 +84,7 @@ function ExplainerViewer({
                             promptId={promptId}
                         />
                     )}
-                    {editable && (
+                    {/* {editable && (
                         <Button
                             w="100%"
                             onClick={onEdit}
@@ -94,7 +93,7 @@ function ExplainerViewer({
                         >
                             Edit
                         </Button>
-                    )}
+                    )} */}
                 </Flex>
             </Stack>
             {content.keywords.map((key, idx) => (
