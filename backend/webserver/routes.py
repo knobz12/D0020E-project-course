@@ -7,6 +7,7 @@ from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
 from modules.ai.flashcards import create_flashcards
 from modules.ai.explainer import create_explaination
+from modules.ai.divideAssignment import divide_assignment_stream
 from modules.ai.title import create_title
 from webserver.app import app
 import os
@@ -350,6 +351,37 @@ def assignment():
         
 
     return app.response_class(stream(), mimetype='text/plain')
+
+@app.route("/api/divideAssignment", methods=["POST"])
+def divide_assignment():
+    params = get_route_parameters()
+
+    if not isinstance(params, tuple):
+        return params
+
+    (file_hashes, course_id, user_id) = params
+
+    def stream():
+        dividedAssignment = ""
+        sem.acquire(timeout=1000)
+        print("CHUNKING")
+        before = time.time()
+        for chunk in divide_assignment_stream(file_hashes):
+            yield chunk
+            dividedAssignment += chunk
+        duration = time.time() - before
+        sem.release()
+
+        with connection_pool.connection() as conn:
+            cur = conn.cursor()
+            updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+            print("Updated at:", updated_at)
+            cur.execute("INSERT INTO prompts (id, updated_at, type, title, content, user_id, course_id, prompt_creation_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", (str(uuid4()), updated_at, "DIVIDEASSIGNMENT", f"DivideAssignment {updated_at}", json.dumps({"text":dividedAssignment}), user_id, course_id, duration))
+
+        
+
+    return app.response_class(stream(), mimetype='text/plain')
+
 
 @app.route("/api/generate_title", methods=["POST"])
 def generate_title():

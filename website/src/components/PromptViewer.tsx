@@ -5,6 +5,7 @@ import { FlashcardsContent } from "./FlashcardsContent"
 import { AssignmentContent } from "./AssignmentContent"
 import { SummaryContent } from "./SummaryContent"
 import { ExplainerContent } from "./ExplainerContent"
+import { DivideAssignmentContent } from "./DivideAssignmentContent"
 
 type PromptViewerProps = {
     title?: string
@@ -41,6 +42,12 @@ type PromptViewerProps = {
               type: "ASSIGNMENT"
           })["content"]
       }
+    | {
+          type: "DIVIDEASSIGNMENT"
+          content: (RouterOutput["prompts"]["getPromptById"] & {
+              type: "DIVIDEASSIGNMENT"
+          })["content"]
+      }
 )
 
 export function PromptViewer({ type, ...props }: PromptViewerProps) {
@@ -67,6 +74,12 @@ export function PromptViewer({ type, ...props }: PromptViewerProps) {
             return (
                 <AssignmentContent
                     {...(props as PromptViewerProps & { type: "ASSIGNMENT" })}
+                />
+            )
+        case "DIVIDEASSIGNMENT":
+            return (
+                <DivideAssignmentContent
+                    {...(props as PromptViewerProps & { type: "DIVIDEASSIGNMENT" })}
                 />
             )
         case "SUMMARY":

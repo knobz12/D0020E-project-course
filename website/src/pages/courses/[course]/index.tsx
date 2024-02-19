@@ -21,6 +21,7 @@ import {
     IconBoxMultiple,
     IconClipboardList,
     IconMessageQuestion,
+    IconTie
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
@@ -56,6 +57,11 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 icon: IconCheck,
                 text: "Assignment",
                 link: "/assignment",
+            },
+            {
+                icon: IconTie,
+                text: "DivideAssignment",
+                link: "/divideAssignment",
             },
              {
                 icon: IconClipboardList,
