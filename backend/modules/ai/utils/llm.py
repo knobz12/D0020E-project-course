@@ -43,7 +43,7 @@ import os, gc, sys, chromadb
 """ from llama_index.llms import * """
 
 # llm: LangLlamaCpp = None
-guid: LlamaCpp = None
+guid: LlamaCpp | None = None
 # llmi: LlamaCPP = None
 openai: str = None
 
@@ -88,14 +88,14 @@ def create_llm() -> LangLlamaCpp:
         n_gpu_layers=args.gpu_layers,
         n_batch=512,
         use_mmap=True,
-        n_ctx=4096,
+        n_ctx=args.ctx_size,
         f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
-        max_tokens=512,
-        temperature=1.1,
+        max_tokens=args.max_tokens,
+        temperature=args.temperature,
         top_k=40,
         top_p=1,
         repeat_penalty=1/0.85,
-        verbose=True,
+        verbose=args.verbose,
     )
 
     return llm
