@@ -665,7 +665,7 @@ export const promptRouter = router({
     react: userProcedure
         .input(
             z.object({
-                type: z.enum(["FLASHCARDS", "QUIZ", "SUMMARY", "ASSIGNMENT", "EXPLAINER"]),
+                type: z.enum(["FLASHCARDS", "QUIZ", "SUMMARY", "ASSIGNMENT", "EXPLAINER","DIVIDEASSIGNMENT"]),
                 positive: z.boolean(),
                 promptId: z.string().uuid(),
             }),
