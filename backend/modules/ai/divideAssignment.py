@@ -4,7 +4,7 @@ from modules.ai.utils.vectorstore import  create_collection
 
 
 from typing import Generator
-def divide_assignment(id: list[str]) -> Generator[str, str, None]:
+def divide_assignment_stream(id: list[str]) -> Generator[str, str, None]:
     llm = create_llm()
     vectorstore = create_collection()
 

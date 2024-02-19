@@ -6,7 +6,7 @@ from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
 from modules.ai.flashcards import create_flashcards
 from modules.ai.explainer import create_explaination
-from modules.ai.divideAssignment import divide_assignment
+from modules.ai.divideAssignment import divide_assignment_stream
 from modules.ai.title import create_title, create_title_index
 from webserver.app import app
 import os
@@ -317,7 +317,7 @@ def assignment():
 
     return app.response_class(stream(), mimetype='text/plain')
 
-@app.route("/api/divideassignment", methods=["POST"])
+@app.route("/api/divideAssignment", methods=["POST"])
 def divide_assignment():
     params = get_route_parameters()
 
@@ -331,7 +331,7 @@ def divide_assignment():
         sem.acquire(timeout=1000)
         print("CHUNKING")
         before = time.time()
-        for chunk in divide_assignment(file_hashes):
+        for chunk in divide_assignment_stream(file_hashes):
             yield chunk
             dividedAssignment += chunk
         duration = time.time() - before
