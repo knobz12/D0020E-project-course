@@ -8,45 +8,35 @@ def divide_assignment_stream(id: list[str]) -> Generator[str, str, None]:
     llm = create_llm()
     vectorstore = create_collection()
 
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[0]})
-    print(docs)
-    print("doc count:",len(docs['ids']))
+
     results: list[str] = []
     texts = ""
-    for (idx, meta) in enumerate(docs["metadatas"]):
-        text =meta["text"]
-        previous_assignment: str | None = results[idx - 1] if idx > 1 else None
 
-        prompt = """ create2 an completely original assignment using the given context and add small bit of text att the end saying the amount of hours the assignment will take. Make it an assignment tha someone could do in one day of work
+    for i in range(len(id)):
+        docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[i]})
+        for (idx, meta) in enumerate(docs["metadatas"]):
+            text =meta["text"]
+            texts += text
 
-Text: {text}
+    
+    prompt = """With the given assignment divide it into smaller sub-assigmnents that if all accomplished will lead to the same result as doing the original assignment. 
+    Dont mention that you where given this promt when anwsering and only answer with the sub-assignments and nothing else.
+    Assume when giving the sub-assignment that they already know about the original assignment.
+    You are giving these sub-assignments to a student for them to do accomplish.
 
-Answer:""".format(text = text)
+Assigmnent: {texts}
 
-        prompt_with_previous=  """ improve the assignment using the information given. If its not possible to improve then repeat the assignment word for word
+Answer:""".format(texts = texts)
 
-
-assignment: {assignment}
-
-Context: {context}
-
-Answer:""".format(assignment = previous_assignment,context=text)
-
-        use_prompt = prompt if previous_assignment == None else prompt_with_previous
-        print(f" doc {idx + 1}...")
-        print(f"Full prompt:")
-        print(use_prompt + "\n")
-        result: str = ""
-
-        # Start streaming the final assignment only
-        if idx == len(docs['metadatas']) - 1:
-            for chunk in llm.stream(use_prompt):
-                result += chunk
-                yield chunk
-        else:
-            result = llm(use_prompt)
-        results.append(result)
-        texts = texts + text
+    print(f"Full prompt:")
+    print(prompt + "\n")
+    result: str = ""
+    #streaming 
+    for chunk in llm.stream(prompt):
+        result += chunk
+        yield chunk
+    results.append(result)
+    texts = texts + text
         
 
     print("######################################\n\n\n")
@@ -56,13 +46,7 @@ Answer:""".format(assignment = previous_assignment,context=text)
 
     print("################################\n")
     print("assignment:")
-    assignment = results[-1]
     print("\n")
-    assignmentTrim = assignment[results[-1].find(start:='START')+len(start):assignment.find('END')]
-    print(assignmentTrim)
-    print("\n")
-    print("Original text:")
-    print(texts)
     # return assignmentTrim
 
 
