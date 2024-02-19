@@ -404,7 +404,7 @@ def estimate():
         sum += float(value)
 
 
-    avg = sum / count
+    avg = sum / (1 if count == 0 else count)
 
     return make_response("{:.1f}".format(avg), 200)
 
