@@ -12,15 +12,46 @@ import {
 import { showNotification } from "@mantine/notifications"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
+interface ChatMessageProps {
+    user: "AI" | "user"
+    message: string
+}
+
+export function ChatMessage({ user, message }: ChatMessageProps) {
+    return (
+        <Card>
+            <Flex align="center" gap="lg">
+                {user === "AI" ? (
+                    <Box h="100%">
+                        <Image
+                            src="https://cdn.aistudybuddy.se/logo.png"
+                            width={64}
+                            height={64}
+                            alt="AI Studybuddy"
+                        />
+                    </Box>
+                ) : (
+                    <Flex justify="center" align="center" w="64px" h="64px">
+                        <Text color="white" fw={700} fz={20}>
+                            You
+                        </Text>
+                    </Flex>
+                )}
+                <Text fz="lg">{message}</Text>
+            </Flex>
+        </Card>
+    )
+}
 
 interface GenerateQuestionPageProps {}
 
 export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
     const [loading, setLoading] = useState<boolean>(false)
     const [height, setHeight] = useState<number>(0)
+    const [streaming, setStreaming] = useState<string | null>(null)
     const [messages, setMessages] = useState<
         { message: string; user: "AI" | "user" }[]
-    >([])
+    >([{ user: "AI", message: "Hello, what can I help you with?" }])
 
     useEffect(function () {
         if (typeof window === undefined) {
@@ -45,22 +76,54 @@ export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
             const url = getApiUrlUrl("/api/chat")
             url.searchParams.set("message", message)
             const response = await fetch(url, { method: "POST" })
-            const text = await response.text()
+
+            // const text = await response.text()
+
             if (response.status !== 200) {
                 return showNotification({
                     color: "red",
-                    title: "Failed to chat",
-                    message: text,
+                    message: "Failed to chat",
                 })
             }
 
-            setMessages((current) => [
-                ...current,
-                {
-                    message: text,
-                    user: current.length % 2 === 0 ? "AI" : "user",
-                },
-            ])
+            const reader = response.body?.getReader()
+
+            if (!reader) {
+                throw new Error("No reader")
+            }
+
+            setStreaming("")
+            while (true) {
+                const { done, value } = await reader.read()
+
+                if (done) {
+                    break
+                }
+
+                if (value === undefined) {
+                    continue
+                }
+
+                // console.log(value)
+                const str = new TextDecoder().decode(value)
+                console.log(str)
+                // console.log()
+                setStreaming((current) => (current += str))
+            }
+
+            setStreaming((streaming) => {
+                if (streaming) {
+                    setMessages((messages) => [
+                        ...messages,
+                        {
+                            message: streaming,
+                            user: "AI",
+                        },
+                    ])
+                }
+
+                return null
+            })
         } catch (e) {
             if (e instanceof Error) {
                 showNotification({
@@ -92,35 +155,16 @@ export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
                                 gap="lg"
                             >
                                 {messages.map(({ message, user }, idx) => (
-                                    <Card key={user + idx}>
-                                        <Flex align="center" gap="lg">
-                                            {user === "AI" ? (
-                                                <Image
-                                                    src="https://cdn.aistudybuddy.se/logo.png"
-                                                    width={64}
-                                                    height={64}
-                                                    alt="AI Studybuddy"
-                                                />
-                                            ) : (
-                                                <Flex
-                                                    justify="center"
-                                                    align="center"
-                                                    w="64px"
-                                                    h="64px"
-                                                >
-                                                    <Text
-                                                        color="white"
-                                                        fw={700}
-                                                        fz={20}
-                                                    >
-                                                        You
-                                                    </Text>
-                                                </Flex>
-                                            )}
-                                            <Text fz="lg">{message}</Text>
-                                        </Flex>
-                                    </Card>
+                                    <ChatMessage
+                                        key={user + idx}
+                                        {...{ user, message }}
+                                    />
                                 ))}
+                                {streaming !== null ? (
+                                    <ChatMessage
+                                        {...{ user: "AI", message: streaming }}
+                                    />
+                                ) : null}
                             </Flex>
                         </div>
                     </div>
@@ -136,17 +180,14 @@ export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
                                 return
                             }
                             e.currentTarget.value = ""
+                            setMessages((current) => [
+                                ...current,
+                                {
+                                    message: val,
+                                    user: "user",
+                                },
+                            ])
                             await getAnswer(val)
-                            // setMessages((current) => [
-                            //     ...current,
-                            //     {
-                            //         message: val,
-                            //         user:
-                            //             current.length % 2 === 0
-                            //                 ? "AI"
-                            //                 : "user",
-                            //     },
-                            // ])
                         }}
                     />
                 </Stack>

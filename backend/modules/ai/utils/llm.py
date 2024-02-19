@@ -5,7 +5,8 @@ with open("/home/knobz/Documents/D0020E/D0020E-project-course/backendV2/secret.t
     print(api_key)
 os.environ["OPENAI_API_KEY"] = api_key"""
 
-from llama_index.llms import LlamaCPP, OpenAI
+from llama_index.llms.llama_cpp import LlamaCPP
+from llama_index.llms.openai import OpenAI
 from llama_index.llms.llama_utils import messages_to_prompt, completion_to_prompt
 from llama_index.node_parser import SimpleNodeParser
 from llama_index.langchain_helpers.text_splitter import TokenTextSplitter
@@ -42,7 +43,7 @@ import os, gc, sys, chromadb
 """ from llama_index.llms import * """
 
 # llm: LangLlamaCpp = None
-guid: LlamaCpp = None
+guid: LlamaCpp | None = None
 # llmi: LlamaCPP = None
 openai: str = None
 
@@ -87,14 +88,14 @@ def create_llm() -> LangLlamaCpp:
         n_gpu_layers=args.gpu_layers,
         n_batch=512,
         use_mmap=True,
-        n_ctx=2048,
+        n_ctx=args.ctx_size,
         f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
-        max_tokens=1000,
-        temperature=0,
+        max_tokens=args.max_tokens,
+        temperature=args.temperature,
         top_k=40,
         top_p=1,
         repeat_penalty=1/0.85,
-        verbose=True,
+        verbose=args.verbose,
     )
 
     return llm

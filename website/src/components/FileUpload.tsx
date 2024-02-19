@@ -25,6 +25,7 @@ import { trpc } from "@/lib/trpc"
 import { FlashcardsContent } from "./FlashcardsContent"
 import dynamic from "next/dynamic"
 import { IconInfoCircle } from "@tabler/icons-react"
+import { getApiUrl } from "@/utils/getApiUrl"
 
 const MultiSelect = dynamic(
     () => import("@mantine/core").then((el) => el.MultiSelect),
@@ -177,6 +178,9 @@ export default function FileUpload({
     // String is database file ID and File is local user file.
     const [selectedFile, setSelectedFile] = useState<string[] | File[] | null>(null)
     const [fileChoice, setFileChoice] = useState<"select" | "upload">("upload")
+
+    const [estimate, setEstimate] = useState<string | null>(null);
+
     const utils = trpc.useUtils()
 
     useEffect(function () {
@@ -228,6 +232,8 @@ export default function FileUpload({
                 })
             }
 
+            
+
             const url = new URL(apiUrl)
 
             for (const [key, value] of Object.entries(params)) {
@@ -246,6 +252,19 @@ export default function FileUpload({
             }
 
             url.searchParams.set("course", course)
+
+
+
+            const est = await fetch(getApiUrl("/api/estimate"), {
+                method: "POST",
+                body: data,
+                credentials: "include",
+            }).catch((e) => null)
+            if (est !== null) {
+                const text = await est.text()
+                setEstimate(text);
+            }
+
 
             console.log("USING URL:", url.toString())
             const res = await fetch(url.toString(), {
@@ -299,38 +318,38 @@ export default function FileUpload({
             // Wait 500 milliseconds before checking for prompt
             await new Promise<void>((res) => setTimeout(res, 500))
 
-            const prompt = await utils.prompts.getMyLatestPrompts.fetch({
-                course: router.query.course as string,
-                type,
-            })
+            // const prompt = await utils.prompts.getMyLatestPrompts.fetch({
+            //     course: router.query.course as string,
+            //     type,
+            // })
 
-            if (prompt) {
-                // showNotification({
-                //     color: "blue",
-                //     icon: <IconInfoCircle />,
-                //     message: (
-                //         <Group spacing="md">
-                //             <Text>
-                //                 Your generated prompt has been saved. Do you
-                //                 want to view it?
-                //             </Text>
-                //             <Button
-                //                 onClick={() =>
-                //                     router.push(
-                //                         `/courses/${
-                //                             router.query.course
-                //                         }/${prompt.type.toLowerCase()}/${
-                //                             prompt.id
-                //                         }`,
-                //                     )
-                //                 }
-                //             >
-                //                 View
-                //             </Button>
-                //         </Group>
-                //     ),
-                // })
-            }
+            // if (prompt) {
+            //     // showNotification({
+            //     //     color: "blue",
+            //     //     icon: <IconInfoCircle />,
+            //     //     message: (
+            //     //         <Group spacing="md">
+            //     //             <Text>
+            //     //                 Your generated prompt has been saved. Do you
+            //     //                 want to view it?
+            //     //             </Text>
+            //     //             <Button
+            //     //                 onClick={() =>
+            //     //                     router.push(
+            //     //                         `/courses/${
+            //     //                             router.query.course
+            //     //                         }/${prompt.type.toLowerCase()}/${
+            //     //                             prompt.id
+            //     //                         }`,
+            //     //                     )
+            //     //                 }
+            //     //             >
+            //     //                 View
+            //     //             </Button>
+            //     //         </Group>
+            //     //     ),
+            //     // })
+            // }
         } catch (e) {
             if (e instanceof Error) {
                 console.error(e)
@@ -519,6 +538,9 @@ export default function FileUpload({
                     </Stack>
                 </Stack>
                 {/* {data !== null && <Textarea h="96rem" value={data} />} */}
+                {estimate !== null && (
+                    <p>estimated time: {estimate}s</p>
+                )}
                 {data !== null && (                    
                     <Flex my="md" gap="md" w="max-content">
                         <Button w="100%" color="blue" variant="filled"
