@@ -43,6 +43,35 @@ export function ChatMessage({ user, message }: ChatMessageProps) {
     )
 }
 
+interface ChatMessageProps {
+    user: "AI" | "user"
+    message: string
+}
+
+export function ChatMessage({ user, message }: ChatMessageProps) {
+    return (
+        <Card>
+            <Flex align="center" gap="lg">
+                {user === "AI" ? (
+                    <Image
+                        src="https://cdn.aistudybuddy.se/logo.png"
+                        width={64}
+                        height={64}
+                        alt="AI Studybuddy"
+                    />
+                ) : (
+                    <Flex justify="center" align="center" w="64px" h="64px">
+                        <Text color="white" fw={700} fz={20}>
+                            You
+                        </Text>
+                    </Flex>
+                )}
+                <Text fz="lg">{message}</Text>
+            </Flex>
+        </Card>
+    )
+}
+
 interface GenerateQuestionPageProps {}
 
 export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
@@ -77,11 +106,55 @@ export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
             url.searchParams.set("message", message)
             const response = await fetch(url, { method: "POST" })
 
-            // const text = await response.text()
+
+            // // const text = await response.text()
+
 
             if (response.status !== 200) {
                 return showNotification({
                     color: "red",
+                    message: "Failed to chat",
+                })
+            }
+
+            const reader = response.body?.getReader()
+
+            if (!reader) {
+                throw new Error("No reader")
+            }
+
+            setStreaming("")
+            while (true) {
+                const { done, value } = await reader.read()
+
+                if (done) {
+                    break
+                }
+
+                if (value === undefined) {
+                    continue
+                }
+
+                // console.log(value)
+                const str = new TextDecoder().decode(value)
+                console.log(str)
+                // console.log()
+                setStreaming((current) => (current += str))
+            }
+
+            setStreaming((streaming) => {
+                if (streaming) {
+                    setMessages((messages) => [
+                        ...messages,
+                        {
+                            message: streaming,
+                            user: "AI",
+                        },
+                    ])
+                }
+
+                return null
+            })
                     message: "Failed to chat",
                 })
             }
@@ -165,6 +238,16 @@ export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
                                         {...{ user: "AI", message: streaming }}
                                     />
                                 ) : null}
+                                    <ChatMessage
+                                        key={user + idx}
+                                        {...{ user, message }}
+                                    />
+                                ))}
+                                {streaming !== null ? (
+                                    <ChatMessage
+                                        {...{ user: "AI", message: streaming }}
+                                    />
+                                ) : null}
                             </Flex>
                         </div>
                     </div>
@@ -180,6 +263,13 @@ export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
                                 return
                             }
                             e.currentTarget.value = ""
+                            setMessages((current) => [
+                                ...current,
+                                {
+                                    message: val,
+                                    user: "user",
+                                },
+                            ])
                             setMessages((current) => [
                                 ...current,
                                 {
