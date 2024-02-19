@@ -22,12 +22,14 @@ export function ChatMessage({ user, message }: ChatMessageProps) {
         <Card>
             <Flex align="center" gap="lg">
                 {user === "AI" ? (
-                    <Image
-                        src="https://cdn.aistudybuddy.se/logo.png"
-                        width={64}
-                        height={64}
-                        alt="AI Studybuddy"
-                    />
+                    <Box h="100%">
+                        <Image
+                            src="https://cdn.aistudybuddy.se/logo.png"
+                            width={64}
+                            height={64}
+                            alt="AI Studybuddy"
+                        />
+                    </Box>
                 ) : (
                     <Flex justify="center" align="center" w="64px" h="64px">
                         <Text color="white" fw={700} fz={20}>
@@ -44,12 +46,12 @@ export function ChatMessage({ user, message }: ChatMessageProps) {
 interface GenerateQuestionPageProps {}
 
 export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
-     const [loading, setLoading] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(false)
     const [height, setHeight] = useState<number>(0)
     const [streaming, setStreaming] = useState<string | null>(null)
     const [messages, setMessages] = useState<
         { message: string; user: "AI" | "user" }[]
-    >([])
+    >([{ user: "AI", message: "Hello, what can I help you with?" }])
 
     useEffect(function () {
         if (typeof window === undefined) {
@@ -153,12 +155,12 @@ export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
                                 gap="lg"
                             >
                                 {messages.map(({ message, user }, idx) => (
-                                                                       <ChatMessage
+                                    <ChatMessage
                                         key={user + idx}
                                         {...{ user, message }}
-                                    /> 
+                                    />
                                 ))}
-                                 {streaming !== null ? (
+                                {streaming !== null ? (
                                     <ChatMessage
                                         {...{ user: "AI", message: streaming }}
                                     />
@@ -182,7 +184,7 @@ export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
                                 ...current,
                                 {
                                     message: val,
-                                    user: "user"
+                                    user: "user",
                                 },
                             ])
                             await getAnswer(val)
