@@ -5,6 +5,7 @@ import {
     Flex,
     Group,
     NumberInput,
+    Progress,
     SegmentedControl,
     SimpleGrid,
     Skeleton,
@@ -176,10 +177,52 @@ export default function FileUpload({
     >({})
     const [isLoading, setIsLoading] = useState<boolean>(false)
     // String is database file ID and File is local user file.
-    const [selectedFile, setSelectedFile] = useState<string[] | File[] | null>(null)
+    const [selectedFile, setSelectedFile] = useState<string[] | File[] | null>(
+        null,
+    )
     const [fileChoice, setFileChoice] = useState<"select" | "upload">("upload")
 
-    const [estimate, setEstimate] = useState<string | null>(null);
+    const [estimate, setEstimate] = useState<string | null>(null)
+    const [percent, setPercent] = useState<number | null>(null)
+
+    useEffect(
+        function () {
+            if (!estimate) {
+                return
+            }
+
+            if (percent !== null && percent >= 100) {
+                setPercent(null)
+                setEstimate(null)
+                return
+            }
+
+            const time = parseFloat(estimate) * 1000
+
+            if (time < 1000) {
+                return setPercent(100)
+            }
+
+            const interval = setInterval(function () {
+                setPercent((current) => {
+                    if (current !== null && current >= 100) {
+                        clearInterval(interval)
+                        setPercent(null)
+                        setEstimate(null)
+                        return null
+                    }
+
+                    const perc = (current ?? 0) + 5
+                    console.log("Increasing perc:", current, perc)
+
+                    return perc
+                })
+            }, time / 20)
+
+            return () => clearInterval(interval)
+        },
+        [estimate],
+    )
 
     const utils = trpc.useUtils()
 
@@ -193,17 +236,14 @@ export default function FileUpload({
     async function redirectToView() {
         const prompt = await utils.prompts.getMyLatestPrompts.fetch({
             course: router.query.course as string,
-            type
+            type,
         })
 
         router.push(
-            `/courses/${
-                router.query.course
-            }/${prompt.type.toLowerCase()}/${
+            `/courses/${router.query.course}/${prompt.type.toLowerCase()}/${
                 prompt.id
             }`,
         )
-        
     }
 
     async function onClick() {
@@ -212,27 +252,22 @@ export default function FileUpload({
             const data = new FormData()
 
             const file = selectedFile
-            
 
             if (Array.isArray(file)) {
                 if (typeof file[0] === "string") {
-                    let file_ids: string = file.join(",");
-                    data.set("file_ids", file_ids);
-
+                    let file_ids: string = file.join(",")
+                    data.set("file_ids", file_ids)
                 } else {
                     for (let i = 0; i < file.length; ++i) {
                         data.append("files", file[i])
                     }
                 }
-            }
-            else if (file === null) {
+            } else if (file === null) {
                 return showNotification({
                     color: "blue",
                     message: "You must select a file.",
                 })
             }
-
-            
 
             const url = new URL(apiUrl)
 
@@ -253,8 +288,6 @@ export default function FileUpload({
 
             url.searchParams.set("course", course)
 
-
-
             const est = await fetch(getApiUrl("/api/estimate"), {
                 method: "POST",
                 body: data,
@@ -262,9 +295,8 @@ export default function FileUpload({
             }).catch((e) => null)
             if (est !== null) {
                 const text = await est.text()
-                setEstimate(text);
+                setEstimate(text)
             }
-
 
             console.log("USING URL:", url.toString())
             const res = await fetch(url.toString(), {
@@ -539,19 +571,24 @@ export default function FileUpload({
                 </Stack>
                 {/* {data !== null && <Textarea h="96rem" value={data} />} */}
                 {estimate !== null && (
-                    <p>estimated time: {estimate}s</p>
+                    <div>
+                        <p>Estimated time: {estimate}s</p>
+                        <Progress value={percent ?? 0} />
+                    </div>
                 )}
-                {data !== null && (                    
+                {data !== null && (
                     <Flex my="md" gap="md" w="max-content">
-                        <Button w="100%" color="blue" variant="filled"
+                        <Button
+                            w="100%"
+                            color="blue"
+                            variant="filled"
                             disabled={isLoading}
                             onClick={redirectToView}
                         >
                             View
                         </Button>
                     </Flex>
-                    )
-                }
+                )}
                 {data !== null &&
                     (type === "QUIZ" ? (
                         typeof data === "string" &&
