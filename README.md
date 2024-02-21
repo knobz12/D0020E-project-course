@@ -1,13 +1,15 @@
-<div style="display:flex;align-items: center; margin-bottom: 2rem; flex-wrap: wrap; justify-content: center;">
-    <img src="https://raw.githubusercontent.com/knobz12/D0020E-project-course/main/media/logo.png" alt="drawing" style="max-width: 200px; width: 100%;"  />
+<!-- <div style="display:flex;align-items: center; margin-bottom: 2rem; flex-wrap: wrap; justify-content: center;"> -->
 
-<div style="flex-grow: 1; text-align:center">
-    <div style="underline:none;font-size:3rem;letter-spacing:-0.015em;font-weight:700">AI Studybuddy</div>
-    <div style="underline:none;font-size:2rem;">The worlds best AI studying assistant</div>
-</div>
-</div>
+<p align="center">
+    <img src="https://raw.githubusercontent.com/knobz12/D0020E-project-course/main/media/logo.png" alt="AI Studybuddy logo" width="200" height="213"  />
+</p>
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+    <h1 align="center">AI Studybuddy</h1>
+    <h3 align="center">The worlds best AI studying assistant</h3>
+</p>
+
+[![License: MIT](https://img.shields.io/badge/license-AI_Studybuddy_license-blue.svg)](https://opensource.org/licenses/MIT)
 
 **Supported platforms via Docker:**
 
