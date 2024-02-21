@@ -9,7 +9,7 @@
     <h3 align="center">The worlds best AI studying assistant</h3>
 </p>
 
-[![License: MIT](https://img.shields.io/badge/license-AI_Studybuddy_license-blue.svg)](https://opensource.org/licenses/MIT)
+[![](https://img.shields.io/badge/license-AI_Studybuddy_license-blue.svg)](https://github.com/knobz12/D0020E-project-course/blob/main/LICENSE)
 
 **Supported platforms via Docker:**
 
@@ -21,7 +21,7 @@
 
 ### Requirements
 
-- In order to run the entire service locally you need to have [Docker and Docker Compose](https://www.docker.com/products/docker-desktop/) installed.
+- In order to run the service locally you need to have [Docker and Docker Compose](https://www.docker.com/products/docker-desktop/) installed.
 
 #### Download an LLM model of your choice
 
@@ -53,21 +53,21 @@ Create a duplicate of `backend/.env.docker.template` with name `backend/.env.doc
 - Authorization calback URL = http://localhost:3000/api/auth/callback/github
 
 3. Press "Register application"
-4. Copy the Client ID value, you will need to use it later. It should be 20 characters long and look like `58eb52a9c123100d54d4`.
+4. Copy the Client ID value, you will need to use it later. It should be 20 characters long and look similar to `58eb52a9c123100d54d4`.
 5. Click "Generate a new client secret" and copy the generated value. Should be 40 characters.
-6. Paste your client id and client secret to GITHUB_ID and GITHUB_SECRET in the `backend/.env.docker` respectively.
+6. Copy your client id and client secret and set them at GITHUB_ID and GITHUB_SECRET in the `backend/.env.docker` respectively.
 
 #### Start the service
 
 Assuming you have Docker and Docker Compose installed you should now be able to run the application with the following command:
 
-```bash
-$ docker compose -f ./docker-compose.local.yml up -d --build
+```sh
+docker compose -f ./docker-compose.local.yml up -d --build
 ```
 
-If successful the last thing you should see is something like:
+If successful you should see something similar to this:
 
-```bash
+```sh
 [+] Running 4/0
  ✔ Container aisb-vectorstore  Running
  ✔ Container aisb-llm          Running
@@ -77,7 +77,7 @@ If successful the last thing you should see is something like:
 
 Once the command has finished you can check that the four services are running:
 
-```bash
+```sh
 $ docker compose -f ./docker-compose.local.yml ps
 NAME               IMAGE                               COMMAND                  SERVICE    CREATED         STATUS         PORTS
 aisb-database      postgres:alpine                     "docker-entrypoint.s…"   database   6 seconds ago   Up 5 seconds   0.0.0.0:5432->5432/tcp, :::5432->5432/tcp
@@ -86,9 +86,9 @@ aisb-vectorstore   ghcr.io/chroma-core/chroma:latest   "/docker_entrypoint.…" 
 aisb-web           web:latest                          "docker-entrypoint.s…"   web        6 seconds ago   Up 5 seconds   0.0.0.0:3000->3000/tcp, :::3000->3000/tcp
 ```
 
-You can check the logs of service by running:
+You can follow the service logs in real time by running:
 
-```bash
+```sh
 $ docker compose -f ./docker-compose.local.yml logs llm web -f
 aisb-web  |    ▲ Next.js 14.1.0
 aisb-web  |    - Local:        http://1daea2c5f2d0:3000
