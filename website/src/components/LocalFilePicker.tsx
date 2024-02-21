@@ -18,37 +18,44 @@ import React, { useEffect, useState } from "react"
 
 interface LocalFilePickerProps {
     isLoading: boolean
-    onSelect: (file: File | null) => void
+    onSelect: (file: File[] | null) => void
 }
 
 export function LocalFilePicker({ isLoading, onSelect }: LocalFilePickerProps) {
     const theme = useMantineTheme()
-    const [inputFile, setFile] = useState<{ file: File; url?: string } | null>(
-        null,
+    const [inputFiles, setFile] = useState<File[]>(
+        []
     )
 
     useEffect(
         function () {
-            onSelect(inputFile?.file ?? null)
+            onSelect(inputFiles)
         },
-        [onSelect, inputFile],
+        [onSelect, inputFiles],
     )
 
-    if (inputFile !== null) {
-        // return null
+    if (inputFiles.length > 0) {
         return (
-            <Flex align="center" w="100%">
-                <Flex gap="md" align="center" className="grow">
-                    <Stack spacing="sm">
-                        <Text size="xl">{inputFile.file.name}</Text>
-                    </Stack>
-                </Flex>
-                <CloseButton
-                    disabled={isLoading}
-                    onClick={() => setFile(null)}
-                    size="lg"
-                />
-            </Flex>
+            <Stack>
+                {inputFiles.map((file, i) => {
+                    return (
+                        <Flex align="center" w="100%">
+                            <Flex gap="md" align="center" className="grow">
+                                <Stack spacing="sm">
+                                    <Text size="xl">{file.name}</Text>
+                                </Stack>
+                            </Flex>
+                            <CloseButton
+                                disabled={isLoading}
+                                onClick={() => setFile((current) =>  current.filter((_, id) => id !== i))}
+                                size="lg"
+                            />
+                        </Flex>
+                    )
+                })}
+
+            </Stack>
+
         )
     }
 
@@ -66,28 +73,18 @@ export function LocalFilePicker({ isLoading, onSelect }: LocalFilePickerProps) {
                 "application/vnd.openxmlformats-officedocument.presentationml.presentation",
             ]}
             onDrop={async (files) => {
-                const file = files.at(0)
 
-                if (!file) {
-                    return
-                }
+                const file_size_sum = files.map((file) => file.size).reduce((previous, current) => previous + current);
 
-                if (file.size > 30_000_000) {
+                if (file_size_sum > 100_000) {
                     return showNotification({
                         color: "orange",
-                        title: "File too large",
-                        message: "Size of file cannot exceed 30MB.",
+                        title: "Files too large",
+                        message: "Size of files cannot exceed 100KB.",
                     })
                 }
 
-                if (file.type.startsWith("image/")) {
-                    const buffer = await file.arrayBuffer()
-                    const bytes = new Uint8Array(buffer)
-                    const url = `data:image/png;base64,` + encode(bytes)
-                    setFile({ file, url: url })
-                    return
-                }
-                setFile({ file })
+                setFile(files)
             }}
         >
             <Group
@@ -129,7 +126,7 @@ export function LocalFilePicker({ isLoading, onSelect }: LocalFilePickerProps) {
                         Drag files here or click to select files
                     </Text>
                     <Text size="sm" color="dimmed" inline mt={7}>
-                        Only attach one file, it should not exceed 30MB
+                        The total file sizes should not exceed 100KB
                     </Text>
                 </div>
             </Group>

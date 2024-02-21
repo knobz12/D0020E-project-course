@@ -32,6 +32,7 @@ enum PromptType {
   ASSIGNMENT
   FLASHCARDS
   EXPLAINER
+  DIVIDEASSIGNMENT
 }
 
 model Prompt {
@@ -54,8 +55,12 @@ model Prompt {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   courseId String @map("course_id") @db.Uuid
+
+  /// Time to create
+  promptCreationTime Float @map("prompt_creation_time") @db.Real
+
   /// The course this prompt belongs to
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   /// Teacher note for this prompt.
   teacherNote TeacherNote?

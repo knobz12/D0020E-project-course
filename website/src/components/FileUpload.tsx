@@ -5,6 +5,7 @@ import {
     Flex,
     Group,
     NumberInput,
+    Progress,
     SegmentedControl,
     SimpleGrid,
     Skeleton,
@@ -25,6 +26,7 @@ import { trpc } from "@/lib/trpc"
 import { FlashcardsContent } from "./FlashcardsContent"
 import dynamic from "next/dynamic"
 import { IconInfoCircle } from "@tabler/icons-react"
+import { getApiUrl } from "@/utils/getApiUrl"
 
 const MultiSelect = dynamic(
     () => import("@mantine/core").then((el) => el.MultiSelect),
@@ -175,8 +177,53 @@ export default function FileUpload({
     >({})
     const [isLoading, setIsLoading] = useState<boolean>(false)
     // String is database file ID and File is local user file.
-    const [selectedFile, setSelectedFile] = useState<string | File | null>(null)
+    const [selectedFile, setSelectedFile] = useState<string[] | File[] | null>(
+        null,
+    )
     const [fileChoice, setFileChoice] = useState<"select" | "upload">("upload")
+
+    const [estimate, setEstimate] = useState<string | null>(null)
+    const [percent, setPercent] = useState<number | null>(null)
+
+    useEffect(
+        function () {
+            if (!estimate) {
+                return
+            }
+
+            if (percent !== null && percent >= 100) {
+                setPercent(null)
+                setEstimate(null)
+                return
+            }
+
+            const time = parseFloat(estimate) * 1000
+
+            if (time < 1000) {
+                return setPercent(100)
+            }
+
+            const interval = setInterval(function () {
+                setPercent((current) => {
+                    if (current !== null && current >= 100) {
+                        clearInterval(interval)
+                        setPercent(null)
+                        setEstimate(null)
+                        return null
+                    }
+
+                    const perc = (current ?? 0) + 5
+                    console.log("Increasing perc:", current, perc)
+
+                    return perc
+                })
+            }, time / 20)
+
+            return () => clearInterval(interval)
+        },
+        [estimate],
+    )
+
     const utils = trpc.useUtils()
 
     useEffect(function () {
@@ -186,28 +233,42 @@ export default function FileUpload({
         })
     }, [])
 
+    async function redirectToView() {
+        const prompt = await utils.prompts.getMyLatestPrompts.fetch({
+            course: router.query.course as string,
+            type,
+        })
+
+        router.push(
+            `/courses/${router.query.course}/${prompt.type.toLowerCase()}/${
+                prompt.id
+            }`,
+        )
+    }
+
     async function onClick() {
         setIsLoading(true)
         try {
             const data = new FormData()
 
-            if (selectedFile === null) {
+            const file = selectedFile
+
+            if (Array.isArray(file)) {
+                if (typeof file[0] === "string") {
+                    let file_ids: string = file.join(",")
+                    data.set("file_ids", file_ids)
+                } else {
+                    for (let i = 0; i < file.length; ++i) {
+                        data.append("files", file[i])
+                    }
+                }
+            } else if (file === null) {
                 return showNotification({
                     color: "blue",
                     message: "You must select a file.",
                 })
             }
 
-            const file = selectedFile
-
-            if (!file) {
-                return showNotification({
-                    color: "blue",
-                    message: "You must select a file first",
-                })
-            }
-
-            data.set(typeof file === "string" ? "file_id" : "file", file)
             const url = new URL(apiUrl)
 
             for (const [key, value] of Object.entries(params)) {
@@ -226,6 +287,16 @@ export default function FileUpload({
             }
 
             url.searchParams.set("course", course)
+
+            const est = await fetch(getApiUrl("/api/estimate"), {
+                method: "POST",
+                body: data,
+                credentials: "include",
+            }).catch((e) => null)
+            if (est !== null) {
+                const text = await est.text()
+                setEstimate(text)
+            }
 
             console.log("USING URL:", url.toString())
             const res = await fetch(url.toString(), {
@@ -279,38 +350,38 @@ export default function FileUpload({
             // Wait 500 milliseconds before checking for prompt
             await new Promise<void>((res) => setTimeout(res, 500))
 
-            const prompt = await utils.prompts.getMyLatestPrompts.fetch({
-                course: router.query.course as string,
-                type,
-            })
+            // const prompt = await utils.prompts.getMyLatestPrompts.fetch({
+            //     course: router.query.course as string,
+            //     type,
+            // })
 
-            if (prompt) {
-                showNotification({
-                    color: "blue",
-                    icon: <IconInfoCircle />,
-                    message: (
-                        <Group spacing="md">
-                            <Text>
-                                Your generated prompt has been saved. Do you
-                                want to view it?
-                            </Text>
-                            <Button
-                                onClick={() =>
-                                    router.push(
-                                        `/courses/${
-                                            router.query.course
-                                        }/${prompt.type.toLowerCase()}/${
-                                            prompt.id
-                                        }`,
-                                    )
-                                }
-                            >
-                                View
-                            </Button>
-                        </Group>
-                    ),
-                })
-            }
+            // if (prompt) {
+            //     // showNotification({
+            //     //     color: "blue",
+            //     //     icon: <IconInfoCircle />,
+            //     //     message: (
+            //     //         <Group spacing="md">
+            //     //             <Text>
+            //     //                 Your generated prompt has been saved. Do you
+            //     //                 want to view it?
+            //     //             </Text>
+            //     //             <Button
+            //     //                 onClick={() =>
+            //     //                     router.push(
+            //     //                         `/courses/${
+            //     //                             router.query.course
+            //     //                         }/${prompt.type.toLowerCase()}/${
+            //     //                             prompt.id
+            //     //                         }`,
+            //     //                     )
+            //     //                 }
+            //     //             >
+            //     //                 View
+            //     //             </Button>
+            //     //         </Group>
+            //     //     ),
+            //     // })
+            // }
         } catch (e) {
             if (e instanceof Error) {
                 console.error(e)
@@ -325,7 +396,7 @@ export default function FileUpload({
         }
     }
     const onFileSelect = useCallback(
-        function (file: string | File | null) {
+        function (file: string[] | File[] | null) {
             setSelectedFile(file)
         },
         [setSelectedFile],
@@ -452,7 +523,6 @@ export default function FileUpload({
                             </Stack>
                         )}
                         <SegmentedControl
-                            disabled={selectedFile !== null}
                             color="primary"
                             data={[
                                 {
@@ -500,6 +570,25 @@ export default function FileUpload({
                     </Stack>
                 </Stack>
                 {/* {data !== null && <Textarea h="96rem" value={data} />} */}
+                {estimate !== null && (
+                    <div>
+                        <p>Estimated time: {estimate}s</p>
+                        <Progress value={percent ?? 0} />
+                    </div>
+                )}
+                {data !== null && (
+                    <Flex my="md" gap="md" w="max-content">
+                        <Button
+                            w="100%"
+                            color="blue"
+                            variant="filled"
+                            disabled={isLoading}
+                            onClick={redirectToView}
+                        >
+                            View
+                        </Button>
+                    </Flex>
+                )}
                 {data !== null &&
                     (type === "QUIZ" ? (
                         typeof data === "string" &&

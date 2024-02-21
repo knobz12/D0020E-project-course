@@ -21,6 +21,7 @@ import {
     IconBoxMultiple,
     IconClipboardList,
     IconMessageQuestion,
+    IconTie
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
@@ -57,14 +58,19 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 text: "Assignment",
                 link: "/assignment",
             },
-            /* {
+            {
+                icon: IconTie,
+                text: "DivideAssignment",
+                link: "/divideAssignment",
+            },
+             {
                 icon: IconClipboardList,
                 text: "Explainer",
                 link: "/explainer",
-            }, */
+            }, 
         ],
     },
-    /* {
+     {
         name: "Question",
         prompts: [
             {
@@ -73,7 +79,7 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 link: "/question",
             },
         ],
-    }, */
+    }, 
 ]
 
 export const PaginationContext = createContext<number>(1)

@@ -109,7 +109,7 @@ def summarize_doc_stream_old(id: str) -> Generator[str, str, None]:
     llm = create_llm()
     vectorstore = create_collection()
 
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
+    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[0]})
     print(docs)
     print("doc count:",len(docs['ids']))
     results: list[str] = []
