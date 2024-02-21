@@ -92,7 +92,7 @@ aisb-llm  | --model-path = /var/data/llm.gguf
 aisb-llm  | --gpu-layers = 0
 aisb-llm  | --prod = true
 aisb-llm  | Starting app
-aisb-llm  | Running bjoern server at http://d6baa113b393:3030
+aisb-llm  | Running server at http://d6baa113b393:3030
 aisb-llm  |  * Serving Flask app 'webserver.app'
 aisb-llm  |  * Debug mode: on
 aisb-llm  | WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
