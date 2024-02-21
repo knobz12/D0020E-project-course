@@ -1,205 +1,113 @@
-# AIStudyBuddy
+AIStudyBuddy
 
-<img src="https://raw.githubusercontent.com/knobz12/D0020E-project-course/main/media/2145c09460c44d609f4293cf7c0a1380.png" alt="drawing" width="600"/>
+<img src="https://raw.githubusercontent.com/knobz12/D0020E-project-course/main/media/2145c09460c44d609f4293cf7c0a1380.png" alt="drawing" width="200"  />
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-### Hot topics
-
-- AI study buddies are cool
-- Here use this https://tesseract-ocr.github.io/tessdoc/Installation.html
-
-----
-
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#description">Description</a>
-    </li>
-    <li>
-      <a href="#usage">Usage</a>
-      <ul>
-        <li><a href="#get-the-code">Get the Code</a></li>
-        <li><a href="#build">Build</a></li>
-        <li><a href="#blas-build">BLAS Build</a></li>
-        <li><a href="#prepare-data--run">Prepare Data & Run</a></li>
-        <li><a href="#memorydisk-requirements">Memory/Disk Requirements</a></li>
-        <li><a href="#quantization">Quantization</a></li>
-        <li><a href="#interactive-mode">Interactive mode</a></li>
-        <li><a href="#constrained-output-with-grammars">Constrained output with grammars</a></li>
-        <li><a href="#instruction-mode-with-alpaca">Instruction mode with Alpaca</a></li>
-        <li><a href="#using-openllama">Using OpenLLaMA</a></li>
-        <li><a href="#using-gpt4all">Using GPT4All</a></li>
-        <li><a href="#using-pygmalion-7b--metharme-7b">Using Pygmalion 7B & Metharme 7B</a></li>
-        <li><a href="#obtaining-the-facebook-llama-original-model-and-stanford-alpaca-model-data">Obtaining the Facebook LLaMA original model and Stanford Alpaca model data</a></li>
-        <li><a href="#verifying-the-model-files">Verifying the model files</a></li>
-        <li><a href="#seminal-papers-and-background-on-the-models">Seminal papers and background on the models</a></li>
-        <li><a href="#perplexity-measuring-model-quality">Perplexity (measuring model quality)</a></li>
-        <li><a href="#android">Android</a></li>
-        <li><a href="#docker">Docker</a></li>
-      </ul>
-    </li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#coding-guidelines">Coding guidelines</a></li>
-    <li><a href="#docs">Docs</a></li>
-  </ol>
-</details>
-
-## Description
-
-Something cool maybe
-
-**Supported platforms:**
+**Supported platforms via Docker:**
 
 - [x] Linux
-- [x] Windows (via CMake)
+- [x] Windows
 - [x] Docker
-- [x] Mac OS(questionable) Needs to be fixed
+- [x] Mac OS
 
-**Supported models:**
+## Install and run
 
-- [X] LLaMA 🦙
-- [x] LLaMA 2 🦙🦙
-- [x] LLaMA 3 🦙🦙🦙
+### Requirements
 
----
+- In order to run the entire service locally you need to have [Docker and Docker Compose](https://www.docker.com/products/docker-desktop/) installed.
 
-## Usage
+#### Download an LLM model of your choice
 
-### Get the Code
+Download any one of the .gguf files in one of the links below. The bigger the model the better AI responses.
+Choose a model size which fits the amount of RAM on your system. We recommend the size of the model you choose to be at most
+1/2 of your available RAM. So if you have 8GB of RAM download a <= 4GB size gguf model.
+
+##### Models ordered by (our opinion) performance/size ratio
+
+[zephyr-7b-beta](https://huggingface.co/TheBloke/zephyr-7B-beta-GGUF/tree/main) (3.08 - 7.7 GB)
+
+[zephyr-3b](https://huggingface.co/TheBloke/stablelm-zephyr-3b-GGUF/tree/main) (1.2 - 2.97 GB)
+
+[Llama-2-13B-Chat](https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/tree/main) (5.43 - 13.8 GB)
+
+[Llama-2-7B-Chat](https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/tree/main) (2.83 - 7.16 GB)
+
+Move the downloaded model file to `backend/models` and rename the file to `llm.gguf`. You should now have a file called `llm.gguf` at the path `./backend/models/llm.gguf`.
+
+#### Enable GitHub OAuth2.0
+
+Create a duplicate of `backend/.env.docker.template` with name `backend/.env.docker`.
+
+1. Visit [GitHub - OAuth Apps](https://github.com/settings/developers) and press "New OAuth App" at the top right.
+2. Enter values for the parameters:
+
+- Application Name = AI Studybuddy
+- Homepage URL = http://localhost:3000
+- Authorization calback URL = http://localhost:3000/api/auth/callback/github
+
+3. Press "Register application"
+4. Copy the Client ID value, you will need to use it later. It should be 20 characters long and look like `58eb52a9c123100d54d4`.
+5. Click "Generate a new client secret" and copy the generated value. Should be 40 characters.
+6. Paste your client id and client secret to GITHUB_ID and GITHUB_SECRET in the `backend/.env.docker` respectively.
+
+#### Start the service
+
+Assuming you have Docker and Docker Compose installed you should now be able to run the application with the following command:
 
 ```bash
-git clone https://github.com/knobz12/D0020E-project-course
-cd D0020E-project-course
+docker compose -f ./docker-compose.local.yml up -d --build
 ```
 
-### Build
-- #### For developers
-	- Install dependencies
+If successful the last thing you should see is something like:
 
-      - ```
-        pip install -r requirements.txt
-        ```
-      - ### Install llama.cpp with right arguments for your operating system
-        - On Windows:
-        ```
-        $env:CMAKE_ARGS="-DLLAMA_CUBLAS=on -DCMAKE_CUDA_ARCHITECTURES=all-major"
-        pip install -U llama-cpp-python --force-reinstall --no-cache-dir
-        ```
-        - On Linux:
-        ```
-        CMAKE_ARGS="-DLLAMA_CUBLAS=1 -DCMAKE_CUDA_ARCHITECTURES=all-major"
-        pip install -U llama-cpp-python --force-reinstall --no-cache-dir
-        ```
-        - On Mac:
-        ```
-        CMAKE_ARGS="-DLLAMA_METAL=on" pip install -U llama-cpp-python --force-reinstall --no-cache-dir
-        ```
-
-- #### For users
-	- On Mac
-
-  Requries Python 3.11. Tested specifically on 3.11.6.
-
-  Can be installed by running
-
-  ```bash
-  brew install python@3.11
-  ```
-
-  #### Download an LLM model of your choice
-  Download any one of the .gguf files in one of the links below. The bigger the model the better AI responses.
-  Choose a model size which fits the amount of RAM on your system. We recommend the size of the model you choose to be at most 
-  1/2 of your available RAM. So if you have 8GB of RAM download a <= 4GB size gguf model.
-
-  #### Models ordered by (our opinion) performance/size ratio
-  [zephyr-7b-beta](https://huggingface.co/TheBloke/zephyr-7B-beta-GGUF/tree/main) (3.08 - 7.7 GB)
-
-  [zephyr-3b](https://huggingface.co/TheBloke/stablelm-zephyr-3b-GGUF/tree/main) (1.2 - 2.97 GB)
-
-  [Llama-2-13B-Chat](https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/tree/main) (5.43 - 13.8 GB)
-
-  [Llama-2-7B-Chat](https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/tree/main) (2.83 - 7.16 GB) 
-
-
-  ### Python
-  #### Installation 
-  ```bash
-  brew install libffi libmagic postgresql
-
-  # Create virtual environment for storing all project depencencies
-  python -m venv ./venv
-
-  # Activate virtual environment
-  source ./venv/bin/activate # Bash shell
-  # or
-  . ./venv/bin/activate.fish # Fish shell
-
-
-  # You can verify that you are in the virtual environment by running:
-  which python
-  # Output should end in:
-  D0020E-project-course/venv/bin/python
-
-
-  # Install llama-cpp with Metal GPU support
-  CMAKE_ARGS="-DLLAMA_METAL=on" pip install llama-cpp-python
-
-  # Install remaining dependencies in the virtual environment
-  pip install -r backend/requirements.macos.txt
-	```
-
-  #### Running
-  ``` bash
-  # Run the python server
-  # * = required
-  #
-  # * --model-path - The path to the gguf model you downloaded earlier
-  #
-  #
-  # --gpu-layers - How much GPU acceleration you want, if any
-  #   0 or unset = no GPU acceleration
-  #   > 0 = Amount of LLM layers to run on GPU. LLM models have different total layers.
-  #
-  #   For example Zephyr 7b has 33 layers so a value of 33 or higher will use max GPU acceleration. 
-  #
-  python ./backend/__main__.py --gpu-layers (number here) --model-path (path to model)
-
-  # Example
-  python ./backend/__main__.py --gpu-layers 33 --model-path ~/Downloads/zephyr-7b-beta.Q6_K.gguf
-	```
-	- On Windows
-	```
-	make install
-	```
-  
-	- On Linux
-	```
-	make install
-	```
-
-### Prepare Data & Run
-
-Run using the sample data:
-
-```
-python aistudybuddy.py
+```bash
+[+] Running 4/0
+ ✔ Container aisb-vectorstore  Running
+ ✔ Container aisb-llm          Running
+ ✔ Container aisb-database     Running
+ ✔ Container aisb-web          Running
 ```
 
-### Contributing
-- Contributors can open PRs
-- Collaborators can push to branches in the `D0020E-project-course` repo and merge PRs into the `main` branch
-- Collaborators will be invited based on contributions
-- Any help with managing issues and PRs is very appreciated!
-### Coding guidelines
+Once the command has finished you can check that the four services are running:
 
-- Avoid adding third-party dependencies, extra files, extra headers, etc.
-- Always consider cross-compatibility with other operating systems and architectures
-- Avoid fancy looking modern STL constructs, use basic `for` loops, avoid templates, keep it simple
-- There are no strict rules for the code style, but try to follow the patterns in the code (indentation, spaces, etc.). Vertical alignment makes things more readable and easier to batch edit
-### Docs
+```bash
+$ docker compose -f ./docker-compose.local.yml ps
+NAME               IMAGE                               COMMAND                  SERVICE    CREATED         STATUS         PORTS
+aisb-database      postgres:alpine                     "docker-entrypoint.s…"   database   6 seconds ago   Up 5 seconds   0.0.0.0:5432->5432/tcp, :::5432->5432/tcp
+aisb-llm           llm:latest                          "python3.11 __main__…"   llm        6 seconds ago   Up 5 seconds   0.0.0.0:3030->3030/tcp, :::3030->3030/tcp
+aisb-vectorstore   ghcr.io/chroma-core/chroma:latest   "/docker_entrypoint.…"   chroma     6 seconds ago   Up 5 seconds   0.0.0.0:8000->8000/tcp, :::8000->8000/tcp
+aisb-web           web:latest                          "docker-entrypoint.s…"   web        6 seconds ago   Up 5 seconds   0.0.0.0:3000->3000/tcp, :::3000->3000/tcp
+```
 
-- [main](./website//README.md)
-- [server](./backend/webserver/README.md)
-- [Performance troubleshooting](./docs/token_generation_performance_tips.md)
+You can check the logs of service by running:
+
+```bash
+$ docker compose -f ./docker-compose.local.yml logs llm web -f
+aisb-web  |    ▲ Next.js 14.1.0
+aisb-web  |    - Local:        http://1daea2c5f2d0:3000
+aisb-web  |    - Network:      http://172.27.0.5:3000
+aisb-web  |
+aisb-web  |  ✓ Ready in 269ms
+aisb-llm  | --model-path = /var/data/llm.gguf
+aisb-llm  | --gpu-layers = 0
+aisb-llm  | --prod = true
+aisb-llm  | Starting app
+aisb-llm  | Running bjoern server at http://d6baa113b393:3030
+aisb-llm  |  * Serving Flask app 'webserver.app'
+aisb-llm  |  * Debug mode: on
+aisb-llm  | WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+aisb-llm  |  * Running on http://d6baa113b393:3030
+aisb-llm  | Press CTRL+C to quit
+aisb-llm  |  * Restarting with stat
+aisb-llm  |  * Debugger is active!
+aisb-llm  |  * Debugger PIN: 651-147-336
+```
+
+### Play
+
+Visit http://localhost:3000 and you should now be able to visit, login and use the service!
+
+### Contact
+
+If you have questions or need help contact us at info@aistudybuddy.se
