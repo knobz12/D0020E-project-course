@@ -1,6 +1,11 @@
-AIStudyBuddy
+<div style="display:flex;align-items: center; margin-bottom: 2rem; flex-wrap: wrap; justify-content: center;">
+    <img src="https://raw.githubusercontent.com/knobz12/D0020E-project-course/main/media/logo.png" alt="drawing" style="max-width: 200px; width: 100%;"  />
 
-<img src="https://raw.githubusercontent.com/knobz12/D0020E-project-course/main/media/logo.png" alt="drawing" width="200"  />
+<div style="flex-grow: 1; text-align:center">
+    <div style="underline:none;font-size:3rem;letter-spacing:-0.015em;font-weight:700">AI Studybuddy</div>
+    <div style="underline:none;font-size:2rem;">The worlds best AI studying assistant</div>
+</div>
+</div>
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
