@@ -8,7 +8,6 @@ AIStudyBuddy
 
 - [x] Linux
 - [x] Windows
-- [x] Docker
 - [x] Mac OS
 
 ## Install and run
