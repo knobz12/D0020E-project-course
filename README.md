@@ -1,6 +1,6 @@
 AIStudyBuddy
 
-<img src="https://raw.githubusercontent.com/knobz12/D0020E-project-course/main/media/2145c09460c44d609f4293cf7c0a1380.png" alt="drawing" width="200"  />
+<img src="https://raw.githubusercontent.com/knobz12/D0020E-project-course/main/media/logo.png" alt="drawing" width="200"  />
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
@@ -92,7 +92,7 @@ aisb-llm  | --model-path = /var/data/llm.gguf
 aisb-llm  | --gpu-layers = 0
 aisb-llm  | --prod = true
 aisb-llm  | Starting app
-aisb-llm  | Running bjoern server at http://d6baa113b393:3030
+aisb-llm  | Running server at http://d6baa113b393:3030
 aisb-llm  |  * Serving Flask app 'webserver.app'
 aisb-llm  |  * Debug mode: on
 aisb-llm  | WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
