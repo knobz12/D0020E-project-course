@@ -6,7 +6,7 @@ services:
     image: ghcr.io/chroma-core/chroma:latest
     restart: on-failure:5
     volumes:
-      - chroma_vol:/chroma
+      - chroma_vol_dev:/chroma
     ports:
       - 8000:8000
   database-dev:
@@ -20,8 +20,8 @@ services:
       - POSTGRES_PASSWORD=pass
       - POSTGRES_DB=db
     volumes:
-      - "database_data:/var/lib/postgresql/data"
+      - "database_data_dev:/var/lib/postgresql/data"
 
 volumes:
-  chroma_vol:
-  database_data:
+  chroma_vol_dev:
+  database_data_dev:
