@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+  llm:
+    container_name: aisb-llm
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    image: llm:latest
+    ports:
+      - 3030:3030
+    networks:
+      - aisb
+    volumes:
+      - ./backend/models/llm.gguf:/var/data/llm.gguf:ro
+  web:
+    container_name: aisb-web
+    build:
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:3030
+      context: ./website
+      dockerfile: ./Dockerfile
+    image: web:latest
+    ports:
+      - 3000:3000
+    networks:
+      - aisb
+    restart: on-failure:5
+    env_file:
+      - ./website/.env.docker
+    depends_on:
+      - chroma
+      - database
+  chroma:
+    container_name: aisb-vectorstore
+    image: ghcr.io/chroma-core/chroma:latest
+    networks:
+      - aisb
+    restart: on-failure:5
+    volumes:
+      - chroma_vol:/chroma
+    ports:
+      - 8000:8000
+  database:
+    container_name: aisb-database
+    image: postgres:alpine
+    networks:
+      - aisb
+    ports:
+      - 5432:5432
+    restart: on-failure:5
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=db
+    volumes:
+      - "database_data:/var/lib/postgresql/data"
+
+networks:
+  aisb:
+
+volumes:
+  chroma_vol:
+  database_data:

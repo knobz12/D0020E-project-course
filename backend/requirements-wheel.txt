@@ -1,2 +1,0 @@
-bjoern==3.2.2
-llama_cpp_python==0.2.32

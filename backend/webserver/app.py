@@ -15,24 +15,9 @@ def start_app():
 
     args = get_args()
     if args.prod != None:
-        import torch
-        cuda = torch.cuda.is_available()
-        dev = torch.cuda.current_device()
-        name = torch.cuda.get_device_name(dev)
-        print(f"Cuda available: {cuda}, device: {dev}, name: {name}")
-
-        alloc1 = torch.cuda.memory.memory_allocated()
-        print("Before:",alloc1)
-        torch.cuda.memory.empty_cache()
-        alloc2 = torch.cuda.memory.memory_allocated()
-        print("After:",alloc2)
         import socket
         hostname = socket.gethostname()
-        import bjoern
         print(f"Running bjoern server at http://{hostname}:3030")
-        socket = bjoern.listen(
-            app, hostname, 3030
-        )
-        bjoern.run()
+        app.run(debug=True,host=hostname, port=3030, threaded=False)
     else:
         app.run(debug=True,host="localhost", port=3030, threaded=False)
