@@ -55,7 +55,7 @@ Create a duplicate of `backend/.env.docker.template` with name `backend/.env.doc
 Assuming you have Docker and Docker Compose installed you should now be able to run the application with the following command:
 
 ```bash
-docker compose -f ./docker-compose.local.yml up -d --build
+$ docker compose -f ./docker-compose.local.yml up -d --build
 ```
 
 If successful the last thing you should see is something like:

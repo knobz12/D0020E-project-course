@@ -17,7 +17,7 @@ def start_app():
     if args.prod != None:
         import socket
         hostname = socket.gethostname()
-        print(f"Running bjoern server at http://{hostname}:3030")
+        print(f"Running server at http://{hostname}:3030")
         app.run(debug=True,host=hostname, port=3030, threaded=False)
     else:
         app.run(debug=True,host="localhost", port=3030, threaded=False)
