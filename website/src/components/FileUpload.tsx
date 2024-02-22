@@ -213,7 +213,7 @@ export default function FileUpload({
                     }
 
                     const perc = (current ?? 0) + 5
-                    console.log("Increasing perc:", current, perc)
+                    // console.log("Increasing perc:", current, perc)
 
                     return perc
                 })
