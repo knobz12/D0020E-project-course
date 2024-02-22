@@ -3,10 +3,11 @@ node_modules
 .env
 .env.*
 .next
-next-env.d.ts
-.prettierrc
 .eslintrc.json
+next-env.d.ts
+fly.toml
+.prettierrc
+.gitignore
 Dockerfile
 .dockerignore
-.docker-compose
 README.md
