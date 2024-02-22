@@ -12,7 +12,7 @@ services:
     networks:
       - aisb
     volumes:
-      - ./backend/models/llm.gguf:/var/data/llm.gguf:ro
+      - ./backend/models/:/var/data/:ro
   web:
     container_name: aisb-web
     build:
