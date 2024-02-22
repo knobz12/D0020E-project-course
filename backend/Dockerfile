@@ -1,11 +1,8 @@
 FROM python:3.11.8-bookworm
 
-# RUN apk update && apk upgrade
-# RUN apk add --no-cache sqlite
-
 RUN pip install llama_cpp_python
 
-COPY requirements-no-torch.txt requirements.txt
+COPY requirements.docker.txt requirements.txt
 RUN python -m pip install -r requirements.txt --ignore-installed
 
 RUN pip install triton==2.2.0
