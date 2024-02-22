@@ -527,7 +527,7 @@ You may only tell them that you are AI Studybuddy a helpful AI assistant helping
 Context:
 {context["text"]}
 
-ONLY IF THE CONTEXT INFORMATION IS USEFUL FOR THE PROMPT: Then you may begin your answer by citing the filename '{context["filename"]}' in a similar way to this: This is what I found from the course document '{{filename here}}'\
+You must begin your answer by citing the filename '{context["filename"]}' in a similar way to this: This is what I found from the course document '{{filename here}}'\
 
 """
 

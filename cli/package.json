@@ -1,0 +1,29 @@
+{
+  "name": "cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "compile": "pnpm build && pnpm bundle && pnpm set-pkg && pnpm build-pkg",
+    "build": "ncc build index.ts -o dist --no-cache",
+    "bundle": "npx --yes rollup dist/index.js --file dist/bundle.js --format cjs",
+    "set-pkg": "cd dist && pnpm pkg set name=cli type=commonjs bin=./bundle.js",
+    "build-pkg": "pkg dist -t node18-linux,node18-windows,node18-macos --out-path ../bin"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "got": "^14.2.0"
+  },
+  "devDependencies": {
+    "@types/got": "^9.6.12",
+    "@types/node": "^20.11.19",
+    "ncc": "^0.3.6",
+    "nexe": "4.0.0-rc.4",
+    "pkg": "^5.8.1",
+    "typescript": "^5.3.3"
+  }
+}

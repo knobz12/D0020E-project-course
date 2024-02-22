@@ -238,15 +238,20 @@ Keyword:
 
 
 
-def explain_word(id: str,keyword:str, docs: str) -> str:
+def explain_word(id: list[str], keyword:str, docsArray: list[str]) -> str:
     llm = create_llm()
+
+    print("---------------------")
+    print(docsArray)
+    print("---------------------")
     
     results: list[str] = []
-    for (idx, meta) in enumerate(docs["metadatas"]):
-        text =meta["text"]
-        previous_explanation: str | None = results[idx - 1] if idx > 1 else None
-
-        prompt = """Human: You are an assistant explaining a keyword
+    for docs in docsArray:
+        for (idx, meta) in enumerate(docs["metadatas"]):
+            text =meta["text"]
+            previous_explanation: str | None = results[idx - 1] if idx > 1 else None
+    
+            prompt = """Human: You are an assistant explaining a keyword
 I want you to explain the word as best as you can and keep it short and concise using the given context:
 
 Context: {text}
@@ -255,7 +260,7 @@ keyword:{keyword}
 
 Answer:""".format(text = text,keyword = keyword)
         
-        prompt_with_previous=  """Human: You are an assistant explaning a keyword.
+            prompt_with_previous=  """Human: You are an assistant explaning a keyword.
 Use the following pieces of retrieved context to improve the explanation. 
 If you can't improve it simply return the old.
 keep it short and concise.
@@ -267,10 +272,10 @@ Context: {context}
 
 Answer:""".format(explanation = previous_explanation,context=text)
 
-        use_prompt = prompt if previous_explanation == None else prompt_with_previous
-        result = llm(use_prompt)
-        results.append(result)
-
+            use_prompt = prompt if previous_explanation == None else prompt_with_previous
+            result = llm(use_prompt)
+            results.append(result)
+    
     print("######################################\n\n\n")
     for (idx, result) in enumerate(results):
         print(f"Result {idx + 1}")
@@ -284,25 +289,34 @@ def create_explaination(id: list[str], amount: int, custom_keywords: list = []) 
     gllm = create_llm_guidance()
     vectorstore = create_collection()
 
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[0]})
-
+    
+    
+    """  for i in range(1,len(id)):
+    docs.update(vectorstore.get(limit=100,include=["metadatas"],where={"id":id[i]})) """
+    print("------------------------------------")
+    #print(docs)
+    print("------------------------------------")
 
     obj = {}
     obj["keywords"] = []
+    docsArray = []
+    for k in range(len(id)):
+        docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[k]})
+        docsArray.append(docs)
+        for (i, doc) in enumerate(docs["metadatas"]):
+            qsts_count = calculate_questions_per_doc(len(docs["metadatas"]), amount, i)
+            result = gllm + generate_keywords(doc["text"], qsts_count)
 
-    for (i, doc) in enumerate(docs["metadatas"]):
-        qsts_count = calculate_questions_per_doc(len(docs["metadatas"]), amount, i)
-        result = gllm + generate_keywords(doc["text"], qsts_count)
-
-        for j in range(0, (amount)):
-            keyword: str = result[f"keyword{j}"]
-            explanation: str = result[f"explanation{j}"]
-            obj["keywords"].append({"keyword" : keyword, "explanation": explanation})
+            for j in range(0, (amount)):
+                keyword: str = result[f"keyword{j}"]
+                explanation: str = result[f"explanation{j}"]
+                obj["keywords"].append({"keyword" : keyword, "explanation": explanation})
     
+
 
     for i in range(0, len(custom_keywords)):
         #print(explain_word(id,custom_keywords[i]))
-        obj["keywords"].append({"keyword" : custom_keywords[i], "explanation": explain_word(id, custom_keywords[i], docs)})
+        obj["keywords"].append({"keyword" : custom_keywords[i], "explanation": explain_word(id, custom_keywords[i], docsArray)})
         
     print("__________________________________________________________________________")
    

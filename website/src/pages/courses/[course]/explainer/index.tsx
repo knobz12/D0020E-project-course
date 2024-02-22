@@ -18,7 +18,7 @@ export default function Explainer({}: ExplainerProps) {
                 parameters={[
                     {
                         id: "amount",
-                        name: "Amount of keywords",
+                        name: "Amount of keywords per document",
                         placeholder:
                             "The amount of keywords you want to generate",
                         type: "number",
