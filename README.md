@@ -43,7 +43,7 @@ Move the downloaded model file to `backend/models` and rename the file to `llm.g
 
 #### Enable GitHub OAuth2.0
 
-Create a duplicate of `backend/.env.docker.template` with name `backend/.env.docker`.
+Create a duplicate of `website/.env.docker.template` with name `website/.env.docker`.
 
 1. Visit [GitHub - OAuth Apps](https://github.com/settings/developers) and press "New OAuth App" at the top right.
 2. Enter values for the parameters:
