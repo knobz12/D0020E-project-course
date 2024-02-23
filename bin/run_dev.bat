@@ -12,7 +12,7 @@ SET POSTGRES_BIN=%cd%/postgres/pgsql/bin
 SET CHROMA_DIR=%cd%/chroma/chroma-0.4.22
 
 mkdir post_data
-%POSTGRES_BIN%/initdb.exe --username=user -D %cd%/post_data 
+%POSTGRES_BIN%/initdb.exe -U user -D %cd%/post_data 
 start "postgres" "%POSTGRES_BIN%/postgres.exe" -D %cd%/post_data
 timeout /t 1
 %POSTGRES_BIN%/createdb.exe db 
@@ -51,4 +51,5 @@ SET NEXTAUTH_SECRET=123
 
 timeout /t 1
 %PNPM% prisma migrate reset -f --skip-seed && %PNPM% prisma db push && %PNPM% prisma db seed
+copy ".next\standalone\server.js" "./"
 start "node" "%NODE%" server.js -p 3000
