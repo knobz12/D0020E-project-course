@@ -9,6 +9,12 @@ services:
     image: llm:latest
     ports:
       - 3030:3030
+    healthcheck:
+      test: curl --fail http://aisb-llm:3030/api/health || exit 1
+      interval: 15s
+      timeout: 30s
+      retries: 3
+      start_period: 10s
     networks:
       - aisb
     volumes:
@@ -23,6 +29,12 @@ services:
     image: web:latest
     ports:
       - 3000:3000
+    healthcheck:
+      test: curl --fail http://aisb-web:3000/ || exit 1
+      interval: 15s
+      timeout: 30s
+      retries: 3
+      start_period: 30s
     networks:
       - aisb
     restart: on-failure:5

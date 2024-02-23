@@ -23,9 +23,7 @@ interface LocalFilePickerProps {
 
 export function LocalFilePicker({ isLoading, onSelect }: LocalFilePickerProps) {
     const theme = useMantineTheme()
-    const [inputFiles, setFile] = useState<File[]>(
-        []
-    )
+    const [inputFiles, setFile] = useState<File[]>([])
 
     useEffect(
         function () {
@@ -39,7 +37,7 @@ export function LocalFilePicker({ isLoading, onSelect }: LocalFilePickerProps) {
             <Stack>
                 {inputFiles.map((file, i) => {
                     return (
-                        <Flex align="center" w="100%">
+                        <Flex key={i + file.name} align="center" w="100%">
                             <Flex gap="md" align="center" className="grow">
                                 <Stack spacing="sm">
                                     <Text size="xl">{file.name}</Text>
@@ -47,15 +45,17 @@ export function LocalFilePicker({ isLoading, onSelect }: LocalFilePickerProps) {
                             </Flex>
                             <CloseButton
                                 disabled={isLoading}
-                                onClick={() => setFile((current) =>  current.filter((_, id) => id !== i))}
+                                onClick={() =>
+                                    setFile((current) =>
+                                        current.filter((_, id) => id !== i),
+                                    )
+                                }
                                 size="lg"
                             />
                         </Flex>
                     )
                 })}
-
             </Stack>
-
         )
     }
 
@@ -73,8 +73,9 @@ export function LocalFilePicker({ isLoading, onSelect }: LocalFilePickerProps) {
                 "application/vnd.openxmlformats-officedocument.presentationml.presentation",
             ]}
             onDrop={async (files) => {
-
-                const file_size_sum = files.map((file) => file.size).reduce((previous, current) => previous + current);
+                const file_size_sum = files
+                    .map((file) => file.size)
+                    .reduce((previous, current) => previous + current)
 
                 if (file_size_sum > 100_000) {
                     return showNotification({
