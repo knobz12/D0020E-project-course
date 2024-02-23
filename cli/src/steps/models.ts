@@ -114,9 +114,7 @@ export async function selectModelUrl(): Promise<string> {
 Your system has ${humanFileSize(total)} total RAM and ${humanFileSize(
           available
         )} available.
-Therefore a model size of at most ${humanFileSize(
-          total / 2
-        )} should work for you.`,
+Therefore a model size up to ${humanFileSize(total / 2)} should work for you.`,
         "Picking the right model size"
       );
       await new Promise<void>((res) => setTimeout(res, 2000));

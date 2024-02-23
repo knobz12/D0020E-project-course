@@ -77,7 +77,6 @@ Authorization calback URL = http://localhost:3000/api/auth/callback/github
 
   const githubSecret = await p.password({
     message: "GitHub OAuth secret key:",
-    mask: "****************************************",
     validate(value) {
       if (value.length < 20 && value.length > 50) {
         return "GitHub id must be between 20 and 50 characters long!";
@@ -101,6 +100,7 @@ Authorization calback URL = http://localhost:3000/api/auth/callback/github
   data = data.replace("********************", githubId);
   data = data.replace("****************************************", githubSecret);
   fs.writeFileSync(websiteEnvFilePath, data);
+  p.log.info(".env.docker file made");
 
   p.log.success(`Environment files created!`);
 }

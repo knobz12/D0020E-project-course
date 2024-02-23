@@ -44,7 +44,7 @@ async function main() {
 
     if (useExisting === false) {
       const renameFile = await p.confirm({
-        message: `Do you want to rename the old file?`,
+        message: `Do you want to rename the old file? If you don't rename it it will be deleted.`,
         initialValue: true,
       });
 
@@ -53,23 +53,25 @@ async function main() {
         process.exit(0);
       }
 
-      const filename = await p.text({
-        message: `What do you want to call this file?`,
-      });
+      if (renameFile === true) {
+        const filename = await p.text({
+          message: `What do you want to call this file?`,
+        });
 
-      if (typeof filename !== "string") {
-        p.log.error("You must select Yes or No");
-        process.exit(0);
-      }
+        if (typeof filename !== "string") {
+          p.log.error("You must select Yes or No");
+          process.exit(0);
+        }
 
-      const newfilepath = path.join(MODEL_FOLDER_PATH, `/${filename}`);
-      console.log(`Renaming file to ${newfilepath}`);
+        const newfilepath = path.join(MODEL_FOLDER_PATH, `/${filename}`);
+        console.log(`Renaming file to ${newfilepath}`);
 
-      if (renameFile) {
-        fs.renameSync(
-          LLM_FILE_PATH,
-          path.join(MODEL_FOLDER_PATH, `/${filename}`)
-        );
+        if (renameFile) {
+          fs.renameSync(
+            LLM_FILE_PATH,
+            path.join(MODEL_FOLDER_PATH, `/${filename}`)
+          );
+        }
       }
 
       const url = await selectModelUrl();
