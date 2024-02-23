@@ -29,5 +29,26 @@ start "py" py %cd%/backend %*
 
 
 cd website
+@rem # If you want to use GitHub OAuth 2.0 login
+SET GITHUB_ID=********************
+SET GITHUB_SECRET=****************************************
+
+@rem # If you want to use Google OAuth 2.0 login
+SET GOOGLE_ID=************************************************************************
+SET GOOGLE_SECRET=************************************
+
+@rem # Should work as is but you may change
+SET DATABASE_URL="postgresql://user:pass@localhost:5432/db?schema=public"
+SET NEXT_PUBLIC_API_URL=http://localhost:3030
+SET COOKIE_DOMAIN=localhost
+SET CHROMA_URL=http://localhost:8000
+SET NEXTAUTH_URL=http://localhost:3000
+SET NEXTAUTH_URL_INTERNAL=http://localhost:3000
+SET TRPC_URL=http://localhost:3000
+SET JWE_SECRET=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+SET JWE_PEPPER=BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+SET NEXTAUTH_SECRET=123
+
+
 start "node" "%NODE%" server.js -p 3000
 cd ../build
