@@ -121,28 +121,39 @@ def create_quiz(id: list[str], questions: int) -> str:
     glmm = create_llm_guidance()
     vectorstore = create_collection()
 
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[0]})
     # print(docs)
 
 
     obj: dict[str, list[dict[str, Any]]] =  {}
+    
+    obj["questions"] = []
+    loops = 0
+    for k in range(len(id)):
+        docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[k]})
+    
+        for (i, doc) in enumerate(docs["metadatas"]):
+            qsts_cunt = calculate_questions_per_doc(len(docs["metadatas"]), questions, i)
+            # print(f"Questions for {i}")
+            result = glmm + newQuestionJSONGenerator(doc["text"], 4, qsts_cunt)
+            # print(str(result))
 
-    for (i, doc) in enumerate(docs["metadatas"]):
-        qsts_cunt = calculate_questions_per_doc(len(docs["metadatas"]), questions, i)
-        # print(f"Questions for {i}")
-        result = glmm + newQuestionJSONGenerator(doc["text"], 4, qsts_cunt)
-        # print(str(result))
+            
 
-        obj["questions"] = []
+            for i in range(0, qsts_cunt):
+                question: str = result[f"question{i}"]
+                obj["questions"].append({"question" : question, "answers": []})
 
-        for i in range(0, qsts_cunt):
-            question: str = result[f"question{i}"]
-            obj["questions"].append({"question" : question, "answers": []})
-
-            for j in range(0,4):
-                answer: str = result[f"answer{i}-{j}"]
-                correct: str = result[f"isAnswer{i}-{j}"]
-                obj["questions"][i]["answers"].append({"text": answer, "correct" : False if correct == "False" else True})
+                for j in range(0,4):
+                    answer: str = result[f"answer{i}-{j}"]
+                    correct: str = result[f"isAnswer{i}-{j}"]
+                    print("k")
+                    print(k)
+                    print("qsts_cunt")
+                    print(qsts_cunt)
+                    obj["questions"][(loops)]["answers"].append({"text": answer, "correct" : False if correct == "False" else True})
+                loops += 1
+        print("This is the object")
+        print(json.dumps(obj))
     
     result: str = json.dumps(obj)
     return result
