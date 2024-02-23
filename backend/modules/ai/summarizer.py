@@ -118,12 +118,12 @@ def summarize_doc_stream_old(id: list[str]) -> Generator[str, str, None]:
         docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[i]})
         for (idx, meta) in enumerate(docs["metadatas"]):
             if(loops > 1):
-                print(".i.                       ")
-                print(results)
-                print("--------------")
-                print(loops)
+                #print(".i.                       ")
+                #print(results)
+                #print("--------------")
+                #print(loops)
                 previous_summary: str | None = results[loops-1] if (loops > 1 ) else None
-                print("previus summary ============"+previous_summary)
+                #print("previus summary ============"+previous_summary)
             text = meta["text"]
 
             prompt = """Human: You are an assistant summarizing document text.
