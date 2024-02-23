@@ -8,6 +8,8 @@ SET POSTGRES_URL="https://sbp.enterprisedb.com/getfile.jsp?fileid=1258892"
 
 SET PNPM_URL="https://github.com/pnpm/pnpm/releases/download/v9.0.0-alpha.5/pnpm-win-x64.exe"
 
+SET GET_PIP_URL="https://bootstrap.pypa.io/get-pip.py"
+
 cd ..
 mkdir build
 cd build
@@ -27,6 +29,7 @@ bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %PNPM_URL% "%cd
 
 tar -xf "./node.zip" -C "./node"
 tar -xf "./python.zip" -C "./python"
+bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %GET_PIP_URL% "%cd%/python/get-pip.py"
 tar -xf "./chroma.zip" -C "./chroma"
 tar -xf "./postgres.zip" -C "./postgres"
 
@@ -45,39 +48,41 @@ echo %PNPM%
 echo %POSTGRES_BIN%
 
 @REM PYTHON
+cd python
+echo python311.zip > python311._pth
+echo ./Lib/site-packages >> python311._pth
+echo ./Scripts >> python311._pth
+echo . >> python311._pth
+echo # Uncomment to run site.main() automatically >> python311._pth
+echo #import site >> python311._pth
 
-%PYTHON% -m venv ./.venv
-call .venv/scripts/activate.bat
-
-py -m ensurepip --upgrade
-pip install -r ../backend/requirements.win.txt
-
+echo import sys > sitecustomize.py
 cd ..
 
+%PYTHON% %cd%/python/get-pip.py
+
+
+%PYTHON% -m pip install virtualenv
+%PYTHON% -m virtualenv ./venv_backend
+call %cd%/venv_backend/Scripts/activate.bat
+
+cd venv_backend/Scripts
+pip.exe install -r ../../../backend/requirements.win.txt
+cd ../../
+
+echo "Creating venv for Chroma"
+%PYTHON% -m virtualenv ./venv_chroma
+call %cd%/venv_chroma/Scripts/activate.bat
+
+echo "Installing chroma requirements"
+cd venv_chroma/Scripts
+pip.exe install -r ../../chroma/chroma-0.4.22/requirements.txt
+pip.exe install uvicorn
+cd ../../
+
+cd ..
 @REM NODE
+
 cd website
 %PNPM% install
 cd ..
-@REM CHROMA
-cd build
-
-echo "Creating venv for Chroma"
-%PYTHON% -m venv ./.venv_chroma
-call .venv_chroma/scripts/activate.bat
-
-echo "Installing chroma requirements"
-pip install -r ./chroma/chroma-0.4.22/requirements.txt
-pip install uvicorn
-
-
-cd ..
-cd build
-mkdir post_data
-@REM %POSTGRES_BIN%/initdb.exe -D %cd%/post_data
-@REM start "postgres" "%POSTGRES_BIN%/postgres.exe" -D %cd%/post_data
-@REM %POSTGRES_BIN%/createuser.exe -s user
-
-@rem assiming we are in chroma venv
-@REM cd chroma/chroma-0.4.22
-@REM start "chroma" uvicorn chromadb.app:app 
-cd ../..
