@@ -39,6 +39,9 @@ COPY --from=builder /app/prisma ./prisma
 RUN mkdir temp
 COPY --from=builder /app/prisma ./temp/prisma
 
+# For healthchecks
+RUN apk add --no-cache curl
+
 COPY <<"EOT" /app/docker-start.sh
 #!/bin/bash
 
