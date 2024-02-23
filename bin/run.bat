@@ -6,6 +6,7 @@ SET PYTHON_URL="https://www.python.org/ftp/python/3.11.8/python-3.11.8-embed-amd
 SET CHROMA_DB_URL="https://github.com/chroma-core/chroma/archive/refs/tags/0.4.22.zip"
 SET POSTGRES_URL="https://sbp.enterprisedb.com/getfile.jsp?fileid=1258892"
 
+SET PNPM_URL="https://github.com/pnpm/pnpm/releases/download/v9.0.0-alpha.5/pnpm-win-x64.exe"
 
 mkdir build
 cd build
@@ -13,11 +14,14 @@ mkdir node
 mkdir python
 mkdir chroma
 mkdir postgres
+
 bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %NODE_URL% "%cd%/node.zip"
 bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %PYTHON_URL% "%cd%/python.zip"
 timeout /t 2
 bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %CHROMA_DB_URL% "%cd%/chroma.zip"
 bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %POSTGRES_URL% "%cd%/postgres.zip"
+bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %PNPM_URL% "%cd%/pnpm.exe"
+
 
 
 tar -xf "./node.zip" -C "./node"
@@ -29,12 +33,14 @@ tar -xf "./postgres.zip" -C "./postgres"
 SET PYTHON=%cd%/python/python.exe
 SET NODE=%cd%/node/node-v20.11.1-win-x64/node.exe
 SET NPM=%NODE% %cd%/node/node-v20.11.1-win-x64/node_modules/npm/bin/npm-cli.js
+SET PNPM=%cd%/pnpm.exe
 SET POSTGRES_BIN=%cd%/postgres/pgsql/bin
 
 
 echo %PYTHON%
 echo %NODE%
 echo %NPM%
+echo %PNPM%
 echo %POSTGRES_BIN%
 
 @REM PYTHON
@@ -67,11 +73,11 @@ pip install uvicorn
 cd ..
 cd build
 mkdir post_data
-%POSTGRES_BIN%/initdb.exe -D %cd%/post_data
-start "postgres" "%POSTGRES_BIN%/postgres.exe" -D %cd%/post_data
-%POSTGRES_BIN%/createuser.exe -s user
+@REM %POSTGRES_BIN%/initdb.exe -D %cd%/post_data
+@REM start "postgres" "%POSTGRES_BIN%/postgres.exe" -D %cd%/post_data
+@REM %POSTGRES_BIN%/createuser.exe -s user
 
 @rem assiming we are in chroma venv
-cd chroma/chroma-0.4.22
-start "chroma" uvicorn chromadb.app:app 
+@REM cd chroma/chroma-0.4.22
+@REM start "chroma" uvicorn chromadb.app:app 
 cd ../..
