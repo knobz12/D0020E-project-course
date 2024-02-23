@@ -51,4 +51,3 @@ SET NEXTAUTH_SECRET=123
 
 
 start "node" "%NODE%" server.js -p 3000
-cd ../build
