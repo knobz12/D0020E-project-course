@@ -23,43 +23,31 @@
 
 - In order to run the service locally you need to have [Docker and Docker Compose](https://www.docker.com/products/docker-desktop/) installed.
 
-#### Download an LLM model of your choice
+#### Setup
 
-Download any one of the .gguf files in one of the links below. The bigger the model the better AI responses.
-Choose a model size which fits the amount of RAM on your system. We recommend the size of the model you choose to be at most
-1/2 of your available RAM. So if you have 8GB of RAM download a <= 4GB size gguf model.
+From your shell enter the folder `bin`. Then run, depending on platform:
 
-##### Models ordered by (our opinion) performance/size ratio
+On MacOS
 
-[zephyr-7b-beta](https://huggingface.co/TheBloke/zephyr-7B-beta-GGUF/tree/main) (3.08 - 7.7 GB)
+```sh
+./cli-macos
+```
 
-[zephyr-3b](https://huggingface.co/TheBloke/stablelm-zephyr-3b-GGUF/tree/main) (1.2 - 2.97 GB)
+On Linux
 
-[Llama-2-13B-Chat](https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/tree/main) (5.43 - 13.8 GB)
+```sh
+./cli-linux
+```
 
-[Llama-2-7B-Chat](https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/tree/main) (2.83 - 7.16 GB)
+On Windows
 
-Move the downloaded model file to `backend/models` and rename the file to `llm.gguf`. You should now have a file called `llm.gguf` at the path `./backend/models/llm.gguf`.
-
-#### Enable GitHub OAuth2.0
-
-Create a duplicate of `website/.env.docker.template` with name `website/.env.docker`.
-
-1. Visit [GitHub - OAuth Apps](https://github.com/settings/developers) and press "New OAuth App" at the top right.
-2. Enter values for the parameters:
-
-- Application Name = AI Studybuddy
-- Homepage URL = http://localhost:3000
-- Authorization calback URL = http://localhost:3000/api/auth/callback/github
-
-3. Press "Register application"
-4. Copy the Client ID value, you will need to use it later. It should be 20 characters long and look similar to `58eb52a9c123100d54d4`.
-5. Click "Generate a new client secret" and copy the generated value. Should be 40 characters.
-6. Copy your client id and client secret and set them at GITHUB_ID and GITHUB_SECRET in the `backend/.env.docker` respectively.
+```sh
+.\cli-win.exe
+```
 
 #### Start the service
 
-Assuming you have Docker and Docker Compose installed you should now be able to run the application with the following command:
+Assuming you've run the CLI and it exited successfully you can now run:
 
 ```sh
 docker compose -f ./docker-compose.local.yml up -d --build
