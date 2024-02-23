@@ -63,7 +63,7 @@ echo "{
 cat package.json
 pnpm install
 
-npx --yes dotenv-cli -v DATABASE_URL="postgresql://user:pass@aisb-database:5432/db?schema=public" -- pnpm prisma db push --schema ../prisma/schema.prisma --skip-generate
+npx --yes dotenv-cli -v DATABASE_URL="postgresql://user:pass@aisb-database:5432/db?schema=public" -- pnpm prisma db push --schema ../prisma/schema.prisma --skip-generate --accept-data-loss
 npx --yes dotenv-cli -v DATABASE_URL="postgresql://user:pass@aisb-database:5432/db?schema=public" -- pnpm prisma db seed --schema ../prisma/schema.prisma
 
 cd ..
