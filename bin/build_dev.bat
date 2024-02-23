@@ -46,7 +46,7 @@ echo %POSTGRES_BIN%
 
 @REM PYTHON
 
-PYTHON -m venv ./.venv
+%PYTHON% -m venv ./.venv
 call .venv/scripts/activate.bat
 
 py -m ensurepip --upgrade
@@ -56,13 +56,13 @@ cd ..
 
 @REM NODE
 cd website
-PNPM install
+%PNPM% install
 cd ..
 @REM CHROMA
 cd build
 
 echo "Creating venv for Chroma"
-PYTHON -m venv ./.venv_chroma
+%PYTHON% -m venv ./.venv_chroma
 call .venv_chroma/scripts/activate.bat
 
 echo "Installing chroma requirements"
