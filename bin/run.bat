@@ -8,6 +8,7 @@ SET POSTGRES_URL="https://sbp.enterprisedb.com/getfile.jsp?fileid=1258892"
 
 SET PNPM_URL="https://github.com/pnpm/pnpm/releases/download/v9.0.0-alpha.5/pnpm-win-x64.exe"
 
+cd ..
 mkdir build
 cd build
 mkdir node
@@ -55,8 +56,7 @@ cd ..
 
 @REM NODE
 cd website
-@REM %NPM% install -g pnpm
-@REM start "pnpm" "pnpm" install
+PNPM install
 cd ..
 @REM CHROMA
 cd build
