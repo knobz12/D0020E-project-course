@@ -103,6 +103,82 @@ export const models: Partial<Record<ModelValues, OptionValue[]>> = {
       hint: "2.97 GB",
     },
   ],
+  L13B: [
+    {
+      value:
+        "https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/blob/main/llama-2-13b-chat.Q2_K.gguf",
+      label: "llama-2-13b-chat.Q2",
+      hint: "5.43 GB",
+    },
+    {
+      value:
+        "https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/blob/main/llama-2-13b-chat.Q3_K_M.gguf",
+      label: "llama-2-13b-chat.Q3",
+      hint: "6.34 GB",
+    },
+    {
+      value:
+        "https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/blob/main/llama-2-13b-chat.Q4_K_M.gguf",
+      label: "llama-2-13b-chat.Q4",
+      hint: "7.87 GB",
+    },
+    {
+      value:
+        "https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/blob/main/llama-2-13b-chat.Q5_K_M.gguf",
+      label: "llama-2-13b-chat.Q5",
+      hint: "9.23 GB",
+    },
+    {
+      value:
+        "https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/blob/main/llama-2-13b-chat.Q6_K.gguf",
+      label: "llama-2-13b-chat.Q6",
+      hint: "10.7 GB",
+    },
+    {
+      value:
+        "https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/blob/main/llama-2-13b-chat.Q8_0.gguf",
+      label: "llama-2-13b-chat.Q8",
+      hint: "13.8 GB",
+    },
+  ],
+  L7B: [
+    {
+      value:
+        "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/blob/main/llama-2-7b-chat.Q2_K.gguf",
+      label: "llama-2-7b-chat.Q2",
+      hint: "2.83 GB",
+    },
+    {
+      value:
+        "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/blob/main/llama-2-7b-chat.Q3_K_M.gguf",
+      label: "llama-2-7b-chat.Q3",
+      hint: "3.3 GB",
+    },
+    {
+      value:
+        "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/blob/main/llama-2-7b-chat.Q4_K_M.gguf",
+      label: "llama-2-7b-chat.Q4",
+      hint: "4.08 GB",
+    },
+    {
+      value:
+        "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/blob/main/llama-2-7b-chat.Q5_K_M.gguf",
+      label: "llama-2-7b-chat.Q5",
+      hint: "4.78 GB",
+    },
+    {
+      value:
+        "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/blob/main/llama-2-7b-chat.Q6_K.gguf",
+      label: "llama-2-7b-chat.Q6",
+      hint: "5.53 GB",
+    },
+    {
+      value:
+        "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/blob/main/llama-2-7b-chat.Q8_0.gguf",
+      label: "llama-2-7b-chat.Q8",
+      hint: "7.16 GB",
+    },
+  ],
 };
 
 export async function selectModelUrl(): Promise<string> {
