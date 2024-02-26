@@ -20,6 +20,7 @@ mkdir postgres
 
 bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %NODE_URL% "%cd%/node.zip"
 bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %PYTHON_URL% "%cd%/python.zip"
+bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %GET_PIP_URL% "%cd%/python/get-pip.py"
 timeout /t 2
 bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %CHROMA_DB_URL% "%cd%/chroma.zip"
 bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %POSTGRES_URL% "%cd%/postgres.zip"
@@ -29,7 +30,6 @@ bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %PNPM_URL% "%cd
 
 tar -xf "./node.zip" -C "./node"
 tar -xf "./python.zip" -C "./python"
-bitsadmin /transfer mydownloadjob /download /priority FOREGROUND %GET_PIP_URL% "%cd%/python/get-pip.py"
 tar -xf "./chroma.zip" -C "./chroma"
 tar -xf "./postgres.zip" -C "./postgres"
 
@@ -84,5 +84,8 @@ cd ..
 @REM NODE
 
 cd website
+SET NEXT_PUBLIC_API_URL=http://localhost:3030
 %PNPM% install
+%PNPM% prisma generate
+%PNPM% build --no-lint
 cd ..
