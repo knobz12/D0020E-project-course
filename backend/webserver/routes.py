@@ -167,47 +167,6 @@ def get_route_parameters() -> tuple[list[str], str, str] | Response:
     # print(result)
     return result
 
-def get_route_parameters_no_course() -> tuple[list[str], str] | Response:
-
-    file_ids = request.form.get("file_ids")
-    file_list = request.files.getlist("files")
-
-    user_id = get_user_id()
-    if user_id == None:
-        return make_response("You need to be logged in to use this service", 406)
-
-    result = None
-    if file_ids != None:
-        file_ids_list = file_ids.split(',')
-        result = (file_ids_list, user_id)
-    elif len(file_list) > 0:
-        file_hashes = []
-        
-        for file in file_list:
-            file_size = file.seek(0, os.SEEK_END)
-            file.seek(0)
-            if (file_size == 0):
-                print("skipping empty file %d", file.filename)
-                continue
-            hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
-            if hash == None:
-                print("skipping invalid file %d", file.filename)
-                continue
-
-            file_hashes.append(hash)
-
-        if len(file_hashes) == 0:
-            result = make_response("All files Invalid or empty", 406)
-        else:
-            result = (file_hashes, user_id)
-    else:
-        result = make_response("Missing files or file ids.", 406)
-
-    
-    # print("get_route_parameters")
-    # print(result)
-    return result
-
 @app.route("/api/quiz", methods=["POST"])
 def quiz():
     sem.acquire(timeout=1000)
@@ -418,10 +377,10 @@ def generate_title():
 
 @app.route("/api/estimate", methods=["POST"])
 def estimate():
-    params = get_route_parameters_no_course()
+    params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hashes, user_id) = params
+    (file_hashes, course_id, user_id) = params
 
     values = None
     with connection_pool.connection() as conn:
