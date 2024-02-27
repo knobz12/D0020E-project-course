@@ -65,11 +65,11 @@ export function PromptViewer({ type, ...props }: PromptViewerProps) {
                 />
             )
         case "EXPLAINER":
-        return (
-            <ExplainerContent
-                {...(props as PromptViewerProps & { type: "EXPLAINER" })}
-            />
-        )
+            return (
+                <ExplainerContent
+                    {...(props as PromptViewerProps & { type: "EXPLAINER" })}
+                />
+            )
         case "ASSIGNMENT":
             return (
                 <AssignmentContent
@@ -79,7 +79,9 @@ export function PromptViewer({ type, ...props }: PromptViewerProps) {
         case "DIVIDEASSIGNMENT":
             return (
                 <DivideAssignmentContent
-                    {...(props as PromptViewerProps & { type: "DIVIDEASSIGNMENT" })}
+                    {...(props as PromptViewerProps & {
+                        type: "DIVIDEASSIGNMENT"
+                    })}
                 />
             )
         case "SUMMARY":

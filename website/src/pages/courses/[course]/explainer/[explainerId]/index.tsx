@@ -58,7 +58,11 @@ export const getServerSideProps = (async ({ req, res, params }) => {
         }
 
         const explainer = await db.prompt.findUnique({
-            where: { id: explainerId, course: { id: dbCourse.id }, type: "EXPLAINER" },
+            where: {
+                id: explainerId,
+                course: { id: dbCourse.id },
+                type: "EXPLAINER",
+            },
             select: {
                 id: true,
                 title: true,

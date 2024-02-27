@@ -1,4 +1,5 @@
 import { Page } from "@/components/Page"
+import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getApiUrlUrl } from "@/utils/getApiUrl"
 import {
     Box,
@@ -10,6 +11,8 @@ import {
     Textarea,
 } from "@mantine/core"
 import { showNotification } from "@mantine/notifications"
+import { GetServerSideProps } from "next"
+import { getServerSession } from "next-auth"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
 
@@ -193,4 +196,20 @@ export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
             </Container>
         </Page>
     )
+}
+
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+    const session = await getServerSession(req, res, authOptions)
+
+    if (!session) {
+        return {
+            redirect: { destination: "/api/auth/signin", permanent: false },
+        }
+    }
+
+    return {
+        props: {
+            session,
+        },
+    }
 }

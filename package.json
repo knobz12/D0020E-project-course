@@ -1,0 +1,12 @@
+{
+    "name": "ai-studybuddy",
+    "version": "0.1.0",
+    "description": "The worlds best AI studying assistant",
+    "scripts": {
+        "format": "prettier -w"
+    },
+    "devDependencies": {
+        "prettier": "^2",
+        "prettier-plugin-tailwindcss": "^0.4"
+    }
+}

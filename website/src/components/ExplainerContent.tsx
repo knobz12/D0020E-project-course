@@ -40,8 +40,6 @@ export function ExplainerContent({
     const [editing, setEditing] = useState<boolean>(false)
     // console.log("Content:", content)
 
-
-
     return (
         <ExplainerViewer
             promptId={promptId}
@@ -105,4 +103,3 @@ function ExplainerViewer({
         </Stack>
     )
 }
-

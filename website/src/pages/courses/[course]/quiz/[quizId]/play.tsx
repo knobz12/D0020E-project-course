@@ -35,7 +35,6 @@ function Player({
     })["content"]
 
     return <div>{playableQuiz(quiz)}</div>
-   
 }
 
 export const getServerSideProps = (async ({ req, res, params }) => {
