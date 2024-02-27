@@ -183,9 +183,9 @@ function DivideAssignmentEditor({
                     <Button
                         onClick={() => {
                             modals.openConfirmModal({
-                                title: "Save quiz",
+                                title: "Save assignment",
                                 children:
-                                    "Are you sure you want to save this DivideAssignment? The previous text will be overwritten.",
+                                    "Are you sure you want to save this divided assignment? The previous text will be overwritten.",
                                 confirmProps: { color: "teal" },
                                 cancelProps: { color: "red" },
                                 labels: { cancel: "Cancel", confirm: "Save" },

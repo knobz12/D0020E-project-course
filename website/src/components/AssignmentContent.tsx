@@ -183,7 +183,7 @@ function AssignmentEditor({
                     <Button
                         onClick={() => {
                             modals.openConfirmModal({
-                                title: "Save quiz",
+                                title: "Save assignment",
                                 children:
                                     "Are you sure you want to save this assignment? The previous text will be overwritten.",
                                 confirmProps: { color: "teal" },
