@@ -26,7 +26,7 @@ import { trpc } from "@/lib/trpc"
 import { FlashcardsContent } from "./FlashcardsContent"
 import dynamic from "next/dynamic"
 import { IconInfoCircle } from "@tabler/icons-react"
-import { getApiUrl } from "@/utils/getApiUrl"
+import { getApiUrl, getApiUrlUrl } from "@/utils/getApiUrl"
 
 const MultiSelect = dynamic(
     () => import("@mantine/core").then((el) => el.MultiSelect),
@@ -287,8 +287,10 @@ export default function FileUpload({
             }
 
             url.searchParams.set("course", course)
+            const url2 = getApiUrlUrl("/api/estimate")
+            url2.searchParams.set("course", course)
 
-            const est = await fetch(getApiUrl("/api/estimate"), {
+            const est = await fetch(url2, {
                 method: "POST",
                 body: data,
                 credentials: "include",
