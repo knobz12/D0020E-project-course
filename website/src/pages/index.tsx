@@ -6,6 +6,7 @@ import Link from "next/link"
 import React from "react"
 import { authOptions } from "./api/auth/[...nextauth]"
 import { useSession } from "next-auth/react"
+import { BackgroundBeams } from "@/components/Beams"
 
 interface LandingPageProps {}
 
@@ -14,6 +15,7 @@ export default function LandingPage({}: LandingPageProps) {
     return (
         <Page>
             {/* <Box> */}
+            <BackgroundBeams />
             <div className="relative px-6 pt-14 lg:px-8">
                 <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
                     <div className="text-center">
