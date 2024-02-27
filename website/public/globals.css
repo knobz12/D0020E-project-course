@@ -7,6 +7,13 @@ input:focus-visible,
     @apply outline-none;
 }
 
+html,
+body,
+#__next,
+#beams {
+    @apply h-full;
+}
+
 .card {
     background-color: transparent;
     width: 300px;

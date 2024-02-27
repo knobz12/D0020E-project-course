@@ -15,8 +15,10 @@ export default function LandingPage({}: LandingPageProps) {
     return (
         <Page>
             {/* <Box> */}
-            <div className="relative">
-                <BackgroundBeams />
+            <div>
+                {/* <div className="absolute top-0 left-0 w-full h-full -z-10"> */}
+                {/* <BackgroundBeams /> */}
+                {/* </div> */}
                 <div className="relative px-6 pt-14 lg:px-8">
                     <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
                         <div className="text-center">

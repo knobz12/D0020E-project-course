@@ -42,35 +42,6 @@ COPY --from=builder /app/prisma ./temp/prisma
 # For healthchecks
 RUN apk add --no-cache curl
 
-COPY <<"EOT" /app/docker-start.sh
-#!/bin/bash
-
-# For pushing the PostgreSQL schema and seeding the database with courses
-mkdir temp
-cd temp
-echo "{
-    \"name\": \"temp\",
-    \"prisma\": {
-        \"seed\": \"ts-node --compiler-options {\\\"module\\\":\\\"CommonJS\\\"} ./prisma/seed.ts\"
-    },
-    \"dependencies\": {
-        \"@prisma/client\": \"^5.10.2\"
-    },
-    \"devDependencies\": {
-        \"prisma\": \"^5.10.2\"
-    }
-}" > package.json
-cat package.json
-pnpm install
-
-npx --yes dotenv-cli -v DATABASE_URL="postgresql://user:pass@aisb-database:5432/db?schema=public" -- pnpm prisma db push --schema ../prisma/schema.prisma --skip-generate --accept-data-loss
-npx --yes dotenv-cli -v DATABASE_URL="postgresql://user:pass@aisb-database:5432/db?schema=public" -- pnpm prisma db seed --schema ../prisma/schema.prisma
-
-cd ..
-rm -rf temp
-#####################
-
-node server.js -p 3000
-EOT
-
-CMD ["bash", "./docker-start.sh"]
+ENV HOSTNAME 0.0.0.0
+ENV PORT 3000
+CMD ["node", "server.js"]

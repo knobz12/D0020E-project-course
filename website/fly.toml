@@ -6,7 +6,7 @@ primary_region = "arn"
 
 [build]
     ignorefile = "./.dockerignore"
-    dockerfile = "./Dockerfile"
+    dockerfile = "./fly.Dockerfile"
 
 [env]
     HOSTNAME = "0.0.0.0"

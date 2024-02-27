@@ -125,7 +125,14 @@ export default function SignInPage({ providers }: SignInPageProps) {
                                 AI Studybuddy
                             </Title>
                         </Stack>
-                        <Paper p="xl" radius="lg" w="100%">
+                        <Paper
+                            p="xl"
+                            radius="lg"
+                            w="100%"
+                            sx={(theme) => ({
+                                background: theme.colors.blue[8] + "33",
+                            })}
+                        >
                             <Stack>
                                 <Stack>
                                     {providers &&
@@ -197,6 +204,7 @@ export const getServerSideProps = (async ({ req, res }) => {
     }
 
     const providers = await getProviders()
+    console.log("Providers:", providers)
 
     return {
         props: {
