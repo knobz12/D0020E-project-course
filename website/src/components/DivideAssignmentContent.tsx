@@ -144,7 +144,8 @@ function DivideAssignmentEditor({
                 notifications.show({
                     color: "teal",
                     title: "DivideAssignment updated",
-                    message: "Your DivideAssignment has been updated with the new text.",
+                    message:
+                        "Your DivideAssignment has been updated with the new text.",
                 })
                 onFinish()
             },

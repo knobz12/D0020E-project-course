@@ -22,37 +22,30 @@ export function SelectFile({ isLoading, onSelect }: SelectFileProps) {
 
     useEffect(
         function () {
-            let ids: string[] = [];
-            for (let i = 0; i < selected.length; ++i)
-            {
-                ids[i] = selected.at(i)!.id;
+            let ids: string[] = []
+            for (let i = 0; i < selected.length; ++i) {
+                ids[i] = selected.at(i)!.id
             }
-
 
             onSelect(ids)
         },
         [onSelect, selected],
     )
-    const max_selected = 5;
+    const max_selected = 5
 
     return (
         <Box bg="dark.8">
             {/* {typeof window !== "undefined" && ( */}
             <DataTable
                 // records={files.data?.files}
-                records={
-                        files.data?.files
-                }
+                records={files.data?.files}
                 fetching={files.isFetching}
                 selectedRecords={selected}
                 onSelectedRecordsChange={(records) => {
-                    if (records.length > max_selected)
-                    {
-                        setSelected(records.slice(0, 5));
-                    }
-                    else
-                    {
-                        setSelected(records);
+                    if (records.length > max_selected) {
+                        setSelected(records.slice(0, 5))
+                    } else {
+                        setSelected(records)
                     }
                 }}
                 loadingText="Loading documents"
@@ -64,19 +57,15 @@ export function SelectFile({ isLoading, onSelect }: SelectFileProps) {
                 page={page}
                 isRecordSelectable={(record) => {
                     if (selected.length >= max_selected) {
-                        for (let i = 0; i < selected.length; ++i)
-                        {
-                            if (selected.at(i)!.id === record.id)
-                            {
-                                return true;
+                        for (let i = 0; i < selected.length; ++i) {
+                            if (selected.at(i)!.id === record.id) {
+                                return true
                             }
                         }
+                    } else {
+                        return true
                     }
-                    else
-                    {
-                        return true;
-                    }
-                    return false;
+                    return false
                 }}
                 columns={[
                     { accessor: "filename" },

@@ -25,7 +25,7 @@ type PromptTypeContent = {
     EXPLAINER: {
         keywords: {
             keyword: string
-            explanation: string 
+            explanation: string
         }[]
     }
     FLASHCARDS: {
@@ -70,17 +70,17 @@ type PromptType = {
           content: PromptTypeContent["ASSIGNMENT"]
       }
     | {
-        type: "DIVIDEASSIGNMENT"
-        content: PromptTypeContent["DIVIDEASSIGNMENT"]
-    }
+          type: "DIVIDEASSIGNMENT"
+          content: PromptTypeContent["DIVIDEASSIGNMENT"]
+      }
     | {
           type: "QUIZ"
           content: PromptTypeContent["QUIZ"]
       }
     | {
-        type: "EXPLAINER"
-        content: PromptTypeContent["EXPLAINER"]
-    }
+          type: "EXPLAINER"
+          content: PromptTypeContent["EXPLAINER"]
+      }
     | {
           type: "FLASHCARDS"
           content: PromptTypeContent["FLASHCARDS"]
@@ -137,7 +137,13 @@ async function formatPrompt(
         userId: prompt.userId,
         title: prompt.title,
         reaction: !userReaction ? null : userReaction.positive,
-        type: prompt.type as "FLASHCARDS" | "QUIZ" | "SUMMARY" | "ASSIGNMENT" | "DIVIDEASSIGNMENT" | "EXPLAINER",
+        type: prompt.type as
+            | "FLASHCARDS"
+            | "QUIZ"
+            | "SUMMARY"
+            | "ASSIGNMENT"
+            | "DIVIDEASSIGNMENT"
+            | "EXPLAINER",
         courseId: prompt.courseId,
         published: prompt.published,
         courseName: prompt.course.name,
@@ -665,7 +671,14 @@ export const promptRouter = router({
     react: userProcedure
         .input(
             z.object({
-                type: z.enum(["FLASHCARDS", "QUIZ", "SUMMARY", "ASSIGNMENT", "EXPLAINER","DIVIDEASSIGNMENT"]),
+                type: z.enum([
+                    "FLASHCARDS",
+                    "QUIZ",
+                    "SUMMARY",
+                    "ASSIGNMENT",
+                    "EXPLAINER",
+                    "DIVIDEASSIGNMENT",
+                ]),
                 positive: z.boolean(),
                 promptId: z.string().uuid(),
             }),

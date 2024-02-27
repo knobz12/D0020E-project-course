@@ -1,27 +1,27 @@
 {
-  "name": "cli",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "tsup --watch --silent",
-    "compile": "pnpm build && pnpm bundle && pnpm pkg:prepare && pnpm pkg:build",
-    "build": "ncc build src/index.ts -o dist --no-cache",
-    "bundle": "rollup dist/index.js --file dist/bundle.js --format cjs -p 'terser'",
-    "pkg:prepare": "cd dist && pnpm pkg set name=cli type=commonjs bin=./bundle.js",
-    "pkg:build": "pkg dist -t node18-linux,node18-windows,node18-macos --out-path ../bin -C Brotli"
-  },
-  "dependencies": {
-    "@clack/prompts": "^0.7.0",
-    "got": "^14.2.0"
-  },
-  "devDependencies": {
-    "@rollup/plugin-terser": "^0.4.4",
-    "@types/got": "^9.6.12",
-    "@types/node": "^20.11.19",
-    "ncc": "^0.3.6",
-    "pkg": "^5.8.1",
-    "rollup": "^4.12.0",
-    "tsup": "^8.0.2",
-    "typescript": "^5.3.3"
-  }
+    "name": "cli",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "tsup --watch --silent",
+        "compile": "pnpm build && pnpm bundle && pnpm pkg:prepare && pnpm pkg:build",
+        "build": "ncc build src/index.ts -o dist --no-cache",
+        "bundle": "rollup dist/index.js --file dist/bundle.js --format cjs -p 'terser'",
+        "pkg:prepare": "cd dist && pnpm pkg set name=cli type=commonjs bin=./bundle.js",
+        "pkg:build": "pkg dist -t node18-linux,node18-windows,node18-macos --out-path ../bin -C Brotli"
+    },
+    "dependencies": {
+        "@clack/prompts": "^0.7.0",
+        "got": "^14.2.0"
+    },
+    "devDependencies": {
+        "@rollup/plugin-terser": "^0.4.4",
+        "@types/got": "^9.6.12",
+        "@types/node": "^20.11.19",
+        "ncc": "^0.3.6",
+        "pkg": "^5.8.1",
+        "rollup": "^4.12.0",
+        "tsup": "^8.0.2",
+        "typescript": "^5.3.3"
+    }
 }
