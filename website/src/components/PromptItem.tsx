@@ -77,7 +77,15 @@ export function PromptItem({ prompt }: PromptItemProps) {
     })
 
     return (
-        <Paper key={prompt.id} className="overflow-hidden" radius="lg" p="lg">
+        <Paper
+            key={prompt.id}
+            className="overflow-hidden"
+            radius="lg"
+            p="lg"
+            sx={(theme) => ({
+                background: theme.colors.blue[8] + "33",
+            })}
+        >
             <Flex gap="md">
                 <Stack>
                     {router.route.startsWith("/courses/[course]") &&
@@ -161,14 +169,14 @@ export function PromptItem({ prompt }: PromptItemProps) {
                                 prompt.type === "QUIZ"
                                     ? "quiz"
                                     : prompt.type === "FLASHCARDS"
-                                      ? "flashcards"
-                                      : prompt.type === "EXPLAINER"
-                                        ? "explainer"
-                                        : prompt.type === "DIVIDEASSIGNMENT"
-                                            ? "divideAssignment"
-                                            : prompt.type === "SUMMARY"
-                                              ? "summary"
-                                              : "assignment"
+                                    ? "flashcards"
+                                    : prompt.type === "EXPLAINER"
+                                    ? "explainer"
+                                    : prompt.type === "DIVIDEASSIGNMENT"
+                                    ? "divideAssignment"
+                                    : prompt.type === "SUMMARY"
+                                    ? "summary"
+                                    : "assignment"
                             }/${prompt.id}`}
                         >
                             <Title order={3} size={32} lineClamp={3}>

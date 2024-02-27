@@ -21,7 +21,7 @@ import {
     IconBoxMultiple,
     IconClipboardList,
     IconMessageQuestion,
-    IconPaperclip
+    IconPaperclip,
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
@@ -63,14 +63,14 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 text: "DivideAssignment",
                 link: "/divideAssignment",
             },
-             {
+            {
                 icon: IconClipboardList,
                 text: "Explainer",
                 link: "/explainer",
-            }, 
+            },
         ],
     },
-     {
+    {
         name: "Question",
         prompts: [
             {
@@ -79,13 +79,13 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 link: "/question",
             },
         ],
-    }, 
+    },
 ]
 
 export const PaginationContext = createContext<number>(1)
 
-export default function Home({} // prompts,
-: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Home({}: // prompts,
+InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [page, setPage] = useState<number>(1)
     const prompts = trpc.prompts.getNonAndPinnedPrompts.useQuery({
@@ -100,7 +100,14 @@ export default function Home({} // prompts,
                     <Stack w="100%" spacing="xl">
                         <Stack>
                             <Title px="md">Create prompts</Title>
-                            <Paper px="xl" py="lg" radius="lg">
+                            <Paper
+                                px="xl"
+                                py="lg"
+                                radius="lg"
+                                sx={(theme) => ({
+                                    background: theme.colors.blue[8] + "33",
+                                })}
+                            >
                                 <Stack spacing="xl">
                                     {promptGroups.map((group) => (
                                         <Stack key={group.name}>
