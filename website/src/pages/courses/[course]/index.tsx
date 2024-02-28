@@ -94,20 +94,13 @@ InferGetServerSidePropsType<typeof getServerSideProps>) {
     })
 
     return (
-        <Page center>
+        <Page>
             <Container w="100%" size="sm">
                 <Center w="100%" h="100%">
                     <Stack w="100%" spacing="xl">
                         <Stack>
                             <Title px="md">Create prompts</Title>
-                            <Paper
-                                px="xl"
-                                py="lg"
-                                radius="lg"
-                                sx={(theme) => ({
-                                    background: theme.colors.blue[8] + "33",
-                                })}
-                            >
+                            <Paper px="xl" py="lg" radius="lg">
                                 <Stack spacing="xl">
                                     {promptGroups.map((group) => (
                                         <Stack key={group.name}>

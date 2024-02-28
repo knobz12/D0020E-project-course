@@ -23,18 +23,12 @@ InferGetServerSidePropsType<typeof getServerSideProps>) {
     const courses = trpc.courses.getCourses.useQuery()
 
     return (
-        <Page center>
+        <Page>
             <Container w="100%" size="sm">
                 <Center w="100%" h="100%">
                     <Stack w="100%">
                         <Title>Courses</Title>
-                        <Paper
-                            px="xl"
-                            py="lg"
-                            sx={(theme) => ({
-                                background: theme.colors.blue[8] + "33",
-                            })}
-                        >
+                        <Paper px="xl" py="lg">
                             <Stack spacing="xl">
                                 <Stack>
                                     <SimpleGrid

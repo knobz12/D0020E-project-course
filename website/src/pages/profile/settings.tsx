@@ -56,12 +56,7 @@ export default function ProfileSettingsPage() {
             <Container w="100%" size="sm">
                 <Stack>
                     <Title px="sm">Settings</Title>
-                    <Paper
-                        p="lg"
-                        sx={(theme) => ({
-                            background: theme.colors.blue[8] + "33",
-                        })}
-                    >
+                    <Paper p="lg">
                         <form
                             onSubmit={form.onSubmit((values) =>
                                 mutateSettings(values),

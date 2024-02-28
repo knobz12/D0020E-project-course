@@ -3,7 +3,6 @@ import {
     Badge,
     Box,
     Button,
-    Container,
     Flex,
     Menu,
     Stack,
@@ -11,7 +10,6 @@ import {
     Title,
 } from "@mantine/core"
 import clsx from "clsx"
-import { Inter } from "next/font/google"
 import React from "react"
 import { useSession, signOut } from "next-auth/react"
 import {
@@ -24,10 +22,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { BreadcrumbsRouter } from "./BreadcrumbsRouter"
 import { GradientBackground } from "./GradientBackground"
-import { useRouter } from "next/router"
 import { BackgroundBeams } from "./Beams"
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 interface PageProps {
     children: React.ReactNode
@@ -35,19 +30,18 @@ interface PageProps {
     navbar?: boolean
 }
 
-export function Page({ children, navbar = true }: PageProps) {
+export function Page({ children, center = false, navbar = true }: PageProps) {
     const { data, status } = useSession()
 
     return (
         <>
             <div
                 className={clsx(
-                    inter.className,
-                    "min-h-screen flex flex-col items-start",
+                    center && "justify-star flex min-h-screen flex-col",
                 )}
             >
                 {navbar && (
-                    <header className="flex justify-between py-4 w-full mx-auto max-w-4xl">
+                    <header className="z-20 mx-auto flex w-full max-w-4xl justify-between py-4">
                         <Stack w="100%" className="px-4 lg:px-0">
                             <Flex
                                 justify="space-between"
@@ -60,7 +54,7 @@ export function Page({ children, navbar = true }: PageProps) {
                                             ? "/courses"
                                             : "/"
                                     }
-                                    className="no-underline flex items-center space-x-4"
+                                    className="flex items-center space-x-4 no-underline"
                                 >
                                     <Image
                                         loading="eager"
@@ -213,7 +207,9 @@ export function Page({ children, navbar = true }: PageProps) {
                     </header>
                 )}
 
-                <GradientBackground center>{children}</GradientBackground>
+                <GradientBackground center={center}>
+                    {children}
+                </GradientBackground>
             </div>
             <BackgroundBeams />
         </>

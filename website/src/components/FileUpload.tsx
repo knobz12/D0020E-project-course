@@ -240,9 +240,11 @@ export default function FileUpload({
         })
 
         router.push(
-            `/courses/${router.query.course}/${prompt.type == "DIVIDEASSIGNMENT" ? "divideAssignment" : prompt.type.toLowerCase()}/${
-                prompt.id
-            }`,
+            `/courses/${router.query.course}/${
+                prompt.type == "DIVIDEASSIGNMENT"
+                    ? "divideAssignment"
+                    : prompt.type.toLowerCase()
+            }/${prompt.id}`,
         )
     }
 

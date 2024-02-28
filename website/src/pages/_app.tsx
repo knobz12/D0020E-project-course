@@ -9,6 +9,9 @@ import type { AppProps } from "next/app"
 import type { Session } from "next-auth"
 import { trpc } from "@/lib/trpc"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { Inter } from "next/font/google"
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 function LlamaApp({
     Component,
@@ -71,6 +74,13 @@ function LlamaApp({
                     content="https://aistudybuddy.se/og.png"
                 />
             </Head>
+            <style jsx global>
+                {`
+                    html {
+                        font-family: ${inter.style.fontFamily} !important;
+                    }
+                `}
+            </style>
             <SessionProvider session={pageProps.session}>
                 {process.env.NODE_ENV === "development" && (
                     <ReactQueryDevtools />
@@ -111,6 +121,29 @@ function LlamaApp({
                         primaryColor: "blue",
                         primaryShade: { dark: 6, light: 6 },
                         components: {
+                            Modal: {
+                                styles(theme, params, context) {
+                                    return {
+                                        title: {
+                                            color: theme.colors.gray[2],
+                                            fontSize: theme.fontSizes.lg,
+                                            fontWeight: 700,
+                                        },
+                                        header: {
+                                            background: "#19314f",
+                                        },
+                                    }
+                                },
+                            },
+                            Paper: {
+                                styles(theme, params, context) {
+                                    return {
+                                        root: {
+                                            background: "#19314f",
+                                        },
+                                    }
+                                },
+                            },
                             Card: {
                                 styles(theme, params, context) {
                                     return {

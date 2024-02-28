@@ -54,8 +54,8 @@ const Question: React.FC<Props> = ({
             className="d-flex 
                         justify-content-center 
                         align-center 
-                        text-center 
-                        flex-column"
+                        flex-column 
+                        text-center"
         >
             <h2 className="">{question}</h2>
             <Container w="100%">
@@ -244,7 +244,7 @@ export default function Quiz(Quizquestions: Content) {
     return (
         <Container w="100%">
             <h1 className="text-center">Quiz</h1>
-            <div className="grid place-items-center h-full">
+            <div className="grid h-full place-items-center">
                 {currentQuestion < Quizquestions.questions.length ? (
                     <Question
                         question={

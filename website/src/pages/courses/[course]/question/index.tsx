@@ -143,13 +143,13 @@ export default function GenerateQuestionPage({}: GenerateQuestionPageProps) {
         <Page>
             <Container
                 style={{ height: `${height}px` }}
-                className="w-full flex flex-col flex-grow"
+                className="flex w-full flex-grow flex-col"
                 size="sm"
             >
-                <Stack className="flex-grow h-full" py="md">
-                    <div className="flex-grow h-full max-h-full overflow-y-auto">
+                <Stack className="h-full flex-grow" py="md">
+                    <div className="h-full max-h-full flex-grow overflow-y-auto">
                         {/* <Stack className="flex-grow flex flex-col-reverse w-full"> */}
-                        <div className="flex-col-reverse h-full">
+                        <div className="h-full flex-col-reverse">
                             <Flex
                                 direction="column"
                                 justify="end"

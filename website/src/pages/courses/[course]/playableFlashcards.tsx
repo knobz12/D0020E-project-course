@@ -48,7 +48,7 @@ export default function Flashcards(Flashcardsquestions: Content) {
     }
 
     return (
-        <div className="grid place-items-center h-full min-h-screen">
+        <div className="grid h-full min-h-screen place-items-center">
             <div>
                 {/* number of cards */}
                 {data && data.questions.length > 0 ? (

@@ -77,15 +77,7 @@ export function PromptItem({ prompt }: PromptItemProps) {
     })
 
     return (
-        <Paper
-            key={prompt.id}
-            className="overflow-hidden"
-            radius="lg"
-            p="lg"
-            sx={(theme) => ({
-                background: theme.colors.blue[8] + "33",
-            })}
-        >
+        <Paper key={prompt.id} className="overflow-hidden" radius="lg" p="lg">
             <Flex gap="md">
                 <Stack>
                     {router.route.startsWith("/courses/[course]") &&
