@@ -55,6 +55,21 @@ function LlamaApp({
                     content="https://cdn.aistudybuddy.se/browserconfig.xml"
                 />
                 <meta name="theme-color" content="#01a0da" />
+                <meta property="og:title" content="AI Studybuddy" />
+                <meta
+                    property="og:description"
+                    content="The worlds best AI studying assistant"
+                />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://aistudybuddy.se/" />
+                <meta
+                    property="og:image"
+                    content="https://aistudybuddy.se/og.png"
+                />
+                <meta
+                    property="og:image:secure_url"
+                    content="https://aistudybuddy.se/og.png"
+                />
             </Head>
             <SessionProvider session={pageProps.session}>
                 {process.env.NODE_ENV === "development" && (
