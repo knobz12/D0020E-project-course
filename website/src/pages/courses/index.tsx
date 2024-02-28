@@ -37,7 +37,12 @@ InferGetServerSidePropsType<typeof getServerSideProps>) {
                         >
                             <Stack spacing="xl">
                                 <Stack>
-                                    <SimpleGrid cols={2}>
+                                    <SimpleGrid
+                                        cols={2}
+                                        breakpoints={[
+                                            { maxWidth: "36rem", cols: 1 },
+                                        ]}
+                                    >
                                         {courses.data?.map(
                                             ({
                                                 id,

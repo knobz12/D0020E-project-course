@@ -112,7 +112,19 @@ InferGetServerSidePropsType<typeof getServerSideProps>) {
                                     {promptGroups.map((group) => (
                                         <Stack key={group.name}>
                                             <Title>{group.name}</Title>
-                                            <SimpleGrid cols={3}>
+                                            <SimpleGrid
+                                                cols={3}
+                                                breakpoints={[
+                                                    {
+                                                        maxWidth: "28rem",
+                                                        cols: 1,
+                                                    },
+                                                    {
+                                                        maxWidth: "48rem",
+                                                        cols: 2,
+                                                    },
+                                                ]}
+                                            >
                                                 {group.prompts.map((prompt) => {
                                                     const Icon = prompt.icon
                                                     return (

@@ -48,7 +48,7 @@ export function Page({ children, navbar = true }: PageProps) {
             >
                 {navbar && (
                     <header className="flex justify-between py-4 w-full mx-auto max-w-4xl">
-                        <Stack w="100%">
+                        <Stack w="100%" className="px-4 lg:px-0">
                             <Flex
                                 justify="space-between"
                                 w="100%"
@@ -69,7 +69,9 @@ export function Page({ children, navbar = true }: PageProps) {
                                         src="https://cdn.aistudybuddy.se/logo.png"
                                         alt="AI Studybuddy logo"
                                     />
-                                    <Title>AI Studybuddy</Title>
+                                    <Title className="hidden sm:block">
+                                        AI Studybuddy
+                                    </Title>
                                 </Link>
                                 {status === "authenticated" ? (
                                     <div>
