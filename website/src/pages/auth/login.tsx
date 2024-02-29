@@ -187,7 +187,6 @@ export const getServerSideProps = (async ({ req, res }) => {
     }
 
     const providers = await getProviders()
-    console.log("Providers:", providers)
 
     return {
         props: {
