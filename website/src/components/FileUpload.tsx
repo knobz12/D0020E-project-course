@@ -407,7 +407,7 @@ export default function FileUpload({
     )
 
     return (
-        <Page center>
+        <Page>
             <Container size="xs" w="100%">
                 <Stack>
                     <Title>{title}</Title>
