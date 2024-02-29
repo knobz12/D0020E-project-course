@@ -9,6 +9,9 @@ import type { AppProps } from "next/app"
 import type { Session } from "next-auth"
 import { trpc } from "@/lib/trpc"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { Inter } from "next/font/google"
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 function LlamaApp({
     Component,
@@ -55,7 +58,29 @@ function LlamaApp({
                     content="https://cdn.aistudybuddy.se/browserconfig.xml"
                 />
                 <meta name="theme-color" content="#01a0da" />
+                <meta property="og:title" content="AI Studybuddy" />
+                <meta
+                    property="og:description"
+                    content="The worlds best AI studying assistant"
+                />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://aistudybuddy.se/" />
+                <meta
+                    property="og:image"
+                    content="https://aistudybuddy.se/og.png"
+                />
+                <meta
+                    property="og:image:secure_url"
+                    content="https://aistudybuddy.se/og.png"
+                />
             </Head>
+            <style jsx global>
+                {`
+                    html {
+                        font-family: ${inter.style.fontFamily} !important;
+                    }
+                `}
+            </style>
             <SessionProvider session={pageProps.session}>
                 {process.env.NODE_ENV === "development" && (
                     <ReactQueryDevtools />
@@ -96,11 +121,25 @@ function LlamaApp({
                         primaryColor: "blue",
                         primaryShade: { dark: 6, light: 6 },
                         components: {
+                            Modal: {
+                                styles(theme, params, context) {
+                                    return {
+                                        title: {
+                                            color: theme.colors.gray[2],
+                                            fontSize: theme.fontSizes.lg,
+                                            fontWeight: 700,
+                                        },
+                                        header: {
+                                            background: "#19314f",
+                                        },
+                                    }
+                                },
+                            },
                             Paper: {
                                 styles(theme, params, context) {
                                     return {
                                         root: {
-                                            backgroundColor: `${theme.colors.blue[8]}33`,
+                                            background: "#19314f",
                                         },
                                     }
                                 },

@@ -181,7 +181,7 @@ function SummaryEditor({
                     <Button
                         onClick={() => {
                             modals.openConfirmModal({
-                                title: "Save quiz",
+                                title: "Save summary",
                                 children:
                                     "Are you sure you want to save this summary? The previous text will be overwritten.",
                                 confirmProps: { color: "teal" },

@@ -1,9 +1,6 @@
-
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react"
 import FileUpload from "@/components/FileUpload"
 import { showNotification } from "@mantine/notifications"
-
 
 import {
     Card,
@@ -17,7 +14,7 @@ import {
     Checkbox,
     CheckboxProps,
 } from "@mantine/core"
-import { IconBiohazard, IconRadioactive } from '@tabler/icons-react';
+import { IconBiohazard, IconRadioactive } from "@tabler/icons-react"
 
 import { Page } from "@/components/Page"
 import Link from "next/link"
@@ -31,8 +28,9 @@ import { RouterOutput, trpc } from "@/lib/trpc"
 
 //insperation 👌 https://www.geeksforgeeks.org/how-to-build-a-quiz-app-with-react-and-typescript/
 
-type Content = (RouterOutput["prompts"]["getPromptById"] & { type: "QUIZ" })["content"]
-
+type Content = (RouterOutput["prompts"]["getPromptById"] & {
+    type: "QUIZ"
+})["content"]
 
 interface Props {
     question: string
@@ -42,8 +40,7 @@ interface Props {
     onSubmit: () => void
 }
 
-var tempChoices:string [];
-
+var tempChoices: string[]
 
 const Question: React.FC<Props> = ({
     question,
@@ -52,39 +49,30 @@ const Question: React.FC<Props> = ({
     onAnswer,
     onSubmit,
 }) => {
-
-    
     return (
         <div
-        
             className="d-flex 
                         justify-content-center 
                         align-center 
-                        text-center 
-                        flex-column"
+                        flex-column 
+                        text-center"
         >
             <h2 className="">{question}</h2>
             <Container w="100%">
                 <Container w="70%">
-                     <button
-                    onClick={() =>
-                        onSubmit()} 
-                    >
-                        {"submit"}
-                    </button>
+                    <button onClick={() => onSubmit()}>{"submit"}</button>
 
                     {choices.map((choice) => (
-                        <Checkbox  
-                        key={choice}
-                        id={choice}
-                        className={"ChoicesElement"}
-                        size={30}
-                        radius={5}
-                        label={choice}
+                        <Checkbox
+                            key={choice}
+                            id={choice}
+                            className={"ChoicesElement"}
+                            size={30}
+                            radius={5}
+                            label={choice}
                         />
-                    ))} 
+                    ))}
                 </Container>
-
 
                 {/* {choices.map((choice) => (
                     <button
@@ -100,79 +88,80 @@ const Question: React.FC<Props> = ({
     )
 }
 
-function CheckCorrectAnswer(answer:string[], CorrectAnswer:string[]){  // checks if the given answer is in the correct answers
+function CheckCorrectAnswer(answer: string[], CorrectAnswer: string[]) {
+    // checks if the given answer is in the correct answers
 
-    let score = 0;
+    let score = 0
 
-    for(let i = 0; i < answer.length; i++){ 
-        if(CorrectAnswer.includes(answer[i])){
-            score += 1;
-        }else{
-            score += -1;
+    for (let i = 0; i < answer.length; i++) {
+        if (CorrectAnswer.includes(answer[i])) {
+            score += 1
+        } else {
+            score += -1
         }
-
     }
 
-    if(score <= 0 ){ score = 0}  // cant get negative points from question
+    if (score <= 0) {
+        score = 0
+    } // cant get negative points from question
 
-    return (score/CorrectAnswer.length)
+    return score / CorrectAnswer.length
 }
 
-function extractChoises(Quizquestions:Content,questionID:number){
-
-    if(questionID >= Quizquestions.questions.length){
-        return [[],[]]
+function extractChoises(Quizquestions: Content, questionID: number) {
+    if (questionID >= Quizquestions.questions.length) {
+        return [[], []]
     }
 
-    var choices:string[] = [];
-    var correctChoices:string[] = [];
-    var num = questionID;
-    
-    let y = 0;
-    for (let i = 0; i<Quizquestions.questions[questionID].answers.length; i++){
-        if(Quizquestions.questions[num].answers[i].correct){  // if correct answer -> add to array
-            correctChoices[y] = Quizquestions.questions[num].answers[i].text 
+    var choices: string[] = []
+    var correctChoices: string[] = []
+    var num = questionID
+
+    let y = 0
+    for (
+        let i = 0;
+        i < Quizquestions.questions[questionID].answers.length;
+        i++
+    ) {
+        if (Quizquestions.questions[num].answers[i].correct) {
+            // if correct answer -> add to array
+            correctChoices[y] = Quizquestions.questions[num].answers[i].text
             y++
         }
 
         choices[i] = Quizquestions.questions[num].answers[i].text
-        
     }
-    return [choices,correctChoices]
+    return [choices, correctChoices]
 }
 
-export default function Quiz(Quizquestions:Content){
+export default function Quiz(Quizquestions: Content) {
+    const [currentQuestion, setCurrentQuestion] = useState(0)
+    const [score, setScore] = useState(0)
+    var TempScore = score
 
-    
+    let choicesArray = extractChoises(Quizquestions, currentQuestion)
 
-    const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [score, setScore] = useState(0);
-    var TempScore = score;
-
-    let choicesArray = extractChoises(Quizquestions,currentQuestion)
-    
-   
     const handleAnswer = (ChossenAnswer: string) => {
-        console.log(TempScore);
+        console.log(TempScore)
         let tempAnswers = [ChossenAnswer]
-        let questionScore = CheckCorrectAnswer(tempAnswers, choicesArray[1]);
-        TempScore = score + questionScore;
-        setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
-        console.log(TempScore);
+        let questionScore = CheckCorrectAnswer(tempAnswers, choicesArray[1])
+        TempScore = score + questionScore
+        setScore(TempScore) // this is an asynchronous call so it wont update before score i shown
+        console.log(TempScore)
 
         let title = ""
         let colour = ""
 
-        if(questionScore == 1){
+        if (questionScore == 1) {
             title = "very good"
             colour = "green"
-        }else if(questionScore>=0.5){
+        } else if (questionScore >= 0.5) {
             title = "good"
             colour = "blue"
-        }else if(questionScore>0){
+        } else if (questionScore > 0) {
             title = "ok"
             colour = "orange"
-        }else{
+        } else {
             title = "💀"
             colour = "black"
         }
@@ -181,47 +170,56 @@ export default function Quiz(Quizquestions:Content){
             title: title,
             message: `You got '${questionScore}' points for that question`,
         })
- 
-        const nextQuestion = currentQuestion + 1;
+
+        const nextQuestion = currentQuestion + 1
         if (nextQuestion < Quizquestions.questions.length) {
-            setCurrentQuestion(nextQuestion);
+            setCurrentQuestion(nextQuestion)
             //choicesArray = extractChoises(Quizquestions,currentQuestion,Quizquestions.questions.length)
         } else {
-            
-            choicesArray = [];
-            alert(`Quiz finished. You scored ${TempScore}/${Quizquestions.questions.length}`);
-            setScore(0);            //reset quiz
-            setCurrentQuestion(0);  //reset quiz
+            choicesArray = []
+            alert(
+                `Quiz finished. You scored ${TempScore}/${Quizquestions.questions.length}`,
+            )
+            setScore(0) //reset quiz
+            setCurrentQuestion(0) //reset quiz
         }
     }
 
-     const handleSubmit = () => {
-        
-        let elements = document.getElementsByClassName("mantine-Checkbox-root ChoicesElement mantine-yxmaw9");
+    const handleSubmit = () => {
+        let elements = document.getElementsByClassName(
+            "mantine-Checkbox-root ChoicesElement mantine-yxmaw9",
+        )
         let ChossenAnswer = []
-        for(let i = 0; i< elements.length; i++){
-            if((elements[i].children[0].children[0].children[0] as HTMLInputElement).checked == true){
-                ChossenAnswer.push(elements[i].children[0].children[1].children[0].innerHTML)
+        for (let i = 0; i < elements.length; i++) {
+            if (
+                (
+                    elements[i].children[0].children[0]
+                        .children[0] as HTMLInputElement
+                ).checked == true
+            ) {
+                ChossenAnswer.push(
+                    elements[i].children[0].children[1].children[0].innerHTML,
+                )
             }
         }
 
-        let questionScore = CheckCorrectAnswer(ChossenAnswer, choicesArray[1]);
-        TempScore = score + questionScore;
-        setScore(TempScore); // this is an asynchronous call so it wont update before score i shown
+        let questionScore = CheckCorrectAnswer(ChossenAnswer, choicesArray[1])
+        TempScore = score + questionScore
+        setScore(TempScore) // this is an asynchronous call so it wont update before score i shown
 
         let title = ""
         let colour = ""
-                
-        if(questionScore == 1){
+
+        if (questionScore == 1) {
             title = "very good"
             colour = "green"
-        }else if(questionScore>=0.5){
+        } else if (questionScore >= 0.5) {
             title = "good"
             colour = "blue"
-        }else if(questionScore>0){
+        } else if (questionScore > 0) {
             title = "ok"
             colour = "orange"
-        }else{
+        } else {
             title = "💀"
             colour = "black"
         }
@@ -230,41 +228,42 @@ export default function Quiz(Quizquestions:Content){
             title: title,
             message: `You got '${questionScore}' points for that question`,
         })
-       
- 
-        const nextQuestion = currentQuestion + 1;
-        if (nextQuestion < Quizquestions.questions.length) {
-            setCurrentQuestion(nextQuestion);
-        } else {
 
-            alert(`Quiz finished. You scored ${TempScore}/${Quizquestions.questions.length}`);
-            setScore(0);            //reset quiz
-            setCurrentQuestion(0);  //reset quiz
+        const nextQuestion = currentQuestion + 1
+        if (nextQuestion < Quizquestions.questions.length) {
+            setCurrentQuestion(nextQuestion)
+        } else {
+            alert(
+                `Quiz finished. You scored ${TempScore}/${Quizquestions.questions.length}`,
+            )
+            setScore(0) //reset quiz
+            setCurrentQuestion(0) //reset quiz
         }
     }
-        
-    
+
     return (
-        <Container w="100%" >
+        <Container w="100%">
             <h1 className="text-center">Quiz</h1>
-            <div className="grid place-items-center h-full">
-            {currentQuestion < Quizquestions.questions.length ? (
-                <Question
-                    question={Quizquestions.questions[currentQuestion].question}
-                    choices={choicesArray[0]}
-                    CorrectAnswer={choicesArray[1]}   
-                    onAnswer={handleAnswer}
-                    onSubmit={handleSubmit}
-                />
-            ) : (
-                "null"
-            )}
+            <div className="grid h-full place-items-center">
+                {currentQuestion < Quizquestions.questions.length ? (
+                    <Question
+                        question={
+                            Quizquestions.questions[currentQuestion].question
+                        }
+                        choices={choicesArray[0]}
+                        CorrectAnswer={choicesArray[1]}
+                        onAnswer={handleAnswer}
+                        onSubmit={handleSubmit}
+                    />
+                ) : (
+                    "null"
+                )}
             </div>
         </Container>
     )
 }
 
- export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     const session = await getServerSession(req, res, authOptions)
 
     return {
@@ -272,4 +271,4 @@ export default function Quiz(Quizquestions:Content){
             session,
         },
     }
-} 
+}

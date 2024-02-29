@@ -16,7 +16,7 @@ export default function GenerateQuizPage({}: GenerateQuizPageProps) {
             parameters={[
                 {
                     id: "questions",
-                    name: "Questions",
+                    name: "Questions per file",
                     placeholder:
                         "The amount of questions you want to generate for the quiz.",
                     type: "number",

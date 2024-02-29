@@ -1,8 +1,6 @@
-import { GradientBackground } from "@/components/GradientBackground"
 import { Page } from "@/components/Page"
 import {
     Button,
-    Card,
     Center,
     Container,
     Divider,
@@ -12,19 +10,13 @@ import {
     Text,
     Title,
 } from "@mantine/core"
-import {
-    IconBrandDiscord,
-    IconBrandGithub,
-    IconBrandGoogle,
-    IconBrandGoogleFilled,
-} from "@tabler/icons-react"
+import { IconBrandDiscord, IconBrandGithub } from "@tabler/icons-react"
 import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import Image from "next/image"
 import React, { useEffect } from "react"
 import { authOptions } from "../api/auth/[...nextauth]"
 import { getServerSession } from "next-auth"
 import { getProviders, signIn } from "next-auth/react"
-import Link from "next/link"
 import { useRouter } from "next/router"
 import { showNotification } from "@mantine/notifications"
 
@@ -109,82 +101,80 @@ export default function SignInPage({ providers }: SignInPageProps) {
         [router],
     )
     return (
-        <Page navbar={false}>
-            <Center mih="100vh" w="100%">
-                <Container size="xs" w="100%">
-                    <Stack align="center" spacing={48} w="100%">
-                        <Stack align="center">
-                            <Image
-                                src="https://cdn.aistudybuddy.se/logo.png"
-                                width={128}
-                                height={128}
-                                loading="eager"
-                                alt="AI Studybuddy logo"
-                            />
-                            <Title order={1} size={48}>
-                                AI Studybuddy
-                            </Title>
-                        </Stack>
-                        <Paper p="xl" radius="lg" w="100%">
+        <Page navbar={false} center>
+            <Container size="xs">
+                <Stack align="center" spacing={48} w="100%">
+                    <Stack align="center">
+                        <Image
+                            src="https://cdn.aistudybuddy.se/logo.png"
+                            width={128}
+                            height={128}
+                            loading="eager"
+                            alt="AI Studybuddy logo"
+                        />
+                        <Title order={1} size={48}>
+                            AI Studybuddy
+                        </Title>
+                    </Stack>
+                    <Paper p="xl" radius="lg" w="100%">
+                        <Stack>
                             <Stack>
-                                <Stack>
-                                    {providers &&
-                                        Object.values(providers).map(
-                                            (provider, idx) => (
-                                                <ProviderButton
-                                                    key={provider.id}
-                                                    providerId={provider.id}
-                                                    name={provider.name}
-                                                    href={provider.signinUrl}
-                                                />
-                                            ),
-                                        )}
-                                </Stack>
-
-                                <Divider color="bluegray.6" />
-
-                                <Text ta="center">Available soon</Text>
-                                <Stack>
-                                    {!providers?.google && (
-                                        <Button
-                                            component="a"
-                                            variant="white"
-                                            color="gray.7"
-                                            size="lg"
-                                        >
-                                            <Group spacing="xs">
-                                                <img
-                                                    src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-                                                    width={20}
-                                                    height={20}
-                                                />
-                                                Sign in with Google
-                                            </Group>
-                                        </Button>
+                                {providers &&
+                                    Object.values(providers).map(
+                                        (provider, idx) => (
+                                            <ProviderButton
+                                                key={provider.id}
+                                                providerId={provider.id}
+                                                name={provider.name}
+                                                href={provider.signinUrl}
+                                            />
+                                        ),
                                     )}
+                            </Stack>
+
+                            <Divider color="bluegray.6" />
+
+                            <Text ta="center">Available soon</Text>
+                            <Stack>
+                                {!providers?.google && (
                                     <Button
-                                        bg="#7289da"
+                                        component="a"
+                                        variant="white"
+                                        color="gray.7"
                                         size="lg"
-                                        sx={{
-                                            ":hover": {
-                                                backgroundColor: "#7289da",
-                                            },
-                                            ":active": {
-                                                backgroundColor: "#7289da",
-                                            },
-                                        }}
                                     >
                                         <Group spacing="xs">
-                                            <IconBrandDiscord /> Sign in with
-                                            Discord
+                                            <img
+                                                src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                                                width={20}
+                                                height={20}
+                                            />
+                                            Sign in with Google
                                         </Group>
                                     </Button>
-                                </Stack>
+                                )}
+                                <Button
+                                    bg="#7289da"
+                                    size="lg"
+                                    sx={{
+                                        ":hover": {
+                                            backgroundColor: "#7289da",
+                                        },
+                                        ":active": {
+                                            backgroundColor: "#7289da",
+                                        },
+                                    }}
+                                >
+                                    <Group spacing="xs">
+                                        <IconBrandDiscord /> Sign in with
+                                        Discord
+                                    </Group>
+                                </Button>
                             </Stack>
-                        </Paper>
-                    </Stack>
-                </Container>
-            </Center>
+                        </Stack>
+                    </Paper>
+                </Stack>
+            </Container>
         </Page>
     )
 }
@@ -197,6 +187,7 @@ export const getServerSideProps = (async ({ req, res }) => {
     }
 
     const providers = await getProviders()
+    console.log("Providers:", providers)
 
     return {
         props: {

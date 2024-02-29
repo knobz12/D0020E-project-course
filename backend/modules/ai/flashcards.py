@@ -87,21 +87,24 @@ def create_flashcards(id: list[str], questions: int):
     gllm = create_llm_guidance()
     vectorstore = create_collection()
 
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[0]})
 
 
     obj = {}
     obj["questions"] = []
 
-    for (i, doc) in enumerate(docs["metadatas"]):
-        qsts_count = calculate_questions_per_doc(len(docs["metadatas"]), questions, i)
-        result = gllm + generate_flashcard(doc["text"], qsts_count)
-        # print(result)
+    for k in range(len(id)):
+        docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id[k]})
 
-        for j in range(0, questions):
-            question: str = result[f"question{j}"]
-            answer: str = result[f"answer{j}"]
-            obj["questions"].append({"question" : question, "answer": answer})
+        for (i, doc) in enumerate(docs["metadatas"]):
+            qsts_count = calculate_questions_per_doc(len(docs["metadatas"]), questions, i)
+            result = gllm + generate_flashcard(doc["text"], qsts_count)
+            # print(result)
+
+            for j in range(0, questions):
+                question: str = result[f"question{j}"]
+                answer: str = result[f"answer{j}"]
+                if(question != None):
+                    obj["questions"].append({"question" : question, "answer": answer})
 
 
 

@@ -3,7 +3,6 @@ import {
     Badge,
     Box,
     Button,
-    Container,
     Flex,
     Menu,
     Stack,
@@ -11,7 +10,6 @@ import {
     Title,
 } from "@mantine/core"
 import clsx from "clsx"
-import { Inter } from "next/font/google"
 import React from "react"
 import { useSession, signOut } from "next-auth/react"
 import {
@@ -24,9 +22,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { BreadcrumbsRouter } from "./BreadcrumbsRouter"
 import { GradientBackground } from "./GradientBackground"
-import { useRouter } from "next/router"
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
+import { BackgroundBeams } from "./Beams"
 
 interface PageProps {
     children: React.ReactNode
@@ -34,165 +30,188 @@ interface PageProps {
     navbar?: boolean
 }
 
-export function Page({ children, navbar = true }: PageProps) {
+export function Page({ children, center = false, navbar = true }: PageProps) {
     const { data, status } = useSession()
 
     return (
-        <div
-            className={clsx(
-                inter.className,
-                "min-h-screen flex flex-col items-start",
-            )}
-        >
-            {navbar && (
-                <header className="flex justify-between py-4 w-full mx-auto max-w-4xl">
-                    <Stack w="100%">
-                        <Flex justify="space-between" w="100%" align="center">
-                            <Link
-                                href={
-                                    status === "authenticated"
-                                        ? "/courses"
-                                        : "/"
-                                }
-                                className="no-underline flex items-center space-x-4"
+        <>
+            <div
+                className={clsx(
+                    center && "justify-star flex min-h-screen flex-col",
+                )}
+            >
+                {navbar && (
+                    <header className="z-20 mx-auto flex w-full max-w-4xl justify-between py-4">
+                        <Stack w="100%" className="px-4 lg:px-0">
+                            <Flex
+                                justify="space-between"
+                                w="100%"
+                                align="center"
                             >
-                                <Image
-                                    loading="eager"
-                                    width={64}
-                                    height={64}
-                                    src="https://cdn.aistudybuddy.se/logo.png"
-                                    alt="AI Studybuddy logo"
-                                />
-                                <Title>AI Studybuddy</Title>
-                            </Link>
-                            {status === "authenticated" ? (
-                                <div>
-                                    <Menu>
-                                        <Menu.Target>
-                                            <Button
-                                                variant="subtle"
-                                                color="blue"
-                                                p={4}
-                                                h={54}
-                                                className="flex justify-end"
-                                            >
-                                                <Flex align="center" gap="sm">
-                                                    {data.user?.image && (
-                                                        <Avatar
-                                                            src={
-                                                                data.user.image
-                                                            }
-                                                        />
-                                                    )}
-                                                    {data.user?.name && (
-                                                        <Stack spacing={0}>
-                                                            <Text
-                                                                size="xl"
-                                                                color="white"
-                                                                fw={600}
-                                                            >
-                                                                {data.user.name}
-                                                            </Text>
-                                                            <Box>
-                                                                <Badge
-                                                                    color={
-                                                                        data
-                                                                            .user
-                                                                            .type ===
-                                                                        "STUDENT"
-                                                                            ? "blue"
-                                                                            : "green"
-                                                                    }
-                                                                    size="sm"
+                                <Link
+                                    href={
+                                        status === "authenticated"
+                                            ? "/courses"
+                                            : "/"
+                                    }
+                                    className="flex items-center space-x-4 no-underline"
+                                >
+                                    <Image
+                                        loading="eager"
+                                        width={64}
+                                        height={64}
+                                        src="https://cdn.aistudybuddy.se/logo.png"
+                                        alt="AI Studybuddy logo"
+                                    />
+                                    <Title className="hidden sm:block">
+                                        AI Studybuddy
+                                    </Title>
+                                </Link>
+                                {status === "authenticated" ? (
+                                    <div>
+                                        <Menu>
+                                            <Menu.Target>
+                                                <Button
+                                                    variant="subtle"
+                                                    color="blue"
+                                                    p={4}
+                                                    h={54}
+                                                    className="flex justify-end"
+                                                >
+                                                    <Flex
+                                                        align="center"
+                                                        gap="sm"
+                                                    >
+                                                        {data.user?.image && (
+                                                            <Avatar
+                                                                src={
+                                                                    data.user
+                                                                        .image
+                                                                }
+                                                            />
+                                                        )}
+                                                        {data.user?.name && (
+                                                            <Stack spacing={0}>
+                                                                <Text
+                                                                    size="xl"
+                                                                    color="white"
+                                                                    fw={600}
                                                                 >
                                                                     {
                                                                         data
                                                                             .user
-                                                                            .type
+                                                                            .name
                                                                     }
-                                                                </Badge>
-                                                            </Box>
-                                                        </Stack>
-                                                    )}
-                                                </Flex>
+                                                                </Text>
+                                                                <Box>
+                                                                    <Badge
+                                                                        color={
+                                                                            data
+                                                                                .user
+                                                                                .type ===
+                                                                            "STUDENT"
+                                                                                ? "blue"
+                                                                                : "green"
+                                                                        }
+                                                                        size="sm"
+                                                                    >
+                                                                        {
+                                                                            data
+                                                                                .user
+                                                                                .type
+                                                                        }
+                                                                    </Badge>
+                                                                </Box>
+                                                            </Stack>
+                                                        )}
+                                                    </Flex>
+                                                </Button>
+                                            </Menu.Target>
+                                            <Menu.Dropdown>
+                                                <Link
+                                                    href="/profile"
+                                                    passHref
+                                                    legacyBehavior
+                                                >
+                                                    <Menu.Item
+                                                        component="a"
+                                                        icon={<IconUser />}
+                                                    >
+                                                        Profile
+                                                    </Menu.Item>
+                                                </Link>
+                                                <Link
+                                                    href="/profile/prompts"
+                                                    passHref
+                                                    legacyBehavior
+                                                >
+                                                    <Menu.Item
+                                                        component="a"
+                                                        icon={<IconList />}
+                                                    >
+                                                        Your prompts
+                                                    </Menu.Item>
+                                                </Link>
+                                                <Link
+                                                    href="/profile/settings"
+                                                    passHref
+                                                    legacyBehavior
+                                                >
+                                                    <Menu.Item
+                                                        component="a"
+                                                        icon={<IconSettings />}
+                                                    >
+                                                        Settings
+                                                    </Menu.Item>
+                                                </Link>
+                                                <Menu.Divider />
+                                                <Menu.Item
+                                                    icon={<IconLogout />}
+                                                    onClick={() => signOut()}
+                                                >
+                                                    Logout
+                                                </Menu.Item>
+                                            </Menu.Dropdown>
+                                        </Menu>
+                                    </div>
+                                ) : (
+                                    <Flex gap="sm">
+                                        <Link
+                                            href={`/api/auth/signin`}
+                                            passHref
+                                            legacyBehavior
+                                            className="no-underline"
+                                        >
+                                            <Button component="a">
+                                                Log in
                                             </Button>
-                                        </Menu.Target>
-                                        <Menu.Dropdown>
-                                            <Link
-                                                href="/profile"
-                                                passHref
-                                                legacyBehavior
+                                        </Link>
+                                        <Link
+                                            href="/api/auth/signin"
+                                            passHref
+                                            legacyBehavior
+                                            className="no-underline"
+                                        >
+                                            <Button
+                                                component="a"
+                                                variant="white"
                                             >
-                                                <Menu.Item
-                                                    component="a"
-                                                    icon={<IconUser />}
-                                                >
-                                                    Profile
-                                                </Menu.Item>
-                                            </Link>
-                                            <Link
-                                                href="/profile/prompts"
-                                                passHref
-                                                legacyBehavior
-                                            >
-                                                <Menu.Item
-                                                    component="a"
-                                                    icon={<IconList />}
-                                                >
-                                                    Your prompts
-                                                </Menu.Item>
-                                            </Link>
-                                            <Link
-                                                href="/profile/settings"
-                                                passHref
-                                                legacyBehavior
-                                            >
-                                                <Menu.Item
-                                                    component="a"
-                                                    icon={<IconSettings />}
-                                                >
-                                                    Settings
-                                                </Menu.Item>
-                                            </Link>
-                                            <Menu.Divider />
-                                            <Menu.Item
-                                                icon={<IconLogout />}
-                                                onClick={() => signOut()}
-                                            >
-                                                Logout
-                                            </Menu.Item>
-                                        </Menu.Dropdown>
-                                    </Menu>
-                                </div>
-                            ) : (
-                                <Flex gap="sm">
-                                    <Link
-                                        href={`/api/auth/signin`}
-                                        passHref
-                                        legacyBehavior
-                                        className="no-underline"
-                                    >
-                                        <Button component="a">Log in</Button>
-                                    </Link>
-                                    <Link
-                                        href="/api/auth/signin"
-                                        passHref
-                                        legacyBehavior
-                                        className="no-underline"
-                                    >
-                                        <Button component="a" variant="white">
-                                            Sign up
-                                        </Button>
-                                    </Link>
-                                </Flex>
-                            )}
-                        </Flex>
-                        <BreadcrumbsRouter />
-                    </Stack>
-                </header>
-            )}
+                                                Sign up
+                                            </Button>
+                                        </Link>
+                                    </Flex>
+                                )}
+                            </Flex>
+                            <BreadcrumbsRouter />
+                        </Stack>
+                    </header>
+                )}
 
-            <GradientBackground center>{children}</GradientBackground>
-        </div>
+                <GradientBackground center={center}>
+                    {children}
+                </GradientBackground>
+            </div>
+            <BackgroundBeams />
+        </>
     )
 }

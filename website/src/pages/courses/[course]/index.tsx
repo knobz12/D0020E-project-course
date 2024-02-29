@@ -21,7 +21,7 @@ import {
     IconBoxMultiple,
     IconClipboardList,
     IconMessageQuestion,
-    IconPaperclip
+    IconPaperclip,
 } from "@tabler/icons-react"
 import Link from "next/link"
 import { getServerSession } from "next-auth"
@@ -63,14 +63,14 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 text: "DivideAssignment",
                 link: "/divideAssignment",
             },
-             {
+            {
                 icon: IconClipboardList,
                 text: "Explainer",
                 link: "/explainer",
-            }, 
+            },
         ],
     },
-     {
+    {
         name: "Question",
         prompts: [
             {
@@ -79,13 +79,13 @@ const promptGroups: { name: string; prompts: Prompt[] }[] = [
                 link: "/question",
             },
         ],
-    }, 
+    },
 ]
 
 export const PaginationContext = createContext<number>(1)
 
-export default function Home({} // prompts,
-: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Home({}: // prompts,
+InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [page, setPage] = useState<number>(1)
     const prompts = trpc.prompts.getNonAndPinnedPrompts.useQuery({
@@ -94,7 +94,7 @@ export default function Home({} // prompts,
     })
 
     return (
-        <Page center>
+        <Page>
             <Container w="100%" size="sm">
                 <Center w="100%" h="100%">
                     <Stack w="100%" spacing="xl">
@@ -105,7 +105,19 @@ export default function Home({} // prompts,
                                     {promptGroups.map((group) => (
                                         <Stack key={group.name}>
                                             <Title>{group.name}</Title>
-                                            <SimpleGrid cols={3}>
+                                            <SimpleGrid
+                                                cols={3}
+                                                breakpoints={[
+                                                    {
+                                                        maxWidth: "28rem",
+                                                        cols: 1,
+                                                    },
+                                                    {
+                                                        maxWidth: "48rem",
+                                                        cols: 2,
+                                                    },
+                                                ]}
+                                            >
                                                 {group.prompts.map((prompt) => {
                                                     const Icon = prompt.icon
                                                     return (

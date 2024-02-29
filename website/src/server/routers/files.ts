@@ -34,8 +34,8 @@ export const filesRouter = router({
                 docCount <= DOCS_PER_PAGE
                     ? 0
                     : offsetNum < 1
-                      ? undefined
-                      : offsetNum
+                    ? undefined
+                    : offsetNum
             const response = await collection.get({
                 limit: DOCS_PER_PAGE,
                 offset,

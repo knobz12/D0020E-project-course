@@ -6,8 +6,9 @@ const nextConfig = {
             ? "https://cdn.aistudybuddy.se"
             : undefined,
     images: {
+        formats: ["image/avif", "image/webp"],
+        minimumCacheTTL: 31536000,
         remotePatterns: [{ hostname: "cdn.aistudybuddy.se" }],
-        unoptimized: true,
     },
 }
 

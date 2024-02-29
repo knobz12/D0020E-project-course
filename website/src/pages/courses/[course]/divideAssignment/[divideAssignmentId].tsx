@@ -26,7 +26,8 @@ export default function DivideAssignmentPage() {
                         title={divideAssignment.data.title}
                         editable={
                             session?.user.type === "TEACHER" ||
-                            divideAssignment.data.userId === session?.user.userId
+                            divideAssignment.data.userId ===
+                                session?.user.userId
                         }
                         content={divideAssignment.data.content}
                     />
@@ -38,7 +39,11 @@ export default function DivideAssignmentPage() {
 
 export const getServerSideProps = (async ({ req, res, params }) => {
     try {
-        if (!params || !("course" in params) || !("divideAssignmentId" in params)) {
+        if (
+            !params ||
+            !("course" in params) ||
+            !("divideAssignmentId" in params)
+        ) {
             return {
                 notFound: true,
             }

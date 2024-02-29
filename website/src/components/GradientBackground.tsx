@@ -1,4 +1,5 @@
 import { Box, clsx } from "@mantine/core"
+import { Inter } from "next/font/google"
 import React from "react"
 
 interface GradientBackgroundProps {
@@ -14,8 +15,8 @@ export function GradientBackground({
         <Box
             component="main"
             className={clsx(
-                center &&
-                    "flex flex-col flex-grow justify-start items-center h-full w-full",
+                "flex h-full w-full flex-grow flex-col items-center justify-center",
+                center && "-mt-24",
             )}
         >
             <Box
@@ -25,9 +26,9 @@ export function GradientBackground({
                         theme.colors.bluegray[9],
                     ),
                 })}
-                className="top-0 fixed w-screen min-h-screen -z-50"
+                className="fixed top-0 -z-50 min-h-screen w-screen"
             />
-            <Box className="flex-grow w-full flex flex-col">{children}</Box>
+            <Box className={"w-full"}>{children}</Box>
         </Box>
     )
 }

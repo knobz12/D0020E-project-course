@@ -88,14 +88,14 @@ function FlashcardsViewer({
 
     return (
         <Stack>
-                <Stack>
+            <Stack>
                 <Title style={{ flex: 1 }}>{title}</Title>
                 <Flex gap="md" w="max-content">
                     {promptId && (
                         <Link
                             className="w-full"
-                            href={`/courses/${router.query.course}/flashcards/${router.query.flashcardsId}/play`} 
-                            >
+                            href={`/courses/${router.query.course}/flashcards/${router.query.flashcardsId}/play`}
+                        >
                             <Button w="100%" color="blue" variant="filled">
                                 Play
                             </Button>

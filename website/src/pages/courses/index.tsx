@@ -16,26 +16,14 @@ import { getServerSession } from "next-auth"
 import { GetServerSideProps, InferGetServerSidePropsType } from "next"
 import { authOptions } from "../api/auth/[...nextauth]"
 import { trpc } from "@/lib/trpc"
-import dynamic from "next/dynamic"
 import * as Tabler from "@tabler/icons-react"
 
-// function IconFromName(name: string) {
-//     const Component = dynamic(() =>
-//         import("@tabler/icons-react").then((e) => {
-//             if (name in e) {
-//                 return e[name]
-//             }
-//             return null
-//         }),
-//     )
-// }
-
-export default function Home({} // courses,
-: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Home({}: // courses,
+InferGetServerSidePropsType<typeof getServerSideProps>) {
     const courses = trpc.courses.getCourses.useQuery()
 
     return (
-        <Page center>
+        <Page>
             <Container w="100%" size="sm">
                 <Center w="100%" h="100%">
                     <Stack w="100%">
@@ -43,7 +31,12 @@ export default function Home({} // courses,
                         <Paper px="xl" py="lg">
                             <Stack spacing="xl">
                                 <Stack>
-                                    <SimpleGrid cols={2}>
+                                    <SimpleGrid
+                                        cols={2}
+                                        breakpoints={[
+                                            { maxWidth: "36rem", cols: 1 },
+                                        ]}
+                                    >
                                         {courses.data?.map(
                                             ({
                                                 id,

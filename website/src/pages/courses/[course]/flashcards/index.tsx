@@ -16,7 +16,7 @@ export default function GenerateFlashcardsPage({}: GenerateFlashcardsPageProps) 
             parameters={[
                 {
                     id: "questions",
-                    name: "Questions",
+                    name: "Questions per file",
                     placeholder:
                         "The amount of flashcards you want to generate.",
                     type: "number",
