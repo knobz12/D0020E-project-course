@@ -36,8 +36,23 @@ args = get_args()
 
 cache = Cache(app,config={"CACHE_TYPE":"SimpleCache"})
 
-total_time = 0
-total_file_size = 0
+class Gen_Time:
+    total_time: float
+    total_file_size : int
+
+    def __init__(self, total_time, total_file_size):
+        self.total_time = total_time
+        self.total_file_size = total_file_size
+
+route_time = {
+    "QUIZ": Gen_Time(0, 0),
+    "FLASHCARDS": Gen_Time(0, 0),
+    "SUMMARY": Gen_Time(0, 0),
+    "ASSIGNMENT": Gen_Time(0, 0),
+    "DIVIDEASSIGNMENT": Gen_Time(0, 0),
+    "EXPLAINER": Gen_Time(0, 0),
+}
+
 
 
 conninfo = f'dbname=db user=user password=pass host={args.db_host} port=5432'
@@ -184,8 +199,7 @@ def get_route_parameters() -> tuple[list[str], str, str, int] | Response:
 
 @app.route("/api/quiz", methods=["POST"])
 def quiz():
-    global total_time
-    global total_file_size
+    global route_time
     sem.acquire(timeout=1000)
     params = get_route_parameters()
     if not isinstance(params, tuple):
@@ -205,8 +219,8 @@ def quiz():
     print("Inserting quiz")
     quiz_id = str(uuid4())
 
-    total_time += duration
-    total_file_size += files_size
+    route_time["QUIZ"].total_time += duration
+    route_time["QUIZ"].total_file_size += files_size
     with connection_pool.connection() as conn:
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -218,8 +232,7 @@ def quiz():
 
 @app.route("/api/flashcards", methods=["POST"])
 def flashcards():
-    global total_time
-    global total_file_size
+    global route_time
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
@@ -241,9 +254,9 @@ def flashcards():
     print(flashcards)
     print("Inserting flashcards")
     content_id = str(uuid4())
-    total_time += duration
-    total_file_size += files_size
 
+    route_time["FLASHCARDS"].total_time += duration
+    route_time["FLASHCARDS"].total_file_size += files_size
     with connection_pool.connection() as conn:
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -277,8 +290,7 @@ def cancel():
 
 @app.route("/api/summary", methods=["POST"])
 def summary():
-    global total_time
-    global total_file_size
+    global route_time
     params = get_route_parameters()
 
     if not isinstance(params, tuple):
@@ -287,8 +299,7 @@ def summary():
     (file_hashes, course_id, user_id, files_size) = params
 
     def stream():
-        global total_time
-        global total_file_size
+        global route_time
         summary = ""
         sem.acquire(timeout=1000)
         print("CHUNKING")
@@ -299,8 +310,8 @@ def summary():
         duration = time.time() - before
         sem.release()
 
-        total_time += duration
-        total_file_size += files_size
+        route_time["SUMMARY"].total_time += duration
+        route_time["SUMMARY"].total_file_size += files_size
         with connection_pool.connection() as conn:
             cur = conn.cursor()
             updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -314,16 +325,14 @@ def summary():
 
 @app.route("/api/assignment", methods=["POST"])
 def assignment():
-    global total_time
-    global total_file_size
+    global route_time
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
     (file_hashes, course_id, user_id, files_size) = params
 
     def stream():
-        global total_time
-        global total_file_size
+        global route_time
         assignment = ""
         sem.acquire(timeout=1000)
         before = time.time()
@@ -334,8 +343,8 @@ def assignment():
         sem.release()
 
 
-        total_time += duration
-        total_file_size += files_size
+        route_time["ASSIGNMENT"].total_time += duration
+        route_time["ASSIGNMENT"].total_file_size += files_size
 
         with connection_pool.connection() as conn:
             cur = conn.cursor()
@@ -349,8 +358,7 @@ def assignment():
 
 @app.route("/api/divideAssignment", methods=["POST"])
 def divide_assignment():
-    global total_time
-    global total_file_size
+    global route_time
     params = get_route_parameters()
 
     if not isinstance(params, tuple):
@@ -359,8 +367,7 @@ def divide_assignment():
     (file_hashes, course_id, user_id, files_size) = params
 
     def stream():
-        global total_time
-        global total_file_size
+        global route_time
         dividedAssignment = ""
         sem.acquire(timeout=1000)
         print("CHUNKING")
@@ -371,8 +378,8 @@ def divide_assignment():
         duration = time.time() - before
         sem.release()
 
-        total_time += duration
-        total_file_size += files_size
+        route_time["DIVIDEASSIGNMENT"].total_time += duration
+        route_time["DIVIDEASSIGNMENT"].total_file_size += files_size
         with connection_pool.connection() as conn:
             cur = conn.cursor()
             updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -419,13 +426,19 @@ def generate_title():
 
 @app.route("/api/estimate", methods=["POST"])
 def estimate():
-    global total_time
-    global total_file_size
+    global route_time
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
     (file_hashes, course_id, user_id, files_size) = params
 
+    type_query = request.args.get("type")
+    if type_query == None:
+        return make_response("Missing required type parameter", 400)
+
+
+    total_time = route_time[type_query].total_time
+    total_file_size = route_time[type_query].total_file_size
 
     avg_per_byte = total_time / (1 if total_file_size == 0 else total_file_size) 
 
@@ -437,8 +450,7 @@ def estimate():
 
 @app.route("/api/explainer", methods=["POST"])
 def explanation():
-    global total_time
-    global total_file_size
+    global route_time
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
@@ -463,8 +475,8 @@ def explanation():
         explanation = create_explaination(file_hashes, amount, custom_keywords)
         duration = time.time() - before
         sem.release()
-        total_time += duration
-        total_file_size += files_size
+        route_time["EXPLAINER"].total_time += duration
+        route_time["EXPLAINER"].total_file_size += files_size
     except Exception as e:
         print(e)
         explanation = ""

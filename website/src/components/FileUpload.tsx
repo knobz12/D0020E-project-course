@@ -291,6 +291,7 @@ export default function FileUpload({
             url.searchParams.set("course", course)
             const url2 = getApiUrlUrl("/api/estimate")
             url2.searchParams.set("course", course)
+            url2.searchParams.set("type", type)
 
             const est = await fetch(url2, {
                 method: "POST",
