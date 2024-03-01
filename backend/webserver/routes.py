@@ -287,6 +287,8 @@ def summary():
     (file_hashes, course_id, user_id, files_size) = params
 
     def stream():
+        global total_time
+        global total_file_size
         summary = ""
         sem.acquire(timeout=1000)
         print("CHUNKING")
@@ -320,6 +322,8 @@ def assignment():
     (file_hashes, course_id, user_id, files_size) = params
 
     def stream():
+        global total_time
+        global total_file_size
         assignment = ""
         sem.acquire(timeout=1000)
         before = time.time()
@@ -355,6 +359,8 @@ def divide_assignment():
     (file_hashes, course_id, user_id, files_size) = params
 
     def stream():
+        global total_time
+        global total_file_size
         dividedAssignment = ""
         sem.acquire(timeout=1000)
         print("CHUNKING")
