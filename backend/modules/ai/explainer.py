@@ -2,55 +2,21 @@ from typing import Any
 from modules.ai.utils.llm import create_llm
 from modules.ai.utils.llm import create_llm_guidance
 from modules.ai.utils.vectorstore import  create_collection
-#from summarizer import summarize_doc
-#test 2
 
-def summarize_doc(id: str) -> str:
-    llm = create_llm()
-    vectorstore = create_collection()
 
-    docs = vectorstore.get(limit=100,include=["metadatas"],where={"id":id})
-    print(docs)
-    print("doc count:",len(docs['ids']))
-    results: list[str] = []
-    for (idx, meta) in enumerate(docs["metadatas"]):
-        text =meta["text"]
-        previous_summary: str | None = results[idx - 1] if idx > 1 else None
+import json
+from modules.ai.utils.llm import create_llm_guidance
+from modules.ai.utils.vectorstore import *
 
-        prompt = """Human: You are an assistant summarizing document text.
-I want you to summarize the text as best as you can in less than four paragraphs but atleast two paragraphs:
+import guidance
+from guidance import select, gen
 
-Text: {text}
+from modules.files.chunks import *
 
-Answer:""".format(text = text)
-        prompt_with_previous=  """Human: You are an assistant summarizing document text.
-Use the following pieces of retrieved context to improve the summary text. 
-If you can't improve it simply return the old.
-The new summary may only be up to four paragraphs but at least two paragraphs.
-Don't directly refer to the context text, pretend like you already knew the context information.
+from pydantic import BaseModel
+from typing import List
 
-Summary: {summary}
-
-Context: {context}
-
-Answer:""".format(summary = previous_summary,context=text)
-
-        use_prompt = prompt if previous_summary == None else prompt_with_previous
-        print(f"Summarizing doc {idx + 1}...")
-        print(f"Full prompt:")
-        print(use_prompt + "\n")
-        result = llm(use_prompt)
-        results.append(result)
-
-    print("######################################\n\n\n")
-    for (idx, result) in enumerate(results):
-        print(f"Result {idx + 1}")
-        print(result + "\n\n\n")
-
-    print("################################\n")
-    print("Summary:")
-    summary = results[-1].splitlines()[2:]
-    return summary
+from llama_index.program import GuidancePydanticProgram
 
 from transformers import (
     TokenClassificationPipeline,
@@ -85,10 +51,6 @@ def get_keywords(doc: str) -> list[str]:
     result: ndarray = extractor(doc)
     list_result:list[str] = result.tolist()
     return list_result
-
-import guidance
-from guidance import gen
-from guidance import gen
 
 @guidance()
 def explanationGuide(lm, summary: str, keywords: list[str]):
@@ -125,7 +87,6 @@ Summary: {summary}
 
 import json
 def create_explaination_old(id: str, amount: int = 10, custom_keywords: list = []) -> str:
-
     
     doc_id = "b53998910b5a91c141f890fa76fbcb7f"
     # summary = summarize_doc(doc_id)
@@ -157,21 +118,7 @@ def create_explaination_old(id: str, amount: int = 10, custom_keywords: list = [
     #return json.dumps({"keywords":[{"keyword":"principles","explanation":"The SOLID Principles refer to a set of design principles that help in creating software that is more resilient, maintainable, and scalable. These principles are Single Responsibility Principle (SRP), Open-Closed Principle (OCP), Liskov Substitution Principle (LSP), Interface Segregation Principle (ISP), and Dependency Inversion Principle (DIP)."}]})
 
 
-import json
-from modules.ai.utils.llm import create_llm_guidance
-from modules.ai.utils.vectorstore import *
 
-import guidance
-from guidance import select, gen
-
-from modules.files.chunks import *
-
-
-
-from pydantic import BaseModel
-from typing import List
-
-from llama_index.program import GuidancePydanticProgram
 
 
 def calculate_questions_per_doc(total_docs: int, total_questions: int, doc_index: int):
