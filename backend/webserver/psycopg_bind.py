@@ -1,8 +1,5 @@
-import psycopg
-import asyncio
-import datetime
+import psycopg, asyncio, datetime, json
 from uuid import uuid4
-import json
 from modules.ai.utils.args import get_args
 
 def id():

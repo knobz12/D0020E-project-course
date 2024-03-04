@@ -1,23 +1,12 @@
-import textwrap
-import magic
+import os, io, glob, pathlib, hashlib
+import textwrap, magic, pptx, PyPDF2, pytesseract
 
-import modules.files.docx3txt as docx3txt
-
-import pytesseract
 from PIL import Image
 from bs4 import BeautifulSoup
 
-import pptx
-import io
-import PyPDF2
+from modules.ai.utils.vectorstore import create_collection
 
-import os
-import pathlib
-
-import glob
-import hashlib
-
-from modules.ai.utils.vectorstore import *
+import modules.files.docx3txt as docx3txt
 
 files_dir = pathlib.Path("./bin/jsoneler/files")
 
