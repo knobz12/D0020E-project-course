@@ -3,11 +3,10 @@ from modules.ai.utils.llm import create_llm
 from modules.ai.utils.llm import create_llm_guidance
 from modules.ai.utils.vectorstore import  create_collection
 import json
-from modules.ai.utils.llm import create_llm_guidance
 from modules.ai.utils.vectorstore import *
 import guidance
-from guidance import  gen
-from modules.files.chunks import *
+from guidance import gen
+#from modules.files.chunks import *
 from typing import List
 
 

@@ -4,15 +4,10 @@ from modules.ai.utils.vectorstore import *
 
 import guidance
 from guidance import select, gen
-
-from modules.files.chunks import *
-
-
-
 from pydantic import BaseModel
 from typing import List
 
-from llama_index.program import GuidancePydanticProgram
+from modules.files.chunks import *
 
 
 def calculate_questions_per_doc(total_docs: int, total_questions: int, doc_index: int):
@@ -60,8 +55,6 @@ Answer: "{gen(f"answer{idx}", stop='"')}"
         
     # print("Flashcards:\n", flashcards)
 
-
-
     res = f"""\
 The following is flashcards questions.
 Generate answers based on the provided context. the answer for each corresponding question must be true. keep the answers concise.
@@ -87,8 +80,6 @@ def create_flashcards(id: list[str], questions: int):
     gllm = create_llm_guidance()
     vectorstore = create_collection()
 
-
-
     obj = {}
     obj["questions"] = []
 
@@ -110,8 +101,6 @@ def create_flashcards(id: list[str], questions: int):
 
     json_result: str = json.dumps(obj)
     return json_result
-
-
 
 def flashcard_test():
     file_hash = Chunkerizer.upload_chunks_from_file("backend/tests/sample_files/Test_htmls/Architectural Design Patterns.html", "D0072E")
