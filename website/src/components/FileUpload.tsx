@@ -354,6 +354,7 @@ export default function FileUpload({
 
             // Wait 500 milliseconds before checking for prompt
             await new Promise<void>((res) => setTimeout(res, 500))
+            setPercent((current) => (current !== null ? 100 : null))
 
             // const prompt = await utils.prompts.getMyLatestPrompts.fetch({
             //     course: router.query.course as string,
