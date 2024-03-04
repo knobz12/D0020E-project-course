@@ -13,8 +13,6 @@ import {
 import { dockerEnv } from "./steps/envs"
 import fs from "fs"
 import path from "path"
-import { upAll } from "docker-compose"
-import { spawn } from "child_process"
 
 async function main() {
     printLogo()
