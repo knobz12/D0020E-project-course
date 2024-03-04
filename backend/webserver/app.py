@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from modules.ai.utils.args import get_args
 
+
 app = Flask(__name__)
 app.secret_key = 'knobz'
 import os
