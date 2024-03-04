@@ -3,10 +3,6 @@ import type { NextRequest } from "next/server"
 import * as jose from "jose"
 
 export async function middleware(request: NextRequest) {
-    console.log("Middleware:")
-    console.log(request.nextUrl.toString())
-    console.log(request.headers)
-    console.log()
     const token = request.cookies.get("aisb.session-token")
 
     if (!token?.value) {
