@@ -1,7 +1,7 @@
 # from modules.ai.summarizer import summarize_doc_stream_old
 from modules.ai.utils.vectorstore import create_collection
 from modules.ai.utils.args import get_args
-from modules.ai.summarizer import summarize_doc_stream_old
+from modules.ai.summarizer import summarize_doc_stream
 from modules.ai.assignment import assignment_doc_stream
 from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
@@ -10,7 +10,7 @@ from modules.ai.explainer import create_explaination
 from modules.ai.divideAssignment import divide_assignment_stream
 from modules.ai.title import create_title
 from webserver.app import app
-import os
+import os, time
 from uuid import uuid4
 import json
 import datetime
@@ -25,8 +25,6 @@ import psycopg_pool
 import jwt
 from threading import Semaphore
 
-import time
-
 # To assure the LLM only works on one prompt at a time
 sem = Semaphore()
 import modules
@@ -36,10 +34,27 @@ args = get_args()
 
 cache = Cache(app,config={"CACHE_TYPE":"SimpleCache"})
 
+class Gen_Time:
+    total_time: float
+    total_file_size : int
+
+    def __init__(self, total_time, total_file_size):
+        self.total_time = total_time
+        self.total_file_size = total_file_size
+
+route_time = {
+    "QUIZ": Gen_Time(0, 0),
+    "FLASHCARDS": Gen_Time(0, 0),
+    "SUMMARY": Gen_Time(0, 0),
+    "ASSIGNMENT": Gen_Time(0, 0),
+    "DIVIDEASSIGNMENT": Gen_Time(0, 0),
+    "EXPLAINER": Gen_Time(0, 0),
+}
+
+
 
 conninfo = f'dbname=db user=user password=pass host={args.db_host} port=5432'
 connection_pool: psycopg_pool.ConnectionPool = psycopg_pool.ConnectionPool(conninfo, open=True)
-
 
 @app.route("/api/health")
 def health():
@@ -113,9 +128,9 @@ def get_user_openai_enabled(user_id: str) -> tuple[bool, str] | None:
 
     return result
 
-from flask import Response
 
-def get_route_parameters() -> tuple[list[str], str, str] | Response:
+
+def get_route_parameters() -> tuple[list[str], str, str, int] | Response:
     """
     Returns tuple where first element is file_hashes list (file id) and course id.
     Otherwise returns a response error which in return can be returned from a route return.
@@ -128,6 +143,10 @@ def get_route_parameters() -> tuple[list[str], str, str] | Response:
     file_ids = request.form.get("file_ids")
 
     file_list = request.files.getlist("files")
+
+    files_size = 0
+
+
 
     user_id = get_user_id()
     if user_id == None:
@@ -148,6 +167,7 @@ def get_route_parameters() -> tuple[list[str], str, str] | Response:
             if (file_size == 0):
                 print("skipping empty file %d", file.filename)
                 continue
+            files_size += file_size
             hash = Chunkerizer.upload_chunks_from_file_bytes(file.read(), file.filename, course)
             if hash == None:
                 print("skipping invalid file %d", file.filename)
@@ -162,18 +182,27 @@ def get_route_parameters() -> tuple[list[str], str, str] | Response:
     else:
         result = make_response("Missing files or file ids.", 406)
 
-    
+    collection = create_collection()
+    # print("DOCS -------------------------------------------------")
+    ids = result[0]
+    for i in range(len(ids)):
+        docs = collection.get(include=["metadatas"], where={"id": ids[i]})
+        for (i, doc) in enumerate(docs["metadatas"]):
+            files_size += len(doc["text"])
+
     # print("get_route_parameters")
     # print(result)
+    result = (result[0], result[1], result[2], files_size)
     return result
 
 @app.route("/api/quiz", methods=["POST"])
 def quiz():
+    global route_time
     sem.acquire(timeout=1000)
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hashes, course_id, user_id) = params
+    (file_hashes, course_id, user_id, files_size) = params
 
     query = request.args.get("questions")
     questions = 3
@@ -188,7 +217,8 @@ def quiz():
     print("Inserting quiz")
     quiz_id = str(uuid4())
 
-
+    route_time["QUIZ"].total_time += duration
+    route_time["QUIZ"].total_file_size += files_size
     with connection_pool.connection() as conn:
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -200,10 +230,11 @@ def quiz():
 
 @app.route("/api/flashcards", methods=["POST"])
 def flashcards():
+    global route_time
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hashes, course_id, user_id) = params
+    (file_hashes, course_id, user_id, files_size) = params
     
     query = request.args.get("questions")
     flashcards_count = 3
@@ -211,18 +242,20 @@ def flashcards():
     if query != None:
         flashcards_count = int(query)
 
+    sem.acquire(timeout=1000)
+    before = time.time()
+    flashcards = create_flashcards(file_hashes, flashcards_count)
+    duration = time.time() - before
+    print(duration)
+    sem.release()
+
+    print(flashcards)
+    print("Inserting flashcards")
+    content_id = str(uuid4())
+
+    route_time["FLASHCARDS"].total_time += duration
+    route_time["FLASHCARDS"].total_file_size += files_size
     with connection_pool.connection() as conn:
-        sem.acquire(timeout=1000)
-        before = time.time()
-        flashcards = create_flashcards(file_hashes, flashcards_count)
-        duration = time.time() - before
-        print(duration)
-        sem.release()
-
-        print(flashcards)
-        print("Inserting flashcards")
-        content_id = str(uuid4())
-
         cur = conn.cursor()
         updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         print("Updated at:", updated_at)
@@ -255,24 +288,28 @@ def cancel():
 
 @app.route("/api/summary", methods=["POST"])
 def summary():
+    global route_time
     params = get_route_parameters()
 
     if not isinstance(params, tuple):
         return params
 
-    (file_hashes, course_id, user_id) = params
+    (file_hashes, course_id, user_id, files_size) = params
 
     def stream():
+        global route_time
         summary = ""
         sem.acquire(timeout=1000)
         print("CHUNKING")
         before = time.time()
-        for chunk in summarize_doc_stream_old(file_hashes):
+        for chunk in summarize_doc_stream(file_hashes):
             yield chunk
             summary += chunk
         duration = time.time() - before
         sem.release()
 
+        route_time["SUMMARY"].total_time += duration
+        route_time["SUMMARY"].total_file_size += files_size
         with connection_pool.connection() as conn:
             cur = conn.cursor()
             updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -286,12 +323,14 @@ def summary():
 
 @app.route("/api/assignment", methods=["POST"])
 def assignment():
+    global route_time
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hashes, course_id, user_id) = params
+    (file_hashes, course_id, user_id, files_size) = params
 
     def stream():
+        global route_time
         assignment = ""
         sem.acquire(timeout=1000)
         before = time.time()
@@ -300,6 +339,10 @@ def assignment():
             assignment += chunk
         duration = time.time() - before
         sem.release()
+
+
+        route_time["ASSIGNMENT"].total_time += duration
+        route_time["ASSIGNMENT"].total_file_size += files_size
 
         with connection_pool.connection() as conn:
             cur = conn.cursor()
@@ -313,14 +356,16 @@ def assignment():
 
 @app.route("/api/divideAssignment", methods=["POST"])
 def divide_assignment():
+    global route_time
     params = get_route_parameters()
 
     if not isinstance(params, tuple):
         return params
 
-    (file_hashes, course_id, user_id) = params
+    (file_hashes, course_id, user_id, files_size) = params
 
     def stream():
+        global route_time
         dividedAssignment = ""
         sem.acquire(timeout=1000)
         print("CHUNKING")
@@ -331,6 +376,8 @@ def divide_assignment():
         duration = time.time() - before
         sem.release()
 
+        route_time["DIVIDEASSIGNMENT"].total_time += duration
+        route_time["DIVIDEASSIGNMENT"].total_file_size += files_size
         with connection_pool.connection() as conn:
             cur = conn.cursor()
             updated_at = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -377,36 +424,35 @@ def generate_title():
 
 @app.route("/api/estimate", methods=["POST"])
 def estimate():
+    global route_time
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hashes, course_id, user_id) = params
+    (file_hashes, course_id, user_id, files_size) = params
 
-    values = None
-    with connection_pool.connection() as conn:
-        cur = conn.cursor()
-        cur.execute("SELECT prompt_creation_time FROM prompts ORDER BY created_at DESC LIMIT 5")
-        values = cur.fetchall()
-
-    sum = 0
-    count = len(values)
-    for tup in values:
-        value = tup[0]
-        sum += float(value)
+    type_query = request.args.get("type")
+    if type_query == None:
+        return make_response("Missing required type parameter", 400)
 
 
-    avg = sum / (1 if count == 0 else count)
+    total_time = route_time[type_query].total_time
+    total_file_size = route_time[type_query].total_file_size
 
-    return make_response("{:.1f}".format(avg), 200)
+    avg_per_byte = total_time / (1 if total_file_size == 0 else total_file_size) 
+
+    time = avg_per_byte * files_size
+
+    return make_response("{:.1f}".format(time), 200)
 
 
 
 @app.route("/api/explainer", methods=["POST"])
 def explanation():
+    global route_time
     params = get_route_parameters()
     if not isinstance(params, tuple):
         return params
-    (file_hashes, course_id, user_id) = params
+    (file_hashes, course_id, user_id, files_size) = params
 
     query = [request.args.get("amount"), request.args.get("keywords")]
     print(request.args)
@@ -427,6 +473,8 @@ def explanation():
         explanation = create_explaination(file_hashes, amount, custom_keywords)
         duration = time.time() - before
         sem.release()
+        route_time["EXPLAINER"].total_time += duration
+        route_time["EXPLAINER"].total_file_size += files_size
     except Exception as e:
         print(e)
         explanation = ""

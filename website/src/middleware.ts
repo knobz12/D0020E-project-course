@@ -6,8 +6,6 @@ export async function middleware(request: NextRequest) {
     const token = request.cookies.get("aisb.session-token")
 
     if (!token?.value) {
-        // const url = new URL(request.url)
-        // return NextResponse.redirect(`${url.origin}/api/auth/signin`)
         return NextResponse.next()
     }
 
@@ -18,9 +16,9 @@ export async function middleware(request: NextRequest) {
         )
     } catch (e) {
         console.error(e)
-        const url = new URL(request.url)
+        const url = new URL(request.url, "/api/auth/signin")
         request.cookies.delete("aisb.session-token")
-        return NextResponse.redirect(`${url.origin}/api/auth/signin`)
+        return NextResponse.redirect(url)
     }
 
     return NextResponse.next({

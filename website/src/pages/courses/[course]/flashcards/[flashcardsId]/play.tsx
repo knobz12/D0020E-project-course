@@ -5,8 +5,7 @@ import { Text } from "@mantine/core"
 import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth/next"
 import { useRouter } from "next/router"
-import Flashcards from ".."
-import playableFlashcards from "../../playableFlashcards"
+import Flashcards from "../../playableFlashcards"
 
 export default function FlashcardsPlay() {
     const router = useRouter()
@@ -15,7 +14,7 @@ export default function FlashcardsPlay() {
     })
 
     return (
-        <Page>
+        <Page center>
             {flashcardsQuery.data &&
             flashcardsQuery.data.type === "FLASHCARDS" ? (
                 <Player data={flashcardsQuery.data} />
@@ -35,7 +34,11 @@ function Player({
         type: "FLASHCARDS"
     })["content"]
 
-    return <div>{playableFlashcards(flashcards)}</div>
+    return (
+        <div>
+            <Flashcards flashcardQuestions={flashcards} />
+        </div>
+    )
 }
 
 export const getServerSideProps = (async ({ req, res, params }) => {

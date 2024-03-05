@@ -139,6 +139,7 @@ export function TeacherNote({ promptId, note }: TeacherNoteProps) {
                                 height={32}
                                 src={note.user.image}
                                 alt={`${note.user.name ?? "Teacher"} avatar`}
+                                unoptimized={true}
                             />
                         )}
                         <Text fw={700}>{note.user.name}</Text>

@@ -41,13 +41,13 @@ body,
     overflow-y: auto;
 }
 
-.card_front {
+/* .card_front {
     background-color: #bbb;
     color: black;
-}
+} */
 
 .card_back {
-    background-color: #2980b9;
-    color: white;
+    /* background-color: #2980b9;
+    color: white; */
     transform: ROTATEY(180deg);
 }

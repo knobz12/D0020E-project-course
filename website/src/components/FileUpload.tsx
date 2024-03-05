@@ -291,6 +291,7 @@ export default function FileUpload({
             url.searchParams.set("course", course)
             const url2 = getApiUrlUrl("/api/estimate")
             url2.searchParams.set("course", course)
+            url2.searchParams.set("type", type)
 
             const est = await fetch(url2, {
                 method: "POST",
@@ -353,6 +354,7 @@ export default function FileUpload({
 
             // Wait 500 milliseconds before checking for prompt
             await new Promise<void>((res) => setTimeout(res, 500))
+            setPercent((current) => (current !== null ? 100 : null))
 
             // const prompt = await utils.prompts.getMyLatestPrompts.fetch({
             //     course: router.query.course as string,
@@ -407,7 +409,7 @@ export default function FileUpload({
     )
 
     return (
-        <Page center>
+        <Page>
             <Container size="xs" w="100%">
                 <Stack>
                     <Title>{title}</Title>

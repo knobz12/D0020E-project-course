@@ -1,46 +1,32 @@
 //import FileUpload from "@/components/FileUpload"
 //import React from "react"
-import React, { useState, useRef } from "react"
-import FileUpload from "@/components/FileUpload"
-
-import {
-    Card,
-    Center,
-    Container,
-    Paper,
-    SimpleGrid,
-    Stack,
-    Text,
-    Title,
-    Checkbox,
-    CheckboxProps,
-} from "@mantine/core"
-import { IconBiohazard, IconRadioactive } from "@tabler/icons-react"
-
-import { Page } from "@/components/Page"
-import Link from "next/link"
-
+import React, { useState } from "react"
+import { Paper, Text, Button } from "@mantine/core"
 import { GetServerSideProps } from "next"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../api/auth/[...nextauth]"
-
-import { useRouter } from "next/router"
-import { RouterOutput, trpc } from "@/lib/trpc"
+import { RouterOutput } from "@/lib/trpc"
 
 type Content = (RouterOutput["prompts"]["getPromptById"] & {
     type: "FLASHCARDS"
 })["content"]
 
-export default function Flashcards(Flashcardsquestions: Content) {
-    let [data] = useState<Content>(Flashcardsquestions)
+export default function Flashcards({
+    flashcardQuestions,
+}: {
+    flashcardQuestions: Content
+}) {
+    let [data] = useState<Content>(flashcardQuestions)
     let [current, setCurrent] = useState(0)
     let [flipped, setFlipped] = useState(false)
 
     function previousCard() {
         setCurrent(current - 1)
+        setFlipped(false)
     }
     function nextCard() {
         setCurrent(current + 1)
+        setFlipped(false)
     }
 
     function toggleFlipped() {
@@ -49,18 +35,14 @@ export default function Flashcards(Flashcardsquestions: Content) {
 
     return (
         <div className="grid h-full min-h-screen place-items-center">
-            <div>
+            <div className="space-y-4">
                 {/* number of cards */}
                 {data && data.questions.length > 0 ? (
-                    <div className="cardNumber">
+                    <Text fw={700} fz={24} className="cardNumber text-center">
                         Card {current + 1} of {data.questions.length}
-                    </div>
-                ) : (
-                    ""
-                )}
-                {/* /number of cards */}
+                    </Text>
+                ) : null}
 
-                {/* render cards */}
                 <div className="card">
                     <div
                         onClick={toggleFlipped}
@@ -71,37 +53,57 @@ export default function Flashcards(Flashcardsquestions: Content) {
                         }}
                         className="card_inner"
                     >
-                        <div className="card_front">
+                        <Paper className="card_front grid h-full place-items-center">
+                            <Text className="absolute left-0 top-0 ml-3 mt-2 text-sm opacity-50">
+                                Question
+                            </Text>
+                            <Text fw={500} fz={20}>
+                                {data && data.questions.length > 0
+                                    ? data.questions[current].question
+                                    : ""}
+                            </Text>
+                        </Paper>
+                        <Paper
+                            bg="blue.9"
+                            className="card_back grid h-full place-items-center"
+                        >
+                            <Text className="absolute left-0 top-0 ml-3 mt-2 text-sm opacity-60">
+                                Answer
+                            </Text>
+                            <Text fw={500} fz={20}>
+                                {data && data.questions.length > 0
+                                    ? data.questions[current].answer
+                                    : ""}
+                            </Text>
+                        </Paper>
+                        {/* <div className="card_front">
                             {data && data.questions.length > 0
                                 ? data.questions[current].question
                                 : ""}
-                        </div>
-                        <div className="card_back">
+                        </div> */}
+                        {/* <div className="card_back">
                             {data && data.questions.length > 0
                                 ? data.questions[current].answer
                                 : ""}
-                        </div>
+                        </div> */}
                     </div>
                 </div>
-                {/* /render cards */}
 
-                {/* render nav buttons */}
-                <div className="nav">
-                    {current > 0 ? (
-                        <button onClick={previousCard}>Previous card</button>
-                    ) : (
-                        <button className="disabled" disabled>
-                            Previous card
-                        </button>
-                    )}
-                    {data && current < data.questions.length - 1 ? (
-                        <button onClick={nextCard}>Next card</button>
-                    ) : (
-                        <button className="disabled" disabled>
-                            Next card
-                        </button>
-                    )}
-                    {/* /render nav buttons */}
+                <div className="flex justify-center gap-4">
+                    <Button
+                        color="red"
+                        disabled={current <= 0}
+                        onClick={previousCard}
+                    >
+                        Previous
+                    </Button>
+                    <Button
+                        color="green"
+                        disabled={data && current >= data.questions.length - 1}
+                        onClick={nextCard}
+                    >
+                        Next
+                    </Button>
                 </div>
             </div>
         </div>

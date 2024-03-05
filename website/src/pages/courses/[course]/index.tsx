@@ -158,6 +158,27 @@ InferGetServerSidePropsType<typeof getServerSideProps>) {
                             <Stack>
                                 <PaginationContext.Provider value={page}>
                                     <AnimatePresence>
+                                        {(prompts.data?.pinned.length ?? 0) +
+                                            (prompts.data?.prompts.length ??
+                                                0) ===
+                                        0 ? (
+                                            <Paper
+                                                className="overflow-hidden"
+                                                radius="lg"
+                                                p="lg"
+                                            >
+                                                <Text
+                                                    ta="center"
+                                                    py="lg"
+                                                    fz={20}
+                                                    fw={700}
+                                                    color="gray.4"
+                                                >
+                                                    No one has created a prompt
+                                                    yet. Be the first one!
+                                                </Text>
+                                            </Paper>
+                                        ) : null}
                                         {prompts.data?.pinned.map((prompt) => {
                                             return (
                                                 <motion.div
