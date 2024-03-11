@@ -98,9 +98,19 @@ aisb-llm  |  * Debugger is active!
 aisb-llm  |  * Debugger PIN: 651-147-336
 ```
 
-### Play
+### Demo
 
-Visit http://localhost:3000 and you should now be able to visit, login and use the service!
+1. Visit http://localhost:3000/auth/login. Click "Sign in with GitHub"
+
+2. Visit https://cdn.aistudybuddy.se/SOLID%20Principles.html, right click, press save as and save it somewhere on your filesystem such that you can access it for the next steps.
+
+3. Visit the summary generation page http://localhost:3000/courses/D7032E/summary
+
+4. Click on the upload file field and select the downloaded file.
+
+5. Click generate
+
+6. Watch the best summary of a course file you'll ever see stream into view.
 
 ### Contact
 
