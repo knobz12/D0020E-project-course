@@ -43,16 +43,3 @@ def create_collection() -> Collection:
         collection = client.create_collection(collection_name)
     
     return collection
-
-# def create_vectorstore() -> Collection:
-#     """Create vectorchain version of vectorstore with chromadb"""
-#     global vectorstore
-#     if vectorstore != None:
-#         print("✅ Using vectorstore")
-#         return vectorstore
-
-#     client = create_chroma_client()
-#     print("Creating embedding function")
-#     embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-
-#     return Chroma(embedding_function=embedding_function,client=client,collection_name=collection_name)

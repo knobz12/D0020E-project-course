@@ -7,43 +7,15 @@ Creating summary of document(s) in the database
 # Optional
 * Argument for document id in database to create summary for
 """
-import chromadb
-from chromadb.utils import embedding_functions
-from chromadb.config import Settings
-from modules.ai.utils.llm import create_llm, create_llm_index, create_llm_index_query_engine
+from modules.ai.utils.llm import create_llm
 from modules.ai.utils.vectorstore import  create_collection 
-from llama_index.vector_stores import ChromaVectorStore, VectorStoreQuery
-from llama_index.vector_stores.types import (
-    MetadataFilter,
-    MetadataFilters,
-    FilterOperator,
-)
-from llama_index import (
-    LLMPredictor,
-    ServiceContext,
-    StorageContext,
-    PromptTemplate,
-    set_global_service_context,
-    SimpleDirectoryReader,
-    VectorStoreIndex,
-    SummaryIndex,
-    Document
-)
-from llama_index.query_engine import RetrieverQueryEngine
-from llama_index.retrievers import (
-    BaseRetriever,
-    VectorIndexRetriever,
-)
-from llama_index import download_loader
-from llama_index.extractors import BaseExtractor
-from llama_index.prompts import PromptTemplate
 
 import modules
 from typing import Generator
 import gc
 import sys, os
 
-def summarize_doc_old(id: str) -> str:
+def summarize_doc(id: str) -> str:
     llm = create_llm()
     vectorstore = create_collection()
 
@@ -105,7 +77,7 @@ Answer:""".format(summary = previous_summary,context=text)
     return summaryTrim
 
 
-def summarize_doc_stream_old(id: list[str]) -> Generator[str, str, None]:
+def summarize_doc_stream(id: list[str]) -> Generator[str, str, None]:
     llm = create_llm()
     vectorstore = create_collection()
 
@@ -186,41 +158,3 @@ def get_user_canceled():
 
 def set_user_canceled(value: bool):
     modules.user_canceled = value
-
-def summarize_doc_stream_index(id: str) -> Generator[str, str, None]:
-    # part_of_old_prompt = "The most important part is to add 'END' when ending the summary and 'START' when starting summary."
-    prompt = """I want you to summarize the text as best as you can.
-    The summary has to be at least two paragraphs long and no longer than four paragraphs long
-    Dont Ever talk about improving the summary
-    Don't directly refer to the context text, pretend like you already knew the context information.
-    Don't write the user prompt or the system prompt.
-    """
-    if get_user_canceled() == True:
-        gc.collect()
-        set_user_canceled(False)
-        raise GeneratorExit("Lol")
-
-    llm = create_llm_index(api_key="", openai=False)
-    query_engine = create_llm_index_query_engine(id, llm)
-    streaming_response = query_engine.query(prompt)
-
-    # chunks = 0
-    from time import sleep
-    for textchunk in streaming_response.response_gen:
-        # sleep(0.1)
-        # if chunks > 10:
-        if get_user_canceled() == True:
-            print("USER CANCELED REQUEST")
-            llm = None
-            query_engine = None
-            gc.collect()
-            set_user_canceled(False)
-            raise GeneratorExit("Lol")
-        # chunks += 1
-        yield textchunk
-    llm = None
-    query_engine = None
-    gc.collect()
-
-if __name__ == "__main__":
-    summarize_doc_stream_old()

@@ -1,7 +1,7 @@
 # from modules.ai.summarizer import summarize_doc_stream_old
 from modules.ai.utils.vectorstore import create_collection
 from modules.ai.utils.args import get_args
-from modules.ai.summarizer import summarize_doc_stream_old
+from modules.ai.summarizer import summarize_doc_stream
 from modules.ai.assignment import assignment_doc_stream
 from modules.files.chunks import Chunkerizer
 from modules.ai.quizer import create_quiz
@@ -10,7 +10,7 @@ from modules.ai.explainer import create_explaination
 from modules.ai.divideAssignment import divide_assignment_stream
 from modules.ai.title import create_title
 from webserver.app import app
-import os
+import os, time
 from uuid import uuid4
 import json
 import datetime
@@ -24,8 +24,6 @@ from flask_caching import Cache
 import psycopg_pool
 import jwt
 from threading import Semaphore
-
-import time
 
 # To assure the LLM only works on one prompt at a time
 sem = Semaphore()
@@ -130,7 +128,7 @@ def get_user_openai_enabled(user_id: str) -> tuple[bool, str] | None:
 
     return result
 
-from flask import Response
+
 
 def get_route_parameters() -> tuple[list[str], str, str, int] | Response:
     """
@@ -304,7 +302,7 @@ def summary():
         sem.acquire(timeout=1000)
         print("CHUNKING")
         before = time.time()
-        for chunk in summarize_doc_stream_old(file_hashes):
+        for chunk in summarize_doc_stream(file_hashes):
             yield chunk
             summary += chunk
         duration = time.time() - before

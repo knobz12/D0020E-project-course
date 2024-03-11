@@ -88,9 +88,6 @@ Answers:
         
     # print("Questions:\n", questions)
 
-
-
-
     res = f"""\
 The following is a quiz question in JSON format.
 Generate answers based on the provided context. Only ONE of the answers is. true, and the others shall be false.
@@ -110,19 +107,9 @@ Questions:
     
     return lm
 
-
-
-
-
-
-
-
 def create_quiz(id: list[str], questions: int) -> str:
     glmm = create_llm_guidance()
     vectorstore = create_collection()
-
-    # print(docs)
-
 
     obj: dict[str, list[dict[str, Any]]] =  {}
     
